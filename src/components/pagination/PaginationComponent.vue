@@ -12,7 +12,7 @@
                         type="button"
                         :disabled="isInFirstPage"
                         @click="onClickPreviousPage"
-                        :class="[isInFirstPage ? disabledClasses : inactiveClasses]"
+                        :class="['bg-inherit text-default', isInFirstPage ? disabledClasses : inactiveClasses]"
                     >
                         {{ previousLabel }}
                     </button>
@@ -23,7 +23,7 @@
                         type="button"
                         :disabled="isPageSelected(page)"
                         @click="onClickPage(page)"
-                        :class="[isPageSelected(page) ? activeClasses : inactiveClasses]"
+                        :class="['bg-inherit text-default', isPageSelected(page) ? activeClasses : inactiveClasses]"
                     >
                         {{ page > Number.MAX_SAFE_INTEGER ? '...': page }}
                     </button>
@@ -34,7 +34,7 @@
                         type="button"
                         :disabled="isInLastPage"
                         @click="onClickNextPage"
-                        :class="[isInLastPage ? disabledClasses : inactiveClasses]"
+                        :class="['bg-inherit text-default', isInLastPage ? disabledClasses : inactiveClasses]"
                     >
                         {{ nextLabel }}
                     </button>
@@ -100,7 +100,7 @@ export default {
         activeClasses: {
             type: String,
             default:
-                'bg-primary hover:bg-inherit text-onprimary hover:text-default border-primary border-2 rounded-sm px-2'
+                'bg-primary hover:bg-inherit text-onprimary hover:text-default border border-primary border-2 rounded-sm px-2'
         },
         inactiveClasses: {
             type: String,
