@@ -4,7 +4,7 @@
             class="data-[active=true]:bg-surface 
             border border-border
             data-[active=true]:border-b-none 
-            dark:data-[active=true]:text-default
+            data-[active=true]:text-default
             -mb-px py-3 px-4 inline-flex items-center gap-x-2 
             text-sm font-medium text-center 
             data-[active=false]:border-t-transparent
