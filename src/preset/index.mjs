@@ -63,7 +63,7 @@ const presetVTail = definePreset(options => {
     return {
         name: 'v-tabler-preset',
         theme: {
-            colors: theme.light.colors,
+            colors: {...theme.light.colors, ...colors },
             fontFamily: { sans: '"Inter", system-ui, sans-serif' }
         },
         shortcuts,
