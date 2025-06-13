@@ -1,4 +1,7 @@
-import { colors } from './colors.js'
+import { colors as customColors } from './colors.js'
+import { presetWind3 } from 'unocss'
+
+const colors = { ...presetWind3().theme.colors, moon: customColors.moon }
 
 const shortcuts = {
     'text-subtle': 'text-txt-subtle',
@@ -64,9 +67,9 @@ const theme = {
                 disabled: '#9ca3af',
                 onprimary: '#f3f4f6',
                 onerror: '#1f2937'
-            }
-        },
-        shortcuts
+            },
+            ...customColors
+        }
     },
     dark: {
         colors: {
@@ -108,10 +111,10 @@ const theme = {
                 disabled: '#4b5563',
                 onprimary: '#f3f4f6',
                 onerror: '#f3f4f6'
-            }
+            },
+            ...customColors
         }
-    },
-    shortcuts
+    }
 }
 
 export { theme, shortcuts }
