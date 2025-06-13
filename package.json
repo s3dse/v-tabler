@@ -34,7 +34,7 @@
     ],
     "scripts": {
         "serve": "vite --port 8081",
-        "build": "vite build",
+        "build": "vite build && unocss \"src/**/*.{vue,js,ts}\" -o dist/styles.css",
         "preview": "vite preview --port 8081",
         "test:unit:watch": "vitest watch --environment jsdom",
         "test:unit": "vitest run --environment jsdom",
