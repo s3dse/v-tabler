@@ -10,7 +10,7 @@ export default {
     props: {
         classes: {
             type: String,
-            default: ''
+            default: 'card'
         }
     },
     name: 'card-component'
