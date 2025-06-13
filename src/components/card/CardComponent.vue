@@ -1,5 +1,5 @@
 <template>
-    <div :class="classes">
+    <div class="card-component" :class="[classes ? classes : 'card']">
         <slot></slot>
     </div>
 </template>
@@ -10,7 +10,7 @@ export default {
     props: {
         classes: {
             type: String,
-            default: 'card'
+            default: ''
         }
     },
     name: 'card-component'
