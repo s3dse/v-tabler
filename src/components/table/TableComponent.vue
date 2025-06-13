@@ -182,7 +182,6 @@ import { ref, useId } from 'vue'
 import PaginationComponent from '@/components/pagination/PaginationComponent.vue'
 import DropdownComponent from '@/components/dropdown/DropdownComponent.vue'
 import { joinLines } from '@/utils/string-join-lines.js'
-import 'virtual:uno.css'
 import { useDebounceFn } from '@vueuse/core'
 import { sortTable } from './table-sort'
 

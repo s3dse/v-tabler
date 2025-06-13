@@ -4,8 +4,6 @@
     </div>
 </template>
 <script>
-import '@unocss/reset/tailwind.css'
-import 'virtual:uno.css'
 export default {
     props: {
         classes: {
