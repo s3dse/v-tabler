@@ -72,21 +72,33 @@ export default defineConfig({
         after:w-full 
         after:z-499`
         ],
-        [/^busy-bg-(.*)$/, ([, c]) => `after:bg-${c}/70`],
-        {
-            // 'form-help': `inline-flex ml-2 items-center justify-center w-5 h-5 bg-subtle text-muted rounded-full cursor-pointer transition duration-100 hover:text-onprimary hover:bg-primary hover:ease-linear`,
-            // 'page-header': 'text-xl font-semibold my-3',
-            // 'card':
-            //     'bg-surface border border-solid border-border rounded-sm',
-            // 'card-title': 'text-base text-default font-medium'
-        }
+        [/^busy-bg-(.*)$/, ([, c]) => `after:bg-${c}/70`]
     ],
     presets: [
         presetUno(),
         presetScrollbar(),
 
-        presetVTail()
+        presetVTail({
+            light: {
+                colors: {
+                    primary: {
+                        DEFAULT: '#ff5733',
+                        hover: '#e0461f'
+                    },
+                    txt: {
+                        DEFAULT: '#222222'
+                    }
+                }
+            }
+        })
     ],
-    transformers: [transformerVariantGroup(), transformerDirectives() ],
-    autocomplete: ['text-subtle', 'text-muted', 'text-default', 'text-inverted', 'text-disabled', 'card-title'],
+    transformers: [transformerVariantGroup(), transformerDirectives()],
+    autocomplete: [
+        'text-subtle',
+        'text-muted',
+        'text-default',
+        'text-inverted',
+        'text-disabled',
+        'card-title'
+    ]
 })
