@@ -1,4 +1,3 @@
-import '@unocss/reset/tailwind-compat.css'
 import * as components from './components'
 import * as directives from './directives'
 
