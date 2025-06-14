@@ -12,7 +12,7 @@
                         type="button"
                         :disabled="isInFirstPage"
                         @click="onClickPreviousPage"
-                        :class="['bg-inherit text-default', isInFirstPage ? disabledClasses : inactiveClasses]"
+                        :class="['text-default', isInFirstPage ? disabledClasses : inactiveClasses]"
                     >
                         {{ previousLabel }}
                     </button>
@@ -23,7 +23,7 @@
                         type="button"
                         :disabled="isPageSelected(page)"
                         @click="onClickPage(page)"
-                        :class="['bg-inherit text-default', isPageSelected(page) ? activeClasses : inactiveClasses]"
+                        :class="[' text-default', isPageSelected(page) ? activeClasses : inactiveClasses]"
                     >
                         {{ page > Number.MAX_SAFE_INTEGER ? '...': page }}
                     </button>
@@ -34,7 +34,7 @@
                         type="button"
                         :disabled="isInLastPage"
                         @click="onClickNextPage"
-                        :class="['bg-inherit text-default', isInLastPage ? disabledClasses : inactiveClasses]"
+                        :class="[' text-default', isInLastPage ? disabledClasses : inactiveClasses]"
                     >
                         {{ nextLabel }}
                     </button>
@@ -100,15 +100,15 @@ export default {
         activeClasses: {
             type: String,
             default:
-                'bg-primary hover:bg-inherit text-onprimary hover:text-default border border-primary border-2 rounded-sm px-2'
+                'bg-primary text-onprimary hover:text-default hover:bg-inherit! border border-primary border-2 rounded-sm px-2'
         },
         inactiveClasses: {
             type: String,
-            default: 'hover:text-primary-hover transition-colors ease'
+            default: 'bg-inherit hover:text-primary-hover transition-colors ease'
         },
         disabledClasses: {
             type: String,
-            default: 'text-disabled'
+            default: 'text-disabled bg-inherit'
         }
     },
     data() {
