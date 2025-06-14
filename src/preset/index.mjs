@@ -24,7 +24,7 @@ const generateAttributeVariants = variants => {
 
 const generateVariantsAutocomplete = variants => Object.keys(variants).map(name => `${name}:`)
 
-const presetVTail = definePreset(options => {
+const presetVTabler = definePreset(options => {
     const themeOverrides = options || {}
 
     const mergedTheme = merge({}, baseTheme, themeOverrides)
@@ -51,4 +51,4 @@ const presetVTail = definePreset(options => {
     }
 })
 
-export default presetVTail
+export { presetVTabler }

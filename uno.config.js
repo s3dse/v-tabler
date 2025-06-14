@@ -1,7 +1,7 @@
-import { defineConfig, presetUno, transformerDirectives } from 'unocss'
+import { defineConfig, presetWind3, transformerDirectives } from 'unocss'
 
 import transformerVariantGroup from '@unocss/transformer-variant-group'
-import presetVTail from './src/preset/index.mjs'
+import { presetVTabler } from './src/preset/index.mjs'
 import { colors } from './src/preset/colors.js'
 import { presetScrollbar } from 'unocss-preset-scrollbar'
 
@@ -21,6 +21,11 @@ const valWithUnit = v => {
 }
 
 export default defineConfig({
+    content: {
+        pipeline: {
+            include: [/\.(vue|html|js|ts)($|\?)/]
+        }
+    },
     rules: [
         [
             /^grid-auto-fill-([[.\d\w\]]+)$/,
@@ -74,25 +79,9 @@ export default defineConfig({
         ],
         [/^busy-bg-(.*)$/, ([, c]) => `after:bg-${c}/70`]
     ],
-    presets: [
-        presetUno(),
-        presetScrollbar(),
-
-        presetVTail({
-            light: {
-                colors: {
-                    primary: {
-                        DEFAULT: '#ff5733',
-                        hover: '#e0461f'
-                    },
-                    txt: {
-                        DEFAULT: '#222222'
-                    }
-                }
-            }
-        })
-    ],
+    presets: [presetWind3(), presetScrollbar(), presetVTabler()],
     transformers: [transformerVariantGroup(), transformerDirectives()],
+    // safelist: safelist,
     autocomplete: [
         'text-subtle',
         'text-muted',
