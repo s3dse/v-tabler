@@ -68,7 +68,7 @@ const cancel = () => emit('cancel')
 
 <template>
   <DialogRoot v-model:open="open">
-    <DialogTrigger :class="getClass('trigger')">
+    <DialogTrigger as-child>
         <slot name="trigger">
             <button class="bg-primary hover:bg-primary-hover active:bg-primary-lt text-onprimary rounded px-4 h-[2.375rem]">Settings</button>
         </slot>
@@ -81,7 +81,7 @@ const cancel = () => emit('cancel')
         <slot name="content" v-bind="{ open }">
         </slot>
         <div class="flex gap-4 justify-end p-3">
-            <DialogClose>
+            <DialogClose as-child>
                 <slot name="cancelTrigger">
                     <button @click="cancel" :class="getClass('cancelButton')">
                         <slot name="cancelLabel">

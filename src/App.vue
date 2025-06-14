@@ -167,8 +167,7 @@ const dropdownModel = ref(null)
 </script>
 
 <template>
-    <div class="p-5 bg-moon-800"></div>
-    <button class="text-default" @click="isLoading = !isLoading">
+    <button class="text-default bg-background" @click="isLoading = !isLoading">
         Loading {{ isLoading }}
     </button>
     <div
