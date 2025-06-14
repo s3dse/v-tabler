@@ -162,7 +162,7 @@
                 :previous-label="paginationPreviousLabel"
                 :next-label="paginationNextLabel"
                 @page-changed="changePage"
-                class="text-default"
+                class="text-default bg-surface"
             >
                 <template #pagination-label="{ data }">
                     <slot name="pagination-label" v-bind="data"></slot>
