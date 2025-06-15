@@ -3,6 +3,8 @@ import { icons } from './icons.js'
 import { theme as baseTheme, shortcuts } from './theme.js'
 import presetTheme from 'unocss-preset-theme'
 import merge from 'lodash.merge'
+import { getSafelist } from './safelist.js'
+import { get } from '@vueuse/core'
 
 const CUSTOM_VARIANTS = Object.freeze({
     'checked-and-highlighted': '[&[data-state=checked][data-highlighted]]',
@@ -23,6 +25,8 @@ const generateAttributeVariants = variants => {
 }
 
 const generateVariantsAutocomplete = variants => Object.keys(variants).map(name => `${name}:`)
+
+const safelist = getSafelist()
 
 const presetVTabler = definePreset(options => {
     const themeOverrides = options || {}
@@ -51,4 +55,4 @@ const presetVTabler = definePreset(options => {
     }
 })
 
-export { presetVTabler }
+export { presetVTabler, safelist }
