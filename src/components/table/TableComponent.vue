@@ -178,6 +178,8 @@
     </div>
 </template>
 <script>
+import '@unocss/reset/tailwind-compat.css'
+import 'virtual:uno.css'
 import { ref, useId } from 'vue'
 import PaginationComponent from '@/components/pagination/PaginationComponent.vue'
 import DropdownComponent from '@/components/dropdown/DropdownComponent.vue'
