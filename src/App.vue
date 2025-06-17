@@ -167,6 +167,19 @@ const dropdownModel = ref(null)
 </script>
 
 <template>
+    <div class="p-4 flex flex-col gap-2">
+        <div class="flex flex-row gap-1">
+            <button class="btn-base-sm">Base SM</button>
+            <button class="btn-base-sm">Base SM</button>
+            <button class="btn-base-sm">Base SM</button>
+        </div>
+        <div class="flex flex-row gap-1">
+            <button class="btn-primary-sm">Base MD</button>
+            <button class="btn-primary-md">Base MD</button>
+            <button class="btn-primary-lg">Base MD</button>
+            <button class="btn-primary-default">Base MD</button>
+        </div>
+    </div>
     <button class="text-default bg-background" @click="isLoading = !isLoading">
         Loading {{ isLoading }}
     </button>
