@@ -32,7 +32,7 @@ const shortcuts = [
         /^btn-(base|primary)-(sm|md|lg|default)$/,
         ([, colorOption, sizeOption]) => {
             const colors = {
-                basic: `bg-surface text-default hover:bg-surface-hover 
+                base: `bg-surface text-default hover:bg-surface-hover 
             active:bg-muted 
             disabled:bg-disabled disabled:text-subtle 
             disabled:hover:cursor-default disabled:pointer-events-none`,
