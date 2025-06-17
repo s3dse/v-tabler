@@ -121,12 +121,24 @@ const fruits = ['Apple', 'Banana', 'Blueberry', 'Grapes', 'Pineapple']
 const selected = ref(selectOptions[0])
 const isLoading = ref(true)
 
-const tab1 = { id: 'a', label: 'First Tab', help: '<p>This is a test!!! And it should work!<p>', component: TestOne, props: { message: 'testOne' } }
+const tab1 = {
+    id: 'a',
+    label: 'First Tab',
+    help: '<p>This is a test!!! And it should work!<p>',
+    component: TestOne,
+    props: { message: 'testOne' }
+}
 const tab2 = { id: 'b', label: 'Second Tab', component: TestTwo, props: { message: 'testTwo' } }
 const tabs = [tab1, tab2]
 
-const listSelectOptions = [...new Array(99999).keys()].map(k => ({ id: k+1, name: `option ${k+1}` }))
-listSelectOptions.unshift({id: 0, name: 'first option is a very long name that should be handled'})
+const listSelectOptions = [...new Array(99999).keys()].map(k => ({
+    id: k + 1,
+    name: `option ${k + 1}`
+}))
+listSelectOptions.unshift({
+    id: 0,
+    name: 'first option is a very long name that should be handled'
+})
 const filterText = ref('')
 const listSelectOptionsFiltered = computed(() =>
     filterText.value
@@ -138,7 +150,6 @@ const listSelectOptionsFiltered = computed(() =>
 
 const listSelectionMultiple = ref([])
 const listSelectionSingle = ref([])
-
 
 const singleSelectOptions = [
     { name: 'Record A', value: 'a' },
@@ -168,33 +179,32 @@ const dropdownModel = ref(null)
 
 <template>
     <div class="p-4 flex flex-col gap-2">
-        <div class="flex flex-row gap-1">
+        <h3 class="text-xl text-default">Basic Buttons</h3>
+        <pre class="text-default text-base">btn-base-(sm|md|lg|default)</pre>
+        <div class="flex flex-row gap-8">
             <button class="btn-base-sm">Base SM</button>
-            <button class="btn-base-sm">Base SM</button>
-            <button class="btn-base-sm">Base SM</button>
+            <button class="btn-base-md">Base MD</button>
+            <button class="btn-base-lg">Base LG</button>
+            <button class="btn-base-default">Base Default</button>
         </div>
-        <div class="flex flex-row gap-1">
-            <button class="btn-primary-sm">Base MD</button>
-            <button class="btn-primary-md">Base MD</button>
-            <button class="btn-primary-lg">Base MD</button>
-            <button class="btn-primary-default">Base MD</button>
+        <h3 class="text-xl text-default">Primary Buttons</h3>
+        <pre class="text-default text-base">btn-primary-(sm|md|lg|default)</pre>
+        <div class="flex flex-row gap-8">
+            <button class="btn-primary-sm">Primary SM</button>
+            <button class="btn-primary-md">Primary MD</button>
+            <button class="btn-primary-lg">Primary LG</button>
+            <button class="btn-primary-default">Primary Default</button>
         </div>
     </div>
-    <button class="text-default bg-background" @click="isLoading = !isLoading">
+    <button class="btn-base-lg rounded-md" @click="isLoading = !isLoading">
         Loading {{ isLoading }}
     </button>
-    <div
-        v-busy="isLoading"
-        class="py-3 border rounded border-border border-solid"
-    >
+    <div v-busy="isLoading" class="py-3 border rounded border-border border-solid">
         <p class="text-default">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
         </p>
     </div>
-    <loading-overlay
-        :show="isLoading"
-        class="py-3 border rounded border-solid border-border"
-    >
+    <loading-overlay :show="isLoading" class="py-3 border rounded border-solid border-border">
         <p class="text-default">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
         </p>
@@ -212,110 +222,45 @@ const dropdownModel = ref(null)
             </template>
         </action-dropdown-component>
 
-           <dropdown-component :options="['a', 'b']" v-model="dropdownModel" class="w-fit">
+        <dropdown-component :options="['a', 'b']" v-model="dropdownModel" class="w-fit">
             <template #toggle-label>
                 <div>select</div>
             </template>
         </dropdown-component>
     </div>
     <dialog-component
-            title="Testing Dialog"
-            description="A dialog..."
-            @cancel="test"
-            :pre-confirm="validateAndSubmit"
-            :confirm-disabled="true"
-        >
-            <template #content>
-                <div
-                    class="flex gap-4 flex-col text-default px-4 pt-3 pb-5"
-                >
-                    <span>test</span>
-                    <span>another test</span>
-                    <span>and another test</span>
-                </div>
-                <select class="custom-select">
-                    <option>a</option>
-                    <option>b</option>
-                </select>
-            </template>
-        </dialog-component>
-    <!-- <div class="p-5">
-        <dialog-component
-            title="Testing Dialog"
-            description="A dialog..."
-            @cancel="test"
-            :pre-confirm="validateAndSubmit"
-            :confirm-disabled="true"
-        >
-            <template #content>
-                <div
-                    class="flex gap-4 flex-col text-gray-900 dark:text-gray-100 px-4 pt-3 pb-5"
-                >
-                    <span>test</span>
-                    <span>another test</span>
-                    <span>and another test</span>
-                </div>
-                <select class="custom-select">
-                    <option>a</option>
-                    <option>b</option>
-                </select>
-            </template>
-        </dialog-component>
-        <modal-component
-            title="A Dialog Title"
-            toggle-type="button"
-            @confirmed="test"
-            @cancelled="stopped"
-            @opened="opened"
-            :dialog-panel-class-list="panelClassList"
-        >
-            <template #content>
-                <p class="pt-2 text-gray-600 px-4">...and some text to show</p>
-            </template>
-        </modal-component>
-        <div class="p-[8rem]"></div>
-        <action-dropdown-component :options="['a', 'b']" @on-select="logItem" class="w-fit">
-            <template #toggle-label>
-                <div>select action</div>
-            </template>
-        </action-dropdown-component>
-        <dropdown-component :options="['a', 'b']" class="w-fit">
-            <template #toggle-label>
-                <div>select</div>
-            </template>
-        </dropdown-component>
-        <card-component class="mt-5">
-            <loading-overlay :show="tableStatus.busy">
-                <table-component
-                    :items="items"
-                    :fields="fields"
-                    :top-rows="topRows"
-                    title="Test"
-                    class="w-[100%] dark:bg-moon-800"
-                >
-                    <template #table-top-controls>
-                        <div
-                            class="border dark:border-moon-700 dark:text-gray-100 px-4 ms-auto"
-                        >
-                            some control
-                        </div>
-                    </template>
-                    <template #page-size-label="{ pageSize }">
-                        Einträge pro Seite: {{ pageSize }}
-                    </template>
-                    <template #cell(share)="data">
-                        <div :title="data.unformatted">
-                            {{ data.value }}
-                        </div>
-                    </template>
-                </table-component>
-            </loading-overlay>
-        </card-component>
-    </div>  -->
-    <div class="py-1 dark:bg-background text-default">give me some space...</div>
-    <div class="py-1 text-muted">Muted...</div>
-    <div class="py-1 text-subtle">Subtle...</div>
-    <div class="py-1 text-disabled">Disabled...</div>
+        title="Testing Dialog"
+        description="A dialog..."
+        @cancel="test"
+        :pre-confirm="validateAndSubmit"
+        :confirm-disabled="true"
+    >
+        <template #content>
+            <div class="flex gap-4 flex-col text-default px-4 pt-3 pb-5">
+                <span>test</span>
+                <span>another test</span>
+                <span>and another test</span>
+            </div>
+            <select class="custom-select">
+                <option>a</option>
+                <option>b</option>
+            </select>
+        </template>
+    </dialog-component>
+
+    <div class="p-4 mt-4 card w-80">
+        <h3 class="text-xl pb-4">Typograhpy</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="py-1 text-default">Default...</div>
+            <pre class="text-default">text-default</pre>
+            <div class="text-muted">Muted...</div>
+            <pre class="text-muted">text-muted</pre>
+            <div class="text-subtle">Subtle...</div>
+            <pre class="text-subtle">text-subtle</pre>
+            <div class="text-disabled">Disabled...</div>
+            <pre class="text-disabled">text-disabled</pre>
+        </div>
+    </div>
 
     <div class="p-3">
         <tab-card-component :tabs="tabs" :current-tab-index="0"></tab-card-component>
@@ -330,11 +275,7 @@ const dropdownModel = ref(null)
                 class="w-[100%] bg-surface text-inverted"
             >
                 <template #table-top-controls>
-                    <div
-                        class="border border-border text-default px-4 ms-auto"
-                    >
-                        some control
-                    </div>
+                    <div class="border border-border text-default px-4 ms-auto">some control</div>
                 </template>
                 <template #page-size-label="{ pageSize }">
                     Einträge pro Seite: {{ pageSize }}
@@ -381,7 +322,8 @@ const dropdownModel = ref(null)
         :options="singleSelectOptions"
         v-model="singleSelectValue"
         label-key="name"
-        class="w-fit mb-2"></single-select>
+        class="w-fit mb-2"
+    ></single-select>
 
     <div class="text-muted">multiple</div>
     <multi-select
@@ -390,9 +332,9 @@ const dropdownModel = ref(null)
         :id-function="x => x.value"
         :label-function="x => x.name"
         :is-default-option="x => x.value === 'all'"
-        :placeholder-function="v => v.length === 1 ? v[0].name : v.length + ' are selected'"
+        :placeholder-function="v => (v.length === 1 ? v[0].name : v.length + ' are selected')"
         class="w-[200px] mb-2"
-        ></multi-select>
+    ></multi-select>
 
     <div class="p-4">
         <ToggleComponent
@@ -402,5 +344,4 @@ const dropdownModel = ref(null)
             v-model="isToggleChecked"
         ></ToggleComponent>
     </div>
-
 </template>
