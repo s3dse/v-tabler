@@ -122,7 +122,7 @@ const theme = {
             dropdownBorder: '#2a3b4f',
             border: '#2a3b4f',
             borderInput: '#4c5f7a',
-            inputfield: '#273449',
+            inputfield: '#0f172a',
             'thead-background': colors.moon[900],
             'thead-text': colors.slate[500],
             disabled: colors.gray[700],
