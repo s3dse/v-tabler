@@ -6,7 +6,7 @@
                 'dropdown-button',
                 buttonClassList
                     ? buttonClassList
-                    : 'bg-surface hover:bg-surface-hover hover:cursor-pointer rounded-sm border border-border text-sm px-4 py-1 text-center text-default inline-flex items-center w-full'
+                    : 'btn-base-default rounded-sm py-1 text-center w-full'
             ]"
             type="button"
         >
