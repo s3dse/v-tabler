@@ -123,8 +123,8 @@ const theme = {
             border: '#2a3b4f',
             borderInput: '#4c5f7a',
             inputfield: '#0f172a',
-            'thead-background': colors.moon[900],
-            'thead-text': colors.slate[500],
+            'thead-background': colors.moon[800],
+            'thead-text': colors.slate[400],
             disabled: colors.gray[700],
             scrollbar: {
                 thumb: '#4c5f7a',
