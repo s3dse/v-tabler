@@ -3,29 +3,64 @@ import { presetWind3 } from 'unocss'
 
 const colors = { ...presetWind3().theme.colors, moon: customColors.moon }
 
-const shortcuts = {
-    'text-subtle': 'text-txt-subtle',
-    'text-muted': 'text-txt-muted',
-    'text-default': 'text-txt-DEFAULT',
-    'text-inverted': 'text-txt-inverted',
-    'text-disabled': 'text-txt-disabled',
-    'text-onprimary': 'text-txt-onprimary',
-    'text-onerror': 'text-txt-onerror',
-    'hovered-major': 'hover:bg-primary-lt hover:text-default',
-    'highlighted-major': 'data-[highlighted]:(bg-primary-lt text-default)',
-    'selected-major': 'bg-primary text-txt-onprimary',
-    'selected-hovered-major': 'bg-primary-hover! text-txt-onprimary!',
-    'hovered-minor': 'hover:bg-surface-hover hover:text-txt-DEFAULT',
-    'selected-minor': 'bg-primary-lt text-txt-DEFAULT',
-    'selected-hovered-minor': 'bg-primary dark:bg-primary/30 hover:bg-primary/80 text-onprimary',
-    'scrollbar-thumb-hover': 'scrollbar-thumbHover',
-    'with-scrollbar': `scrollbar scrollbar-thumb-color-scrollbar-thumb hover:scrollbar-thumb-color-scrollbar-thumbHover
-            scrollbar-track-color-inherit scrollbar-rounded scrollbar-thumb-radius-2px`,
-    'form-help': `inline-flex ml-2 items-center justify-center w-5 h-5 bg-subtle text-muted rounded-full cursor-pointer transition duration-100 hover:text-onprimary hover:bg-primary hover:ease-linear`,
-    'page-header': 'text-xl font-semibold my-3',
-    card: 'bg-surface border border-solid border-border rounded-sm',
-    'card-title': 'text-base text-default font-medium'
-}
+const shortcuts = [
+    {
+        'text-subtle': 'text-txt-subtle',
+        'text-muted': 'text-txt-muted',
+        'text-default': 'text-txt-DEFAULT',
+        'text-inverted': 'text-txt-inverted',
+        'text-disabled': 'text-txt-disabled',
+        'text-onprimary': 'text-txt-onprimary',
+        'text-onerror': 'text-txt-onerror',
+        'hovered-major': 'hover:bg-primary-lt hover:text-default',
+        'highlighted-major': 'data-[highlighted]:(bg-primary-lt text-default)',
+        'selected-major': 'bg-primary text-txt-onprimary',
+        'selected-hovered-major': 'bg-primary-hover! text-txt-onprimary!',
+        'hovered-minor': 'hover:bg-surface-hover hover:text-txt-DEFAULT',
+        'selected-minor': 'bg-primary-lt text-txt-DEFAULT',
+        'selected-hovered-minor':
+            'bg-primary dark:bg-primary/30 hover:bg-primary/80 text-onprimary',
+        'scrollbar-thumb-hover': 'scrollbar-thumbHover',
+        'with-scrollbar': `scrollbar scrollbar-thumb-color-scrollbar-thumb hover:scrollbar-thumb-color-scrollbar-thumbHover
+                scrollbar-track-color-inherit scrollbar-rounded scrollbar-thumb-radius-2px`,
+        'form-help': `inline-flex ml-2 items-center justify-center w-5 h-5 bg-subtle text-muted rounded-full cursor-pointer transition duration-100 hover:text-onprimary hover:bg-primary hover:ease-linear`,
+        'page-header': 'text-xl font-semibold my-3',
+        card: 'bg-surface border border-solid border-border rounded-sm',
+        'card-title': 'text-base text-default font-medium'
+    },
+    [
+        /^btn-(base|primary)-(sm|md|lg|default)$/,
+        ([, colorOption, sizeOption]) => {
+            const colors = {
+                basic: `bg-surface text-default hover:bg-surface-hover 
+            active:bg-muted 
+            disabled:bg-disabled disabled:text-subtle 
+            disabled:hover:cursor-default disabled:pointer-events-none`,
+                primary: `bg-primary text-onprimary hover:bg-primary-hover 
+            active:bg-primary/80 
+            disabled:bg-disabled disabled:text-subtle 
+            disabled:hover:cursor-default disabled:pointer-events-none`
+            }
+            const color = colors[colorOption]
+            const sizes = {
+                sm: 'px-3 py-1.5 text-xs',
+                md: 'px-4 py-2 text-sm',
+                lg: 'px-5 py-2.5 text-base',
+                default: 'px-4 text-sm'
+            }
+            const size = sizes[sizeOption] || sizes.default
+            const layout = 'inline-flex items-center justify-center gap-1'
+            const disabledCursor = 'disabled:hover:cursor-default disabled:pointer-events-none'
+            const focus = 'focus:outline-none focus-visible:ring focus-visible:ring-primary-lt'
+            const transition = 'transition-colors duration-150'
+            return `${layout} ${color} ${size} ${disabledCursor} ${focus} ${transition}`
+        }
+    ],
+    {
+        'btn-base': 'btn-base-default'
+    }
+]
+
 const theme = {
     light: {
         colors: {
