@@ -56,8 +56,9 @@ const shortcuts = [
             const layout = 'inline-flex items-center justify-center gap-1'
             const disabledCursor = 'disabled:hover:cursor-default disabled:pointer-events-none'
             const focus = 'focus:outline-none focus-visible:ring focus-visible:ring-primary-lt'
+            const hoverCursor = 'hover:cursor-pointer'
             const transition = 'transition-colors duration-150'
-            return `${layout} ${color} ${size} ${disabledCursor} ${focus} ${transition}`
+            return `${layout} ${color} ${size} ${hoverCursor} ${disabledCursor} ${focus} ${transition}`
         }
     ],
     {

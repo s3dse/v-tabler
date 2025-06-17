@@ -261,18 +261,9 @@ export default {
         },
         pageSizeButtonClassList: {
             type: String,
-            default: joinLines(`border
-                                border-border
-                                bg-transparent
-                                hover:bg-subtle
-                                text-default
-                                hover:cursor-pointer
+            default: joinLines(`btn-transparent-default 
                                 rounded-sm
-                                text-sm
-                                px-4
-                                h-[100%]
-                                inline-flex
-                                items-center`)
+                                h-[100%]`)
         },
         searchInputClassList: {
             type: String,
