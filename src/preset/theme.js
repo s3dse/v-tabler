@@ -25,7 +25,7 @@ const shortcuts = [
                 scrollbar-track-color-inherit scrollbar-rounded scrollbar-thumb-radius-2px`,
         'form-help': `inline-flex ml-2 items-center justify-center w-5 h-5 bg-subtle text-muted rounded-full cursor-pointer transition duration-100 hover:text-onprimary hover:bg-primary hover:ease-linear`,
         'page-header': 'text-xl font-semibold my-3',
-        card: 'bg-surface border border-solid border-border rounded-sm',
+        card: 'bg-surface text-default border border-solid border-border rounded-sm',
         'card-title': 'text-base text-default font-medium'
     },
     [
