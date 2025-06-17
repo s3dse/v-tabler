@@ -26,7 +26,7 @@ const generateAttributeVariants = variants => {
 
 const generateVariantsAutocomplete = variants => Object.keys(variants).map(name => `${name}:`)
 
-const safelist = getSafelist()
+const safelist = getSafelist(shortcuts)
 
 const presetVTabler = definePreset(options => {
     const themeOverrides = options || {}
