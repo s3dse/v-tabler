@@ -100,11 +100,11 @@ export default {
         activeClasses: {
             type: String,
             default:
-                'bg-primary text-onprimary hover:text-default hover:bg-inherit! border border-primary border-2 rounded-sm px-2'
+                'bg-primary text-onprimary hover:text-default hover:bg-inherit! border border-primary border-2 rounded-sm px-2 transition-colors duration-150'
         },
         inactiveClasses: {
             type: String,
-            default: 'bg-inherit hover:text-primary-hover transition-colors ease'
+            default: 'bg-inherit hover:text-primary-hover transition-colors duration-150 ease'
         },
         disabledClasses: {
             type: String,
