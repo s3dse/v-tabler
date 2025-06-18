@@ -14,11 +14,11 @@
         >
             <input type="checkbox" class="sr-only" v-model="isChecked" />
             <div
-                class="w-10 h-6 data-[checked=true]:bg-primary data-[checked=false]:bg-inputfield border border-border rounded-full shadow-inner transition duration-200 ease-in-out"
+                class="w-10 h-6 data-[checked=true]:bg-primary data-[checked=false]:bg-inputfield border border-border rounded-full shadow-inner transition duration-150 ease-in-out"
                 :data-checked="isChecked"
             ></div>
             <div
-                class="absolute left-0.5 w-5 h-5 bg-surface border border-2 border-border text-default  rounded-full shadow transform transition-transform duration-200 ease-in-out"
+                class="absolute left-0.5 w-5 h-5 bg-surface border border-2 border-border text-default  rounded-full shadow transform transition-transform duration-150 ease-in-out"
                 :class="{ 'translate-x-4.05 bg-surface': isChecked, 'border-primary-hover': isFocused }"
             >
                 <slot name="toggle-icon" v-bind="{ isChecked }">

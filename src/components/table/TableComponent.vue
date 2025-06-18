@@ -269,6 +269,8 @@ export default {
             type: String,
             default: joinLines(`form-inputfield
                                 rounded-sm
+                                placeholder:text-muted
+                                text-default
                                 px-2
                                 text-sm
                                 flex

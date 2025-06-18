@@ -23,20 +23,22 @@ const shortcuts = [
         'scrollbar-thumb-hover': 'scrollbar-thumbHover',
         'with-scrollbar': `scrollbar scrollbar-thumb-color-scrollbar-thumb hover:scrollbar-thumb-color-scrollbar-thumbHover
                 scrollbar-track-color-inherit scrollbar-rounded scrollbar-thumb-radius-2px`,
-        'form-help': `inline-flex ml-2 items-center justify-center w-5 h-5 bg-subtle text-muted rounded-full cursor-pointer transition duration-100 hover:text-onprimary hover:bg-primary hover:ease-linear`,
+        'form-help': `inline-flex ml-2 items-center justify-center w-5 h-5 bg-subtle text-muted rounded-full cursor-pointer transition duration-150 ease-in-out hover:text-onprimary hover:bg-primary hover:ease-linear`,
         'page-header': 'text-xl font-semibold my-3',
         card: 'bg-surface text-default border border-solid border-border rounded-sm',
         'card-title': 'text-base text-default font-medium',
         'form-inputfield':
-            'bg-inputfield border border-border rounded focus:border-primary focus:ring-2 focus:ring-primary-lt focus:outline-none h-[2.375rem] transition-colors duration-150',
+            'bg-inputfield border border-border rounded focus:border-primary focus:ring-2 focus:ring-primary-lt focus:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
         'form-inputfield-within':
-            'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-lt focus-within:outline-none h-[2.375rem] transition-colors duration-150',
+            'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-lt focus-within:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
         'header-1': 'text-3xl font-semibold leading-relaxed',
         'header-2': 'text-2xl font-semibold leading-relaxed',
         'header-3': 'text-xl font-medium leading-relaxed',
         'header-4': 'text-lg font-medium leading-relaxed',
         'header-5': 'text-base font-medium leading-relaxed',
-        'header-6': 'text-sm font-medium leading-relaxed'
+        'header-6': 'text-sm font-medium leading-relaxed',
+        'color-transition': 'transition-colors duration-150 ease-in-out',
+
     },
     [
         /^btn-(base|primary|transparent)-(sm|md|lg|default)$/,
@@ -67,7 +69,7 @@ const shortcuts = [
             const disabledCursor = 'disabled:hover:cursor-default disabled:pointer-events-none'
             const focus = 'focus:outline-none focus-visible:ring focus-visible:ring-primary-lt'
             const hoverCursor = 'hover:cursor-pointer'
-            const transition = 'transition-colors duration-150'
+            const transition = 'transition-colors duration-150 ease-in-out'
             return `${layout} ${color} ${size} ${hoverCursor} ${disabledCursor} ${focus} ${transition}`
         }
     ],

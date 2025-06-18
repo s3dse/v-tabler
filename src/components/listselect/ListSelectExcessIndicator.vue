@@ -3,7 +3,7 @@
         <div class="bg-background rounded">
             <div
                 v-if="listLengthExceeded"
-                class="flex gap-3 items-center bg-error-bg dark:bg-error-bg border border-error-border rounded p-2 text-sm text-onerror transition-colors duration-100 ease-in-out"
+                class="flex gap-3 items-center bg-error-bg dark:bg-error-bg border border-error-border rounded p-2 text-sm text-onerror color-transition"
             >
             <div class="i-tabler-alert-circle text-base block text-error"></div>
                 {{ props.maxSelectionLengthTextFn(props.maxSelectionLength) }}

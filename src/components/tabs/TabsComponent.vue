@@ -17,7 +17,7 @@
             hover:border-t-border  hover:border-l-border hover:border-r-border
             hover:border-t-solid  hover:border-l-solid hover:border-r-solid
             disabled:bg-disabled disabled:pointer-events-none 
-            dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-muted transition-colors duration-100 ease-in-out"
+            dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-muted color-transition"
             v-for="(tab, index) in tabs" :key="tab" :title="tabLabel(tab)" :help="tab.help" @click="selectTab(index)" :data-active="index===tabIndex"></tab-component>
     </ul>
 </template>
