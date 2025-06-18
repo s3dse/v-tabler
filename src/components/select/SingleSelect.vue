@@ -18,8 +18,8 @@ import { getClass as dispatchClass } from '@/utils/css-class-dispatch.js'
 
 const classes = {
     trigger: `inline-flex items-center justify-between gap-2 min-w-[10rem] 
-        bg-inputfield text-sm text-muted border border-border
-        h-[2.375rem] rounded px-3`,
+        form-inputfield text-sm text-muted 
+        h-[2.375rem] px-3`,
     content: `bg-surface rounded min-w-[11.25rem] 
         border border-border
         shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] z-501`,

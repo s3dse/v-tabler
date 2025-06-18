@@ -7,22 +7,23 @@
         @keydown.esc="closeDropdown"
         @keydown.tab="closeDropdown"
         tabindex="0"
+        class="form-inputfield"
     >
         <label
-            class="selectcomponent__label flex items-center bg-inputfield border border-border rounded"
+            class="selectcomponent__label flex items-center"
+                    @click.prevent="toggleOpen"
         >
             <input
                 :value="modelText"
                 readonly
                 tabindex="-1"
-                class="w-full h-[2.31rem] rounded text-muted text-sm bg-inputfield outline-none pl-2 hover:cursor-pointer"
+                class="w-full h-[2.375rem] inline-flex items-center rounded text-muted text-sm bg-inherit outline-none pl-2 hover:cursor-pointer"
                 :class="props.inputClasses"
                 :id="inputId"
             />
             <div>
                 <span
                     class="shrink-0 i-tabler-chevron-down block text-2xl text-muted mr-2 hover:cursor-pointer"
-                    @click.prevent="toggleOpen"
                     ref="dropdownToggle"
                 ></span>
             </div>
@@ -96,7 +97,7 @@ const preserveArray = (value, multiple) => {
     }
 }
 
-const inputId = useId()
+const inputId = `selectcomponent-input-${useId()}`
 
 const modelValue = defineModel({
     type: Array,

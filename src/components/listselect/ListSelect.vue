@@ -181,6 +181,7 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
                 :toggleOpen="toggleOpen"
                 @keydown.arrow-down="open = true"
                 @keydown.arrow-up="open = true"
+                class="form-inputfield-within"
             />
         </ListboxFilter>
         <div

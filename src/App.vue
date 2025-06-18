@@ -316,27 +316,36 @@ const dropdownModel = ref(null)
     </div>
     <div class="p-2 text-default">Some text below.</div>
 
-    <div class="text-muted">Small options selects:</div>
-    <div class="text-muted">single</div>
-    <single-select
-        :options="singleSelectOptions"
-        v-model="singleSelectValue"
-        label-key="name"
-        class="w-fit mb-2"
-    ></single-select>
+    <h3 class="text-default text-xl p-2 mt-8">Small options selects:</h3>
+    <div class="flex flex-row gap-8">
+        <div class="text-muted">
+            <p>single</p>
+            <single-select
+                :options="singleSelectOptions"
+                v-model="singleSelectValue"
+                label-key="name"
+                class="w-fit mb-2"
+            ></single-select>
+        </div>
+        <div class="text-muted">
+            <p>multiple</p>
 
-    <div class="text-muted">multiple</div>
-    <multi-select
-        :options="multiSelectOptions"
-        v-model="multiSelectValue"
-        :id-function="x => x.value"
-        :label-function="x => x.name"
-        :is-default-option="x => x.value === 'all'"
-        :placeholder-function="v => (v.length === 1 ? v[0].name : v.length + ' are selected')"
-        class="w-[200px] mb-2"
-    ></multi-select>
+            <multi-select
+                :options="multiSelectOptions"
+                v-model="multiSelectValue"
+                :id-function="x => x.value"
+                :label-function="x => x.name"
+                :is-default-option="x => x.value === 'all'"
+                :placeholder-function="
+                    v => (v.length === 1 ? v[0].name : v.length + ' are selected')
+                "
+                class="w-[200px] mb-2"
+            ></multi-select>
+        </div>
+    </div>
 
-    <div class="p-4">
+    <div class="p-4 mt-8">
+        <h3 class="text-xl text-default">Switch</h3>
         <ToggleComponent
             class="justify-around w-80"
             left-label="Left"

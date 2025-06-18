@@ -26,7 +26,9 @@ const shortcuts = [
         'form-help': `inline-flex ml-2 items-center justify-center w-5 h-5 bg-subtle text-muted rounded-full cursor-pointer transition duration-100 hover:text-onprimary hover:bg-primary hover:ease-linear`,
         'page-header': 'text-xl font-semibold my-3',
         card: 'bg-surface text-default border border-solid border-border rounded-sm',
-        'card-title': 'text-base text-default font-medium'
+        'card-title': 'text-base text-default font-medium',
+        'form-inputfield': 'bg-inputfield border border-border rounded focus:border-primary focus:ring-2 focus:ring-primary-lt focus:outline-none h-[2.375rem] transition-colors duration-150',
+        'form-inputfield-within': 'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-lt focus-within:outline-none h-[2.375rem] transition-colors duration-150'
     },
     [
         /^btn-(base|primary|transparent)-(sm|md|lg|default)$/,

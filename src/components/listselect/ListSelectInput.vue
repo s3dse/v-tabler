@@ -1,13 +1,13 @@
 <template>
-    <label
-        class="flex items-center bg-inputfield border border-border rounded"
-    >
+    <label class="flex items-center">
         <input
             v-model="searchTerm"
-            class="w-full h-[2.31rem] bg-inputfield rounded text-sm text-default outline-none pl-2"
+            class="w-full h-full bg-inputfield rounded text-sm text-default outline-none pl-2"
             :class="props.inputClasses"
             ref="searchInput"
             v-bind:placeholder="inputPlaceholder"
+            :id="id"
+            tabindex="0"
         />
         <div
             v-if="searchTerm"
@@ -25,11 +25,14 @@
     </label>
 </template>
 <script setup>
+import { useId } from 'vue'
 const props = defineProps({
     inputClasses: String,
     optionsLoading: Boolean,
     inputPlaceholder: String,
     toggleOpen: Function
-});
-const searchTerm = defineModel('searchTerm', { type: String, default: null });
+})
+const searchTerm = defineModel('searchTerm', { type: String, default: null })
+
+const id = `listselect-input-${useId()}`
 </script>
