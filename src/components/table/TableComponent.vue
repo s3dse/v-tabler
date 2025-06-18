@@ -267,13 +267,8 @@ export default {
         },
         searchInputClassList: {
             type: String,
-            default: joinLines(`border
-                                autofill:!bg-green 
-                                border-border
-                                bg-inputfield
-                                text-muted
+            default: joinLines(`form-inputfield
                                 rounded-sm
-                                focus:ring-primary
                                 px-2
                                 text-sm
                                 flex
