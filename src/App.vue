@@ -1,6 +1,6 @@
 <script setup>
 import data from './assets/MOCK_DATA-2.json'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import TableComponent from './components/table/TableComponent.vue'
 import CardComponent from './components/card/CardComponent.vue'
 import LoadingOverlay from './components/loading-overlay/LoadingOverlay.vue'
@@ -11,7 +11,6 @@ import TabCardComponent from './components/card/TabCardComponent.vue'
 import TestOne from './components/card/TestOne.vue'
 import TestTwo from './components/card/TestTwo.vue'
 import ListSelect from './components/listselect/ListSelect.vue'
-import { joinLines } from './utils/string-join-lines'
 import SingleSelect from './components/select/SingleSelect.vue'
 import MultiSelect from './components/select/MultiSelect.vue'
 import ToggleComponent from './components/toggle/ToggleComponent.vue'
@@ -19,7 +18,6 @@ import ToggleComponent from './components/toggle/ToggleComponent.vue'
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
-// const items = await delay(2000).tehn(() => ref([...data]))
 const nullRecord = {
     id: null,
     first_name: null,
@@ -88,8 +86,6 @@ const logItem = item => {
     console.log(item)
 }
 const test = () => console.log('test')
-const stopped = () => console.log('stopped')
-const opened = () => console.log('opened')
 const validateAndSubmit = () => {
     const selection = document.querySelector('.custom-select').selectedOptions[0].innerText
     if (selection === 'a') {
@@ -100,25 +96,7 @@ const validateAndSubmit = () => {
         return true
     }
 }
-const panelClassList = joinLines(`w-full 
-                            max-w-md 
-                            overflow-hidden 
-                            bg-white 
-                            rounded-lg
-                            text-left 
-                            align-middle 
-                            shadow-xl`)
 
-const selectOptions = [
-    { name: 'Record A', value: 'a' },
-    { name: 'Record B', value: 'b' },
-    { name: 'Record C', value: 'c' },
-    { name: 'Record D', value: 'd' },
-    { name: 'Record E', value: 'e' },
-    { name: 'Record F', value: 'f' }
-]
-const fruits = ['Apple', 'Banana', 'Blueberry', 'Grapes', 'Pineapple']
-const selected = ref(selectOptions[0])
 const isLoading = ref(true)
 
 const tab1 = {
@@ -139,14 +117,6 @@ listSelectOptions.unshift({
     id: 0,
     name: 'first option is a very long name that should be handled'
 })
-const filterText = ref('')
-const listSelectOptionsFiltered = computed(() =>
-    filterText.value
-        ? listSelectOptions.filter(item =>
-              item.label.toLowerCase().includes(filterText.value.toLowerCase())
-          )
-        : listSelectOptions
-)
 
 const listSelectionMultiple = ref([])
 const listSelectionSingle = ref([])
@@ -171,8 +141,6 @@ const multiSelectOptions = [
     { name: 'All Records', value: 'all' }
 ]
 const multiSelectValue = ref([multiSelectOptions[0], multiSelectOptions[1]])
-
-const isToggleChecked = ref(false)
 
 const dropdownModel = ref(null)
 </script>
@@ -203,15 +171,25 @@ const dropdownModel = ref(null)
             left-label="Toggle Loading"
             v-model="isLoading"
         ></ToggleComponent>
-        <div v-busy="isLoading" class="p-3 card">
-            <p class="text-default">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
-            </p>
+        <div v-busy="isLoading" class="p-3 card flex gap-4 justify-between">
+            <span class="flex gap-4">
+                <p class="text-default">Busy Indicator Directive</p>
+                <pre>v-busy</pre>
+            </span>
+            <span class="flex">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.</p>
+            </span>
         </div>
-        <loading-overlay :show="isLoading" class="p-3 card">
-            <p class="text-default">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
-            </p>
+        <loading-overlay :show="isLoading" class="p-3 card flex gap-4 justify-between">
+            <span class="flex gap-4">
+                <p class="text-default">Busy Indicator Component</p>
+                <pre>LoadingOverlay</pre>
+            </span>
+            <span class="flex">
+                <p class="text-default">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
+                </p>
+            </span>
         </loading-overlay>
     </div>
     <div class="p-4">
@@ -256,17 +234,71 @@ const dropdownModel = ref(null)
         </div>
     </div>
 
-    <div class="p-4 mt-4 w-120">
-        <h3 class="text-xl pb-4">Typography</h3>
-        <div class="grid grid-cols-2 gap-4 card p-3">
-            <div class="text-default">Default...</div>
-            <pre class="text-default">text-default</pre>
-            <div class="text-muted">Muted...</div>
-            <pre class="text-muted">text-muted</pre>
-            <div class="text-subtle">Subtle...</div>
-            <pre class="text-subtle">text-subtle</pre>
-            <div class="text-disabled">Disabled...</div>
-            <pre class="text-disabled">text-disabled</pre>
+    <div class="p-4 w-full">
+        <h3 class="text-xl text-default font-medium pt-4 pb-8">Typography</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4 card p-3">
+                <div class="text-default">Default...</div>
+                <pre class="text-default">text-default</pre>
+                <div class="text-muted">Muted...</div>
+                <pre class="text-muted">text-muted</pre>
+                <div class="text-subtle">Subtle...</div>
+                <pre class="text-subtle">text-subtle</pre>
+                <div class="text-disabled">Disabled...</div>
+                <pre class="text-disabled">text-disabled</pre>
+            </div>
+            <div class="grid grid-cols-2 gap-4 p-3">
+                <div class="text-default">Default...</div>
+                <pre class="text-default">text-default</pre>
+                <div class="text-muted">Muted...</div>
+                <pre class="text-muted">text-muted</pre>
+                <div class="text-subtle">Subtle...</div>
+                <pre class="text-subtle">text-subtle</pre>
+                <div class="text-disabled">Disabled...</div>
+                <pre class="text-disabled">text-disabled</pre>
+            </div>
+        </div>
+        <div class="p-4"></div>
+        <div class="flex flex-col gap-2 m-0 p-0 text-default">
+            <div class="border border-border rounded-sm p-4">
+                <h1 class="text-4xl font-bold pt-6 pb-8">Heading 1</h1>
+                <p class="leading-7">
+                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+                    tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
+                    vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+                    no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+                    amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
+                    labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+                    et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
+                    sanctus est Lorem ipsum dolor sit amet.
+                </p>
+            </div>
+            <div class="border border-border rounded-sm p-4">
+                <h2 class="text-2xl font-semibold pt-2 pb-6">Heading 2</h2>
+                <p class="leading-7">
+                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+                    tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
+                    vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+                    no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+                    amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
+                    labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+                    et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
+                    sanctus est Lorem ipsum dolor sit amet.
+                </p>
+            </div>
+            <div class="border border-border rounded-sm p-4">
+                <h3 class="text-xl pt-1 pb-4">Heading 3</h3>
+                <p class="leading-7">
+                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+                    tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
+                    vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+                    no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+                    amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
+                    labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+                    et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
+                    sanctus est Lorem ipsum dolor sit amet.
+                </p>
+            </div>
         </div>
     </div>
 
