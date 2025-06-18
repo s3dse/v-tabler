@@ -235,7 +235,8 @@ const dropdownModel = ref(null)
     </div>
 
     <div class="p-4 w-full">
-        <h3 class="header-1 text-default">Typography</h3>
+        <h1 class="header-1 text-default">Typography</h1>
+        <h2 class="header-2 text-default">Semantic Text Color</h2>
         <div class="grid grid-cols-2 gap-4">
             <div class="grid grid-cols-2 gap-4 card p-3">
                 <div class="text-default">Default...</div>
@@ -257,13 +258,11 @@ const dropdownModel = ref(null)
                 <div class="text-disabled">Disabled...</div>
                 <pre class="text-disabled">text-disabled</pre>
             </div>
+            <h2 class="header-2 text-default">Tinted Text Color</h2>
             <div class="col-span-2">
-                <h1 class="header-1 text-default text-mix:txt-DEFAULT@80:green-500">Tinted Font Color</h1>
-                <pre class="border rounded-sm p-4 text-default">text-mix:txt-DEFAULT@80:green-500</pre>
-                <h1 class="header-1 text-default text-mix:txt-DEFAULT@80:amber-500">Tinted Font Color</h1>
-                <pre class="border rounded-sm p-4 text-default">text-mix:txt-DEFAULT@80:amber-500</pre>
-                <h1 class="header-1 text-default text-mix:txt-DEFAULT@80:red-500">Tinted Font Color</h1>
-                <pre class="border rounded-sm p-4 text-default">text-mix:txt-DEFAULT@80:red-500</pre>
+                <pre class="text-mix:txt-DEFAULT@80:green-500">text-mix:txt-DEFAULT@80:green-500</pre>
+                <pre class="text-mix:txt-DEFAULT@70:amber-500">text-mix:txt-DEFAULT@70:amber-500</pre>
+                <pre class="text-mix:txt-DEFAULT@50:red-500">text-mix:txt-DEFAULT@50:red-500</pre>
             </div>
         </div>
         <div class="p-4"></div>
