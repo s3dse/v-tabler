@@ -147,7 +147,7 @@ const dropdownModel = ref(null)
 
 <template>
     <div class="p-4 mt-4 flex flex-col gap-2">
-        <h3 class="text-xl text-default pt-4 pb-6">Basic Buttons</h3>
+        <h3 class="header-1 text-default">Basic Buttons</h3>
         <pre class="text-default text-base">btn-base-(sm|md|lg|default)</pre>
         <div class="flex flex-row gap-8">
             <button class="btn-base-sm">Base SM</button>
@@ -155,7 +155,7 @@ const dropdownModel = ref(null)
             <button class="btn-base-lg">Base LG</button>
             <button class="btn-base-default">Base Default</button>
         </div>
-        <h3 class="text-xl text-default pt-4 pb-6">Primary Buttons</h3>
+        <h3 class="header-1 text-default">Primary Buttons</h3>
         <pre class="text-default text-base">btn-primary-(sm|md|lg|default)</pre>
         <div class="flex flex-row gap-8">
             <button class="btn-primary-sm">Primary SM</button>
@@ -165,7 +165,7 @@ const dropdownModel = ref(null)
         </div>
     </div>
     <div class="p-4 flex flex-col gap-2">
-        <h3 class="text-xl text-default pt-4 pb-6">Busy Indicators</h3>
+        <h3 class="header-1 text-default">Busy Indicators</h3>
         <ToggleComponent
             class="flex gap-5"
             left-label="Toggle Loading"
@@ -193,7 +193,7 @@ const dropdownModel = ref(null)
         </loading-overlay>
     </div>
     <div class="p-4">
-        <h3 class="text-xl text-default pt-4 pb-8">Dialogues and Dropdowns</h3>
+        <h3 class="header-1 text-default">Dialogues and Dropdowns</h3>
         <div class="flex flex-col gap-4">
             <action-dropdown-component
                 :options="['a', 'b']"
@@ -235,7 +235,7 @@ const dropdownModel = ref(null)
     </div>
 
     <div class="p-4 w-full">
-        <h3 class="text-xl text-default font-medium pt-4 pb-8">Typography</h3>
+        <h3 class="header-1 text-default">Typography</h3>
         <div class="grid grid-cols-2 gap-4">
             <div class="grid grid-cols-2 gap-4 card p-3">
                 <div class="text-default">Default...</div>
@@ -261,7 +261,7 @@ const dropdownModel = ref(null)
         <div class="p-4"></div>
         <div class="flex flex-col gap-2 m-0 p-0 text-default">
             <div class="border border-border rounded-sm p-4">
-                <h1 class="text-4xl font-bold pt-6 pb-8">Heading 1</h1>
+                <h1 class="header-1">Heading 1</h1>
                 <p class="leading-7">
                     Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
                     tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
@@ -274,7 +274,7 @@ const dropdownModel = ref(null)
                 </p>
             </div>
             <div class="border border-border rounded-sm p-4">
-                <h2 class="text-2xl font-semibold pt-2 pb-6">Heading 2</h2>
+                <h2 class="header-2">Heading 2</h2>
                 <p class="leading-7">
                     Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
                     tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
@@ -287,7 +287,7 @@ const dropdownModel = ref(null)
                 </p>
             </div>
             <div class="border border-border rounded-sm p-4">
-                <h3 class="text-xl pt-1 pb-4">Heading 3</h3>
+                <h3 class="header-3">Heading 3</h3>
                 <p class="leading-7">
                     Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
                     tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
@@ -298,6 +298,30 @@ const dropdownModel = ref(null)
                     et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
                     sanctus est Lorem ipsum dolor sit amet.
                 </p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p>on surface</p>
+                    <div class="card p-4">
+                        <h1 class="header-1">Header 1</h1>
+                        <h2 class="header-2">Header 2</h2>
+                        <h3 class="header-3">Header 3</h3>
+                        <h4 class="header-4">Header 4</h4>
+                        <h5 class="header-5">Header 5</h5>
+                        <h6 class="header-6">Header 6</h6>
+                    </div>
+                </div>
+                <div>
+                    <p>on background</p>
+                    <div class="p-4">
+                        <h1 class="header-1">Header 1</h1>
+                        <h2 class="header-2">Header 2</h2>
+                        <h3 class="header-3">Header 3</h3>
+                        <h4 class="header-4">Header 4</h4>
+                        <h5 class="header-5">Header 5</h5>
+                        <h6 class="header-6">Header 6</h6>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -330,9 +354,7 @@ const dropdownModel = ref(null)
     </card-component>
 
     <div class="p-4">
-        <h3 class="text-default text-xl pt-4 pb-8">
-            Selections for large option lists (virtualized)
-        </h3>
+        <h1 class="header-1 text-default">Selections for large option lists (virtualized)</h1>
         <div class="p-2 text-muted">single mode</div>
         <div class="pl-8">
             <list-select
@@ -360,9 +382,7 @@ const dropdownModel = ref(null)
             ></list-select>
         </div>
 
-        <h3 class="text-default text-xl pt-4 pb-8">
-            Selections for small option lists (un-virtualized)
-        </h3>
+        <h1 class="header-1 text-default">Selections for small option lists (un-virtualized)</h1>
         <div class="flex flex-row gap-8">
             <div class="text-muted">
                 <p>single mode</p>

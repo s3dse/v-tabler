@@ -28,7 +28,13 @@ const shortcuts = [
         card: 'bg-surface text-default border border-solid border-border rounded-sm',
         'card-title': 'text-base text-default font-medium',
         'form-inputfield': 'bg-inputfield border border-border rounded focus:border-primary focus:ring-2 focus:ring-primary-lt focus:outline-none h-[2.375rem] transition-colors duration-150',
-        'form-inputfield-within': 'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-lt focus-within:outline-none h-[2.375rem] transition-colors duration-150'
+        'form-inputfield-within': 'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-lt focus-within:outline-none h-[2.375rem] transition-colors duration-150',
+        'header-1': 'text-3xl font-semibold leading-relaxed',
+        'header-2': 'text-2xl font-semibold leading-relaxed',
+        'header-3': 'text-xl font-medium leading-relaxed',
+        'header-4': 'text-lg font-medium leading-relaxed',
+        'header-5': 'text-base font-medium leading-relaxed',
+        'header-6': 'text-sm font-medium leading-relaxed',
     },
     [
         /^btn-(base|primary|transparent)-(sm|md|lg|default)$/,
