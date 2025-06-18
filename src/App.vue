@@ -249,7 +249,7 @@ const dropdownModel = ref(null)
     </dialog-component>
 
     <div class="p-4 mt-4 card w-80">
-        <h3 class="text-xl pb-4">Typograhpy</h3>
+        <h3 class="text-xl pb-4">Typography</h3>
         <div class="grid grid-cols-2 gap-4">
             <div class="py-1 text-default">Default...</div>
             <pre class="text-default">text-default</pre>
