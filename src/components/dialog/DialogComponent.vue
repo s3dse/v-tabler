@@ -70,7 +70,7 @@ const cancel = () => emit('cancel')
   <DialogRoot v-model:open="open">
     <DialogTrigger as-child>
         <slot name="trigger">
-            <button class="bg-primary hover:bg-primary-hover active:bg-primary-lt text-onprimary rounded px-4 h-[2.375rem]">Settings</button>
+            <button class="btn-primary-lg rounded px-4 h-[2.375rem]">Settings</button>
         </slot>
     </DialogTrigger>
     <DialogPortal>

@@ -257,6 +257,14 @@ const dropdownModel = ref(null)
                 <div class="text-disabled">Disabled...</div>
                 <pre class="text-disabled">text-disabled</pre>
             </div>
+            <div class="col-span-2">
+                <h1 class="header-1 text-default text-mix:txt-DEFAULT@80:green-500">Tinted Font Color</h1>
+                <pre class="border rounded-sm p-4 text-default">text-mix:txt-DEFAULT@80:green-500</pre>
+                <h1 class="header-1 text-default text-mix:txt-DEFAULT@80:amber-500">Tinted Font Color</h1>
+                <pre class="border rounded-sm p-4 text-default">text-mix:txt-DEFAULT@80:amber-500</pre>
+                <h1 class="header-1 text-default text-mix:txt-DEFAULT@80:red-500">Tinted Font Color</h1>
+                <pre class="border rounded-sm p-4 text-default">text-mix:txt-DEFAULT@80:red-500</pre>
+            </div>
         </div>
         <div class="p-4"></div>
         <div class="flex flex-col gap-2 m-0 p-0 text-default">

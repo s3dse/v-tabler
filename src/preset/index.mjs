@@ -1,10 +1,9 @@
 import { definePreset, presetIcons } from 'unocss'
 import { icons } from './icons.js'
-import { theme as baseTheme, shortcuts } from './theme.js'
+import { theme as baseTheme, shortcuts, rules, autocompletions } from './theme.js'
 import presetTheme from 'unocss-preset-theme'
 import merge from 'lodash.merge'
 import { getSafelist } from './safelist.js'
-import { get } from '@vueuse/core'
 
 const CUSTOM_VARIANTS = Object.freeze({
     'checked-and-highlighted': '[&[data-state=checked][data-highlighted]]',
@@ -40,6 +39,7 @@ const presetVTabler = definePreset(options => {
             fontFamily: { sans: '"Inter", system-ui, sans-serif' }
         },
         shortcuts,
+        rules,
         presets: [
             presetIcons({
                 collections: {
@@ -48,9 +48,13 @@ const presetVTabler = definePreset(options => {
             }),
             presetTheme({ theme: mergedTheme })
         ],
+        safelist: ['text-moon-500'],
         variants: [...generateAttributeVariants(CUSTOM_VARIANTS)],
         autocomplete: {
-            templates: generateVariantsAutocomplete(CUSTOM_VARIANTS)
+            templates: [
+                ...generateVariantsAutocomplete(CUSTOM_VARIANTS),
+                ...autocompletions.templates
+            ]
         }
     }
 })
