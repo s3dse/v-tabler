@@ -28,9 +28,9 @@ const shortcuts = [
         card: 'bg-surface text-default border border-solid border-border rounded-sm',
         'card-title': 'text-base text-default font-medium',
         'form-inputfield':
-            'bg-inputfield border border-border rounded focus:border-primary focus:ring-2 focus:ring-primary-lt focus:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
+            'bg-inputfield border border-border rounded focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
         'form-inputfield-within':
-            'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-lt focus-within:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
+            'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring focus-within:ring-primary/30 focus-within:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
         'header-1': 'text-3xl font-semibold leading-relaxed',
         'header-2': 'text-2xl font-semibold leading-relaxed',
         'header-3': 'text-xl font-medium leading-relaxed',
@@ -67,7 +67,7 @@ const shortcuts = [
             const size = sizes[sizeOption] || sizes.default
             const layout = 'inline-flex items-center justify-center gap-1'
             const disabledCursor = 'disabled:hover:cursor-default disabled:pointer-events-none'
-            const focus = 'focus:outline-none focus-visible:ring focus-visible:ring-primary-lt'
+            const focus = 'focus:outline-none focus-visible:ring focus-visible:ring-primary/30'
             const hoverCursor = 'hover:cursor-pointer'
             const transition = 'transition-colors duration-150 ease-in-out'
             return `${layout} ${color} ${size} ${hoverCursor} ${disabledCursor} ${focus} ${transition}`
