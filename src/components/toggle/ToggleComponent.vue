@@ -4,11 +4,13 @@
             <span v-if="leftLabel" class="text-default">{{ leftLabel }}</span>
         </slot>
         <label
-            class="relative inline-flex items-center cursor-pointer"
+            class="relative inline-flex items-center cursor-pointer outline-none"
             tabindex="0"
             @keydown.space.prevent="isChecked = !isChecked"
             @keydown.left.prevent="isChecked = false"
             @keydown.right.prevent="isChecked = true"
+            @focus="isFocused = true"
+            @blur="isFocused = false"
         >
             <input type="checkbox" class="sr-only" v-model="isChecked" />
             <div
@@ -16,8 +18,8 @@
                 :data-checked="isChecked"
             ></div>
             <div
-                class="absolute left-0.5 w-5 h-5 bg-surface text-default  rounded-full shadow transform transition-transform duration-200 ease-in-out"
-                :class="{ 'translate-x-4.05': isChecked }"
+                class="absolute left-0.5 w-5 h-5 bg-surface border border-2 border-border text-default  rounded-full shadow transform transition-transform duration-200 ease-in-out"
+                :class="{ 'translate-x-4.05 bg-surface': isChecked, 'border-primary-hover': isFocused }"
             >
                 <slot name="toggle-icon" v-bind="{ isChecked }">
                     <span :data-checked="isChecked" class="flex mx-auto mt-0.5"></span>
@@ -30,10 +32,13 @@
     </div>
 </template>
 <script setup>
+import { ref } from 'vue'
 const isChecked = defineModel({
     type: Boolean,
     default: false
 })
+
+const isFocused = ref(false)
 const props = defineProps({
     leftLabel: {
         type: String,
