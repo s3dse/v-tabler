@@ -178,8 +178,8 @@ const dropdownModel = ref(null)
 </script>
 
 <template>
-    <div class="p-4 flex flex-col gap-2">
-        <h3 class="text-xl text-default">Basic Buttons</h3>
+    <div class="p-4 mt-4 flex flex-col gap-2">
+        <h3 class="text-xl text-default pt-4 pb-6">Basic Buttons</h3>
         <pre class="text-default text-base">btn-base-(sm|md|lg|default)</pre>
         <div class="flex flex-row gap-8">
             <button class="btn-base-sm">Base SM</button>
@@ -187,7 +187,7 @@ const dropdownModel = ref(null)
             <button class="btn-base-lg">Base LG</button>
             <button class="btn-base-default">Base Default</button>
         </div>
-        <h3 class="text-xl text-default">Primary Buttons</h3>
+        <h3 class="text-xl text-default pt-4 pb-6">Primary Buttons</h3>
         <pre class="text-default text-base">btn-primary-(sm|md|lg|default)</pre>
         <div class="flex flex-row gap-8">
             <button class="btn-primary-sm">Primary SM</button>
@@ -196,62 +196,70 @@ const dropdownModel = ref(null)
             <button class="btn-primary-default">Primary Default</button>
         </div>
     </div>
-    <button class="btn-base-lg rounded-md" @click="isLoading = !isLoading">
-        Loading {{ isLoading }}
-    </button>
-    <div v-busy="isLoading" class="py-3 border rounded border-border border-solid">
-        <p class="text-default">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
-        </p>
+    <div class="p-4 flex flex-col gap-2">
+        <h3 class="text-xl text-default pt-4 pb-6">Busy Indicators</h3>
+        <ToggleComponent
+            class="flex gap-5"
+            left-label="Toggle Loading"
+            v-model="isLoading"
+        ></ToggleComponent>
+        <div v-busy="isLoading" class="p-3 card">
+            <p class="text-default">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
+            </p>
+        </div>
+        <loading-overlay :show="isLoading" class="p-3 card">
+            <p class="text-default">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
+            </p>
+        </loading-overlay>
     </div>
-    <loading-overlay :show="isLoading" class="py-3 border rounded border-solid border-border">
-        <p class="text-default">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
-        </p>
-    </loading-overlay>
-    <div class="flex px-50">
-        <action-dropdown-component
-            :options="['a', 'b']"
-            up-icon=""
-            down-icon=""
-            @on-select="logItem"
-            class="px-10 ms-auto me-2 h-full rounded-sm hover:cursor-pointer"
-        >
-            <template #toggle-label>
-                <div class="i-tabler-menu-2"></div>
-            </template>
-        </action-dropdown-component>
+    <div class="p-4">
+        <h3 class="text-xl text-default pt-4 pb-8">Dialogues and Dropdowns</h3>
+        <div class="flex flex-col gap-4">
+            <action-dropdown-component
+                :options="['a', 'b']"
+                up-icon=""
+                down-icon=""
+                @on-select="logItem"
+                class="w-15 h-full rounded-sm hover:cursor-pointer"
+            >
+                <template #toggle-label>
+                    <div class="i-tabler-menu-2"></div>
+                </template>
+            </action-dropdown-component>
 
-        <dropdown-component :options="['a', 'b']" v-model="dropdownModel" class="w-fit">
-            <template #toggle-label>
-                <div>select</div>
-            </template>
-        </dropdown-component>
+            <dropdown-component :options="['a', 'b']" v-model="dropdownModel" class="w-fit">
+                <template #toggle-label>
+                    <div>select</div>
+                </template>
+            </dropdown-component>
+            <dialog-component
+                title="Testing Dialog"
+                description="A dialog..."
+                @cancel="test"
+                :pre-confirm="validateAndSubmit"
+                :confirm-disabled="true"
+            >
+                <template #content>
+                    <div class="flex gap-4 flex-col text-default px-4 pt-3 pb-5">
+                        <span>test</span>
+                        <span>another test</span>
+                        <span>and another test</span>
+                    </div>
+                    <select class="custom-select">
+                        <option>a</option>
+                        <option>b</option>
+                    </select>
+                </template>
+            </dialog-component>
+        </div>
     </div>
-    <dialog-component
-        title="Testing Dialog"
-        description="A dialog..."
-        @cancel="test"
-        :pre-confirm="validateAndSubmit"
-        :confirm-disabled="true"
-    >
-        <template #content>
-            <div class="flex gap-4 flex-col text-default px-4 pt-3 pb-5">
-                <span>test</span>
-                <span>another test</span>
-                <span>and another test</span>
-            </div>
-            <select class="custom-select">
-                <option>a</option>
-                <option>b</option>
-            </select>
-        </template>
-    </dialog-component>
 
-    <div class="p-4 mt-4 card w-80">
+    <div class="p-4 mt-4 w-120">
         <h3 class="text-xl pb-4">Typography</h3>
-        <div class="grid grid-cols-2 gap-4">
-            <div class="py-1 text-default">Default...</div>
+        <div class="grid grid-cols-2 gap-4 card p-3">
+            <div class="text-default">Default...</div>
             <pre class="text-default">text-default</pre>
             <div class="text-muted">Muted...</div>
             <pre class="text-muted">text-muted</pre>
@@ -288,69 +296,66 @@ const dropdownModel = ref(null)
             </table-component>
         </loading-overlay>
     </card-component>
-    <div class="p-2 text-default">Multiple.</div>
-    <div class="pl-8">
-        <list-select
-            class="w-fit"
-            :options="listSelectOptions"
-            :dropdownClasses="`right-0 min-w-50 w-fit`"
-            :multiple="true"
-            :label-fn="e => e.name"
-            v-model="listSelectionMultiple"
-            @update:modelValue="e => console.log(e)"
-            :truncate-items="true"
-        ></list-select>
-    </div>
-    <div class="p-2 text-default">Single.</div>
-    <div class="pl-8">
-        <list-select
-            class="w-fit"
-            :options="listSelectOptions"
-            :dropdownClasses="`right-0 min-w-50 w-fit`"
-            :multiple="false"
-            :label-fn="e => e.name"
-            v-model="listSelectionSingle"
-            @update:modelValue="e => console.log(e)"
-            :truncate-items="true"
-        ></list-select>
-    </div>
-    <div class="p-2 text-default">Some text below.</div>
 
-    <h3 class="text-default text-xl p-2 mt-8">Small options selects:</h3>
-    <div class="flex flex-row gap-8">
-        <div class="text-muted">
-            <p>single</p>
-            <single-select
-                :options="singleSelectOptions"
-                v-model="singleSelectValue"
-                label-key="name"
-                class="w-fit mb-2"
-            ></single-select>
+    <div class="p-4">
+        <h3 class="text-default text-xl pt-4 pb-8">
+            Selections for large option lists (virtualized)
+        </h3>
+        <div class="p-2 text-muted">single mode</div>
+        <div class="pl-8">
+            <list-select
+                class="w-fit"
+                :options="listSelectOptions"
+                :dropdownClasses="`right-0 min-w-50 w-fit`"
+                :multiple="false"
+                :label-fn="e => e.name"
+                v-model="listSelectionSingle"
+                @update:modelValue="e => console.log(e)"
+                :truncate-items="true"
+            ></list-select>
         </div>
-        <div class="text-muted">
-            <p>multiple</p>
-
-            <multi-select
-                :options="multiSelectOptions"
-                v-model="multiSelectValue"
-                :id-function="x => x.value"
-                :label-function="x => x.name"
-                :is-default-option="x => x.value === 'all'"
-                :placeholder-function="
-                    v => (v.length === 1 ? v[0].name : v.length + ' are selected')
-                "
-                class="w-[200px] mb-2"
-            ></multi-select>
+        <div class="p-2 text-muted">multiple mode</div>
+        <div class="pl-8">
+            <list-select
+                class="w-fit"
+                :options="listSelectOptions"
+                :dropdownClasses="`right-0 min-w-50 w-fit`"
+                :multiple="true"
+                :label-fn="e => e.name"
+                v-model="listSelectionMultiple"
+                @update:modelValue="e => console.log(e)"
+                :truncate-items="true"
+            ></list-select>
         </div>
-    </div>
 
-    <div class="p-4 mt-8">
-        <h3 class="text-xl text-default">Switch</h3>
-        <ToggleComponent
-            class="justify-around w-80"
-            left-label="Left"
-            right-label="Right"
-            v-model="isToggleChecked"
-        ></ToggleComponent>
+        <h3 class="text-default text-xl pt-4 pb-8">
+            Selections for small option lists (un-virtualized)
+        </h3>
+        <div class="flex flex-row gap-8">
+            <div class="text-muted">
+                <p>single mode</p>
+                <single-select
+                    :options="singleSelectOptions"
+                    v-model="singleSelectValue"
+                    label-key="name"
+                    class="w-fit mb-2"
+                ></single-select>
+            </div>
+            <div class="text-muted">
+                <p>multiple mode</p>
+
+                <multi-select
+                    :options="multiSelectOptions"
+                    v-model="multiSelectValue"
+                    :id-function="x => x.value"
+                    :label-function="x => x.name"
+                    :is-default-option="x => x.value === 'all'"
+                    :placeholder-function="
+                        v => (v.length === 1 ? v[0].name : v.length + ' are selected')
+                    "
+                    class="w-[200px] mb-2"
+                ></multi-select>
+            </div>
+        </div>
     </div>
 </template>

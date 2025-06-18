@@ -5,4 +5,4 @@ defineProps({
     }
 })
 </script>
-<template><div class="card-title ">{{ message }}</div></template>
+<template><div class="card-title p-4">{{ message }}</div></template>
