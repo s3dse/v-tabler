@@ -1,15 +1,15 @@
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, toValue } from 'vue'
 
-export function useDropdownPosition(containerRef, contentRef) {
+export function useDropdownPosition(containerRef) {
     const dropdownAbove = ref(false)
     const dropdownLeft = ref(false)
     const dropdownStyles = ref({})
 
-    async function updateDropdownPosition() {
+    async function updateDropdownPosition(contentRef) {
         await nextTick()
         requestAnimationFrame(() => {
             const container = containerRef.value
-            const dropdown = contentRef?.value?.dropdownRef
+            const dropdown = toValue(contentRef)
             if (!container || !dropdown) return
 
             const rect = container.getBoundingClientRect()

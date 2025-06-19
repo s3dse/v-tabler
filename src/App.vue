@@ -14,6 +14,7 @@ import ListSelect from './components/listselect/ListSelect.vue'
 import SingleSelect from './components/select/SingleSelect.vue'
 import MultiSelect from './components/select/MultiSelect.vue'
 import ToggleComponent from './components/toggle/ToggleComponent.vue'
+import CollapsibleCard from './components/card/CollapsibleCard.vue'
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -146,192 +147,231 @@ const dropdownModel = ref(null)
 </script>
 
 <template>
-    <div class="p-4 mt-4 flex flex-col gap-2">
-        <h3 class="header-1 text-default">Basic Buttons</h3>
-        <pre class="text-default text-base">btn-base-(sm|md|lg|default)</pre>
-        <div class="flex flex-row gap-8">
-            <button class="btn-base-sm">Base SM</button>
-            <button class="btn-base-md">Base MD</button>
-            <button class="btn-base-lg">Base LG</button>
-            <button class="btn-base-default">Base Default</button>
+    <CollapsibleCard class="my-4">
+        <template #header>
+            <h1 class="header-1 pt-2 px-4 text-default">Buttons</h1>
+        </template>
+        <div class="p-4 flex flex-col gap-2">
+            <h1 class="header-2 text-default">Basic Buttons</h1>
+            <pre class="text-default text-base">btn-base-(sm|md|lg|default)</pre>
+            <div class="flex flex-row gap-8 pb-4">
+                <button class="btn-base-sm">Base SM</button>
+                <button class="btn-base-md">Base MD</button>
+                <button class="btn-base-lg">Base LG</button>
+                <button class="btn-base-default">Base Default</button>
+            </div>
+            <h3 class="header-2 text-default">Primary Buttons</h3>
+            <pre class="text-default text-base">btn-primary-(sm|md|lg|default)</pre>
+            <div class="flex flex-row gap-8">
+                <button class="btn-primary-sm">Primary SM</button>
+                <button class="btn-primary-md">Primary MD</button>
+                <button class="btn-primary-lg">Primary LG</button>
+                <button class="btn-primary-default">Primary Default</button>
+            </div>
         </div>
-        <h3 class="header-1 text-default">Primary Buttons</h3>
-        <pre class="text-default text-base">btn-primary-(sm|md|lg|default)</pre>
-        <div class="flex flex-row gap-8">
-            <button class="btn-primary-sm">Primary SM</button>
-            <button class="btn-primary-md">Primary MD</button>
-            <button class="btn-primary-lg">Primary LG</button>
-            <button class="btn-primary-default">Primary Default</button>
-        </div>
-    </div>
-    <div class="p-4 flex flex-col gap-2">
-        <h3 class="header-1 text-default">Busy Indicators</h3>
-        <ToggleComponent
-            class="flex gap-5"
-            left-label="Toggle Loading"
-            v-model="isLoading"
-        ></ToggleComponent>
-        <div v-busy="isLoading" class="p-3 card flex gap-4 justify-between">
-            <span class="flex gap-4">
-                <p class="text-default">Busy Indicator Directive</p>
-                <pre>v-busy</pre>
-            </span>
-            <span class="flex">
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.</p>
-            </span>
-        </div>
-        <loading-overlay :show="isLoading" class="p-3 card flex gap-4 justify-between">
-            <span class="flex gap-4">
-                <p class="text-default">Busy Indicator Component</p>
-                <pre>LoadingOverlay</pre>
-            </span>
-            <span class="flex">
-                <p class="text-default">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
-                </p>
-            </span>
-        </loading-overlay>
-    </div>
-    <div class="p-4">
-        <h3 class="header-1 text-default">Dialogues and Dropdowns</h3>
-        <div class="flex flex-col gap-4">
-            <action-dropdown-component
-                :options="['a', 'b']"
-                up-icon=""
-                down-icon=""
-                @on-select="logItem"
-                class="w-15 h-full rounded-sm hover:cursor-pointer"
-            >
-                <template #toggle-label>
-                    <div class="i-tabler-menu-2"></div>
-                </template>
-            </action-dropdown-component>
+    </CollapsibleCard>
 
-            <dropdown-component :options="['a', 'b']" v-model="dropdownModel" class="w-fit">
-                <template #toggle-label>
-                    <div>select</div>
-                </template>
-            </dropdown-component>
-            <dialog-component
-                title="Testing Dialog"
-                description="A dialog..."
-                @cancel="test"
-                :pre-confirm="validateAndSubmit"
-                :confirm-disabled="true"
-            >
-                <template #content>
-                    <div class="flex gap-4 flex-col text-default px-4 pt-3 pb-5">
-                        <span>test</span>
-                        <span>another test</span>
-                        <span>and another test</span>
-                    </div>
-                    <select class="custom-select">
-                        <option>a</option>
-                        <option>b</option>
-                    </select>
-                </template>
-            </dialog-component>
+    <CollapsibleCard class="my-4">
+        <template #header>
+            <h1 class="header-1 pt-2 px-4 text-default">Busy Indicators</h1>
+        </template>
+        <div class="p-4 flex flex-col gap-2">
+            <ToggleComponent
+                class="flex gap-5"
+                left-label="Toggle Loading"
+                v-model="isLoading"
+            ></ToggleComponent>
+            <div v-busy="isLoading" class="p-3 card flex gap-4 justify-between">
+                <span class="flex gap-4">
+                    <p class="text-default">Busy Indicator Directive</p>
+                    <pre>v-busy</pre>
+                </span>
+                <span class="flex">
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.</p>
+                </span>
+            </div>
+            <loading-overlay :show="isLoading" class="p-3 card flex gap-4 justify-between">
+                <span class="flex gap-4">
+                    <p class="text-default">Busy Indicator Component</p>
+                    <pre>LoadingOverlay</pre>
+                </span>
+                <span class="flex">
+                    <p class="text-default">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
+                    </p>
+                </span>
+            </loading-overlay>
         </div>
-    </div>
+    </CollapsibleCard>
 
-    <div class="p-4 w-full">
-        <h1 class="header-1 text-default">Typography</h1>
-        <h2 class="header-2 text-default">Semantic Text Color</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <div class="grid grid-cols-2 gap-4 card p-3">
-                <div class="text-default">Default...</div>
-                <pre class="text-default">text-default</pre>
-                <div class="text-muted">Muted...</div>
-                <pre class="text-muted">text-muted</pre>
-                <div class="text-subtle">Subtle...</div>
-                <pre class="text-subtle">text-subtle</pre>
-                <div class="text-disabled">Disabled...</div>
-                <pre class="text-disabled">text-disabled</pre>
-            </div>
-            <div class="grid grid-cols-2 gap-4 p-3">
-                <div class="text-default">Default...</div>
-                <pre class="text-default">text-default</pre>
-                <div class="text-muted">Muted...</div>
-                <pre class="text-muted">text-muted</pre>
-                <div class="text-subtle">Subtle...</div>
-                <pre class="text-subtle">text-subtle</pre>
-                <div class="text-disabled">Disabled...</div>
-                <pre class="text-disabled">text-disabled</pre>
-            </div>
-            <h2 class="header-2 text-default">Tinted Text Color</h2>
-            <div class="col-span-2">
-                <pre class="text-mix:txt-DEFAULT@80:green-500">text-mix:txt-DEFAULT@80:green-500</pre>
-                <pre class="text-mix:txt-DEFAULT@70:amber-500">text-mix:txt-DEFAULT@70:amber-500</pre>
-                <pre class="text-mix:txt-DEFAULT@50:red-500">text-mix:txt-DEFAULT@50:red-500</pre>
+    <CollapsibleCard class="my-4">
+        <template #header>
+            <h1 class="header-1 pt-2 px-4 text-default">Dialogues and Dropdowns</h1>
+        </template>
+        <div class="p-4">
+            <div class="flex flex-row gap-4">
+                <action-dropdown-component
+                    :options="['a', 'b']"
+                    up-icon=""
+                    down-icon=""
+                    @on-select="logItem"
+                    class="w-15 h-full rounded-sm hover:cursor-pointer"
+                >
+                    <template #toggle-label>
+                        <div class="i-tabler-menu-2"></div>
+                    </template>
+                </action-dropdown-component>
+
+                <dropdown-component :options="['a', 'b']" v-model="dropdownModel" class="w-fit">
+                    <template #toggle-label>
+                        <div>select</div>
+                    </template>
+                </dropdown-component>
+                <dialog-component
+                    title="Testing Dialog"
+                    description="A dialog..."
+                    @cancel="test"
+                    :pre-confirm="validateAndSubmit"
+                    :confirm-disabled="true"
+                >
+                    <template #content>
+                        <div class="flex gap-4 flex-col text-default px-4 pt-3 pb-5">
+                            <span>test</span>
+                            <span>another test</span>
+                            <span>and another test</span>
+                        </div>
+                        <select class="custom-select">
+                            <option>a</option>
+                            <option>b</option>
+                        </select>
+                    </template>
+                </dialog-component>
             </div>
         </div>
-        <div class="p-4"></div>
-        <div class="flex flex-col gap-2 m-0 p-0 text-default">
-            <div class="border border-border rounded-sm p-4">
-                <h1 class="header-1">Heading 1: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod</h1>
-                <p class="leading-7">
-                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
-                    tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
-                    vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
-                    no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
-                    amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
-                    labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
-                    et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
-                    sanctus est Lorem ipsum dolor sit amet.
-                </p>
-            </div>
-            <div class="border border-border rounded-sm p-4">
-                <h2 class="header-2">Heading 2: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod</h2>
-                <p class="leading-7">
-                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
-                    tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
-                    vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
-                    no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
-                    amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
-                    labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
-                    et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
-                    sanctus est Lorem ipsum dolor sit amet.
-                </p>
-            </div>
-            <div class="border border-border rounded-sm p-4">
-                <h3 class="header-3">Heading 3: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod</h3>
-                <p class="leading-7">
-                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
-                    tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
-                    vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
-                    no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
-                    amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
-                    labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
-                    et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
-                    sanctus est Lorem ipsum dolor sit amet.
-                </p>
-            </div>
+    </CollapsibleCard>
+
+    <CollapsibleCard>
+        <template #header>
+            <h1 class="header-1 pt-2 px-4 text-default">Typography</h1>
+        </template>
+        <div class="p-4 w-full">
+            <h2 class="header-2 text-default">Semantic Text Color</h2>
             <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <p>on surface</p>
-                    <div class="card p-4">
-                        <h1 class="header-1">Heading 1</h1>
-                        <h2 class="header-2">Heading 2</h2>
-                        <h3 class="header-3">Heading 3</h3>
-                        <h4 class="header-4">Heading 4</h4>
-                        <h5 class="header-5">Heading 5</h5>
-                        <h6 class="header-6">Heading 6</h6>
-                    </div>
+                <div class="grid grid-cols-2 gap-4 card p-3">
+                    <div class="text-default">Default...</div>
+                    <pre class="text-default">text-default</pre>
+                    <div class="text-muted">Muted...</div>
+                    <pre class="text-muted">text-muted</pre>
+                    <div class="text-subtle">Subtle...</div>
+                    <pre class="text-subtle">text-subtle</pre>
+                    <div class="text-disabled">Disabled...</div>
+                    <pre class="text-disabled">text-disabled</pre>
                 </div>
-                <div>
-                    <p>on background</p>
-                    <div class="p-4">
-                        <h1 class="header-1">Heading 1</h1>
-                        <h2 class="header-2">Heading 2</h2>
-                        <h3 class="header-3">Heading 3</h3>
-                        <h4 class="header-4">Heading 4</h4>
-                        <h5 class="header-5">Heading 5</h5>
-                        <h6 class="header-6">Heading 6</h6>
+                <div class="grid grid-cols-2 gap-4 p-3">
+                    <div class="text-default">Default...</div>
+                    <pre class="text-default">text-default</pre>
+                    <div class="text-muted">Muted...</div>
+                    <pre class="text-muted">text-muted</pre>
+                    <div class="text-subtle">Subtle...</div>
+                    <pre class="text-subtle">text-subtle</pre>
+                    <div class="text-disabled">Disabled...</div>
+                    <pre class="text-disabled">text-disabled</pre>
+                </div>
+                <h2 class="header-2 text-default">Tinted Text Color</h2>
+                <div class="col-span-2">
+                    <pre class="text-mix:txt-DEFAULT@80:green-500">
+text-mix:txt-DEFAULT@80:green-500
+</pre
+                    >
+                    <pre class="text-mix:txt-DEFAULT@70:amber-500">
+text-mix:txt-DEFAULT@70:amber-500
+</pre
+                    >
+                    <pre class="text-mix:txt-DEFAULT@50:red-500">
+text-mix:txt-DEFAULT@50:red-500</pre
+                    >
+                </div>
+            </div>
+            <div class="p-4"></div>
+            <div class="flex flex-col gap-2 m-0 p-0 text-default">
+                <div class="border border-border rounded-sm p-4">
+                    <h1 class="header-1">
+                        Heading 1: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+                        nonumy eirmod
+                    </h1>
+                    <p class="leading-7">
+                        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+                        eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+                        voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
+                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
+                        amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+                        nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
+                        diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
+                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
+                        amet.
+                    </p>
+                </div>
+                <div class="border border-border rounded-sm p-4">
+                    <h2 class="header-2">
+                        Heading 2: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+                        nonumy eirmod
+                    </h2>
+                    <p class="leading-7">
+                        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+                        eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+                        voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
+                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
+                        amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+                        nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
+                        diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
+                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
+                        amet.
+                    </p>
+                </div>
+                <div class="border border-border rounded-sm p-4">
+                    <h3 class="header-3">
+                        Heading 3: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+                        nonumy eirmod
+                    </h3>
+                    <p class="leading-7">
+                        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+                        eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+                        voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
+                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
+                        amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+                        nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
+                        diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
+                        clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
+                        amet.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p>on surface</p>
+                        <div class="card p-4">
+                            <h1 class="header-1">Heading 1</h1>
+                            <h2 class="header-2">Heading 2</h2>
+                            <h3 class="header-3">Heading 3</h3>
+                            <h4 class="header-4">Heading 4</h4>
+                            <h5 class="header-5">Heading 5</h5>
+                            <h6 class="header-6">Heading 6</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <p>on background</p>
+                        <div class="p-4">
+                            <h1 class="header-1">Heading 1</h1>
+                            <h2 class="header-2">Heading 2</h2>
+                            <h3 class="header-3">Heading 3</h3>
+                            <h4 class="header-4">Heading 4</h4>
+                            <h5 class="header-5">Heading 5</h5>
+                            <h6 class="header-6">Heading 6</h6>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </CollapsibleCard>
 
     <div class="p-3">
         <tab-card-component :tabs="tabs" :current-tab-index="0"></tab-card-component>

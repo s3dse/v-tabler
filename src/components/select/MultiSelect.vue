@@ -88,6 +88,8 @@ const props = defineProps({
         type: Function
     }
 })
+const containerRef = useTemplateRef('dropdown-container')
+const dropdownContentRef = useTemplateRef('dropdownContent')
 
 const modelText = computed(() => {
     const value = modelValue.value
@@ -98,7 +100,9 @@ const modelText = computed(() => {
 const toggleOpen = () => {
     open.value = !open.value
     if (open.value) {
-        updateDropdownPosition()
+        nextTick().then(() => {
+            updateDropdownPosition(ref(dropdownContentRef?.value?.dropdownRef))
+        })
     }
 }
 
@@ -108,8 +112,5 @@ const closeDropdown = () => {
 const multiSelectWrapperRef = useTemplateRef('multiSelectWrapper')
 const onClickOutsideHandler = [closeDropdown, { ignore: [multiSelectWrapperRef] }]
 
-const containerRef = useTemplateRef('dropdown-container')
-const dropdownContentRef = useTemplateRef('dropdownContent')
-
-const { updateDropdownPosition, dropdownStyles } = useDropdownPosition(containerRef, dropdownContentRef)
+const { updateDropdownPosition, dropdownStyles } = useDropdownPosition(containerRef)
 </script>
