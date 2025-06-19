@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest'
 import { mount, enableAutoUnmount } from '@vue/test-utils'
 import { ref } from 'vue'
 import MultiSelect from '../MultiSelect.vue'
+import MultiSelectContent from '../MultiSelectContent.vue'
 
 const options = [
     { value: 1, name: 'Option 1' },
@@ -20,7 +21,8 @@ const defaultProps = (mergeProps = {}) => ({
         isDefaultOption: () => false,
         multiple: true,
         ...mergeProps
-    }
+    },
+    attachTo: document.body
 })
 
 enableAutoUnmount(afterEach)
@@ -38,13 +40,16 @@ describe('MultiSelect', () => {
                 MultiSelect,
                 defaultProps({
                     'onUpdate:modelValue': v => (modelRef.value = v),
+                    modelValue: modelRef.value,
                     multiple: false
                 })
             )
             await wrapper.vm.toggleOpen()
-            await wrapper.findAll('[role=option]').at(1).trigger('click')
+            const dropdown = wrapper.findComponent(MultiSelectContent)
+            expect(dropdown.exists()).toBe(true)
+            await dropdown.findAll('[role=option]', { deep: true }).at(1).trigger('click')
             expect(modelRef.value).toEqual([options[1]])
-            await wrapper.findAll('[role=option]').at(2).trigger('click')
+            await dropdown.findAll('[role=option]', { deep: true }).at(2).trigger('click')
             expect(modelRef.value).toEqual([options[2]])
         })
 
@@ -62,7 +67,8 @@ describe('MultiSelect', () => {
             await wrapper.vm.$nextTick()
             expect(modelRef.value).toEqual([options[4]])
             await wrapper.vm.toggleOpen()
-            expect(wrapper.find('[role=option][aria-selected="true"]').text()).toBe('All Options')
+            const dropdown = wrapper.findComponent(MultiSelectContent)
+            expect(dropdown.find('[role=option][aria-selected="true"]').text()).toBe('All Options')
         })
     })
 
@@ -74,9 +80,10 @@ describe('MultiSelect', () => {
             }
             const wrapper = mount(MultiSelect, defaultProps(props))
             await wrapper.vm.toggleOpen()
-            await wrapper.findAll('[role=option]').at(1).trigger('click')
+            const dropdown = wrapper.findComponent(MultiSelectContent)
+            await dropdown.findAll('[role=option]').at(1).trigger('click')
             expect(wrapper.props('modelValue')).toEqual([options[1]])
-            await wrapper.findAll('[role=option]').at(2).trigger('click')
+            await dropdown.findAll('[role=option]').at(2).trigger('click')
             expect(wrapper.props('modelValue')).toEqual([options[1], options[2]])
         })
 
@@ -87,7 +94,8 @@ describe('MultiSelect', () => {
             }
             const wrapper = mount(MultiSelect, defaultProps(props))
             await wrapper.vm.toggleOpen()
-            await wrapper.findAll('[role=option]').at(1).trigger('click') // Deselect Option 2
+            const dropdown = wrapper.findComponent(MultiSelectContent)
+            await dropdown.findAll('[role=option]').at(1).trigger('click') // Deselect Option 2
             expect(wrapper.props('modelValue')).toEqual([{ value: 2, name: 'Option 2' }]) // Should remain selected
         })
 
@@ -101,7 +109,8 @@ describe('MultiSelect', () => {
             }
             const wrapper = mount(MultiSelect, defaultProps(props))
             await wrapper.vm.toggleOpen()
-            await wrapper.findAll('[role=option]').at(2).trigger('click') // Deselect Option 2
+            const dropdown = wrapper.findComponent(MultiSelectContent)
+            await dropdown.findAll('[role=option]').at(2).trigger('click') // Deselect Option 2
 
             expect(wrapper.props('modelValue')).toEqual([{ value: 2, name: 'Option 2' }])
         })
@@ -115,11 +124,12 @@ describe('MultiSelect', () => {
                 })
             )
             await wrapper.vm.toggleOpen()
-            await wrapper.findAll('[role=option]').at(0).trigger('click')
-            await wrapper.findAll('[role=option]').at(1).trigger('click')
-            await wrapper.findAll('[role=option]').at(2).trigger('click')
+            const dropdown = wrapper.findComponent(MultiSelectContent)
+            await dropdown.findAll('[role=option]').at(0).trigger('click')
+            await dropdown.findAll('[role=option]').at(1).trigger('click')
+            await dropdown.findAll('[role=option]').at(2).trigger('click')
             expect(wrapper.props('modelValue')).toEqual([options[0], options[1], options[2]])
-            await wrapper.findAll('[role=option]').at(3).trigger('click') // Select Option 4
+            await dropdown.findAll('[role=option]').at(3).trigger('click') // Select Option 4
             expect(wrapper.props('modelValue')).toEqual([options[4]]) // Should switch to default option
         })
 
@@ -133,7 +143,8 @@ describe('MultiSelect', () => {
                 })
             )
             await wrapper.vm.toggleOpen()
-            await wrapper.findAll('[role=option]').at(0).trigger('click') // Select Option 1
+            const dropdown = wrapper.findComponent(MultiSelectContent)
+            await dropdown.findAll('[role=option]').at(0).trigger('click') // Select Option 1
             expect(wrapper.props('modelValue')).toEqual([options[0]])
         })
     })

@@ -1,6 +1,6 @@
 <template>
     <div
-        v-click-outside="closeDropdown"
+        ref="multiSelectWrapper"
         @keydown.space="!open && toggleOpen()"
         @keydown.arrow-down="!open && toggleOpen()"
         @keydown.arrow-up="!open && toggleOpen()"
@@ -26,87 +26,41 @@
             </div>
         </label>
         <div class="relative w-full" ref="dropdown-container">
-        <Teleport to="body">
-            <div
-                class="p-3 bg-surface rounded min-w-[15.75rem] w-fit max-h-50rem overflow-auto with-scrollbar border border-border shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] z-501"
-                v-if="open"
-                ref="dropdown"
-                :style="dropdownStyles"
-            >
-                <ul
-                    ref="listRef"
-                    role="listbox"
-                    @keydown="onArrowKey"
-                    aria-multiselectable="true"
-                    :aria-activedescendant="'option-' + idFunction(options[focusedIndex])"
+            <Teleport to="body">
+                <MultiSelectContent
+                    ref="dropdownContent"
+                    :disabled="!open"
+                    v-on-click-outside="onClickOutsideHandler"
+                    v-model="modelValue"
+                    :options="props.options"
+                    :isDefaultOption="props.isDefaultOption"
+                    :open="open"
+                    :idFunction="idFunction"
+                    :labelFunction="labelFunction"
+                    :multiple="props.multiple"
+                    :style="dropdownStyles"
                     @keydown.esc.prevent="closeDropdown"
-                >
-                    <li
-                        v-for="(option, i) in options"
-                        class="multi-select-item leading-none flex items-center pl-8 outline-none select-none py-1 data-[disabled]:cursor-not-allowed text-default highlighted-major [&[data-state=checked][data-highlighted]]:selected-hovered-major"
-                        :class="[focusedIndex === i ? 'bg-primary text-onprimary' : '']"
-                        :id="'option-' + idFunction(option)"
-                        :key="idFunction(option)"
-                        role="option"
-                        @mouseenter="focusedIndex = i"
-                        @focus="focusedIndex = i"
-                        :data-highlighted="focusedIndex === i || null"
-                        :tabindex="i === focusedIndex ? 0 : -1"
-                        @keydown.enter.prevent="toggleSelect(option)"
-                        @click="toggleSelect(option)"
-                        :aria-selected="isSelected(option)"
-                        :data-state="isSelected(option) ? 'checked' : 'unchecked'"
-                    >
-                        <div class="relative inline-flex items-center justify-center">
-                            <span
-                                :data-selected="isSelected(option)"
-                                class="data-[selected=true]:block data-[selected=true]:i-tabler-check absolute left-[-1.75rem]"
-                            ></span>
-                            {{ labelFunction(option) }}
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </Teleport>
+                    @keydown.tab="closeDropdown"
+                ></MultiSelectContent>
+            </Teleport>
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed, toRef, toValue, ref, useTemplateRef, useId, nextTick } from 'vue'
-import { useSmartMultiSelect } from './useSmartSelect'
-import { useListKeyboardNavigation } from './useListKeyboardNavigation'
-import { clickOutside } from '@/directives/click-outside'
+import { computed, ref, useTemplateRef, useId, nextTick } from 'vue'
 import { useDropdownPosition } from './use-dropdown-position'
-
-const vClickOutside = clickOutside
-
-const preserveArray = (value, multiple) => {
-    if (!Array.isArray(value)) {
-        return value ? [value] : []
-    } else {
-        if (multiple) {
-            return value
-        } else {
-            return value.slice(-1)
-        }
-    }
-}
+import MultiSelectContent from './MultiSelectContent.vue'
+import { vOnClickOutside } from '@vueuse/components'
 
 const inputId = `selectcomponent-input-${useId()}`
 
 const modelValue = defineModel({
     type: Array,
     default: () => [],
-    required: true,
-    get(value) {
-        const val = toValue(value)
-        return preserveArray(val, props.multiple)
-    },
-    set(newValue) {
-        return preserveArray(newValue, props.multiple)
-    }
+    required: true
 })
+
 const open = ref(false)
 
 const props = defineProps({
@@ -135,54 +89,27 @@ const props = defineProps({
     }
 })
 
-const options = toRef(props, 'options')
-
 const modelText = computed(() => {
     const value = modelValue.value
     if (props.placeholderFunction) return props.placeholderFunction(value)
     return value.length === 1 ? props.labelFunction(value[0]) : `${value.length} selected`
 })
 
-const closeDropdown = () => {
-    open.value = false
-}
-
-const handleEnter = event => {
-    if (!open.value) {
-        event.preventDefault()
-        toggleOpen()
-    }
-}
-
 const toggleOpen = () => {
     open.value = !open.value
     if (open.value) {
         updateDropdownPosition()
-        resetFocus()
     }
 }
 
-const { toggleSelect, isSelected } = useSmartMultiSelect({
-    modelValue,
-    multiple: props.multiple,
-    options,
-    isDefaultOption: props.isDefaultOption,
-    getId: props.idFunction,
-    multiple: props.multiple
-})
-
-const listTemplateRef = useTemplateRef('listRef')
-
-const { focusedIndex, onArrowKey, resetFocus } = useListKeyboardNavigation({
-    itemsRef: options,
-    listTemplateRef
-})
+const closeDropdown = () => {
+    open.value = false
+}
+const multiSelectWrapperRef = useTemplateRef('multiSelectWrapper')
+const onClickOutsideHandler = [closeDropdown, { ignore: [multiSelectWrapperRef] }]
 
 const containerRef = useTemplateRef('dropdown-container')
-const dropdownRef = useTemplateRef('dropdown')
+const dropdownContentRef = useTemplateRef('dropdownContent')
 
-const { dropdownAbove, dropdownLeft, updateDropdownPosition, dropdownStyles } = useDropdownPosition(
-    containerRef,
-    dropdownRef
-)
+const { updateDropdownPosition, dropdownStyles } = useDropdownPosition(containerRef, dropdownContentRef)
 </script>

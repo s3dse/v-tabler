@@ -1,6 +1,6 @@
 import { ref, nextTick } from 'vue'
 
-export function useDropdownPosition(containerRef, dropdownRef) {
+export function useDropdownPosition(containerRef, contentRef) {
     const dropdownAbove = ref(false)
     const dropdownLeft = ref(false)
     const dropdownStyles = ref({})
@@ -9,11 +9,11 @@ export function useDropdownPosition(containerRef, dropdownRef) {
         await nextTick()
         requestAnimationFrame(() => {
             const container = containerRef.value
-            const dropdown = dropdownRef?.value
+            const dropdown = contentRef?.value?.dropdownRef
             if (!container || !dropdown) return
 
             const rect = container.getBoundingClientRect()
-            
+
             const spaceBelow = window.innerHeight - rect.bottom
             const dropdownHeight = dropdown.offsetHeight
 
