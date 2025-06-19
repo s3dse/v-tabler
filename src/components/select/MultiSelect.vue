@@ -26,21 +26,20 @@
             </div>
         </label>
         <div class="relative w-full" ref="dropdown-container">
+        <Teleport to="body">
             <div
-                class="p-3 absolute bg-surface rounded min-w-[15.75rem] w-full max-h-50rem overflow-auto with-scrollbar border border-border shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] z-501"
+                class="p-3 bg-surface rounded min-w-[15.75rem] w-fit max-h-50rem overflow-auto with-scrollbar border border-border shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] z-501"
                 v-if="open"
-                :class="[
-                    dropdownAbove ? 'bottom-full' : 'top-full',
-                    dropdownLeft ? 'right-0' : 'left-0'
-                ]"
                 ref="dropdown"
+                :style="dropdownStyles"
             >
                 <ul
                     ref="listRef"
                     role="listbox"
                     @keydown="onArrowKey"
                     aria-multiselectable="true"
-                    :aria-activedescendant="'opion-' + idFunction(options[focusedIndex])"
+                    :aria-activedescendant="'option-' + idFunction(options[focusedIndex])"
+                    @keydown.esc.prevent="closeDropdown"
                 >
                     <li
                         v-for="(option, i) in options"
@@ -68,6 +67,7 @@
                     </li>
                 </ul>
             </div>
+        </Teleport>
         </div>
     </div>
 </template>
@@ -181,7 +181,7 @@ const { focusedIndex, onArrowKey, resetFocus } = useListKeyboardNavigation({
 const containerRef = useTemplateRef('dropdown-container')
 const dropdownRef = useTemplateRef('dropdown')
 
-const { dropdownAbove, dropdownLeft, updateDropdownPosition } = useDropdownPosition(
+const { dropdownAbove, dropdownLeft, updateDropdownPosition, dropdownStyles } = useDropdownPosition(
     containerRef,
     dropdownRef
 )

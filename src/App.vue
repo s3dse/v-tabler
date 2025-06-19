@@ -390,7 +390,7 @@ const dropdownModel = ref(null)
         </div>
 
         <h1 class="header-1 text-default">Selections for small option lists (un-virtualized)</h1>
-        <div class="flex flex-row gap-8">
+        <div class="flex flex-row overflow-hidden gap-8">
             <div class="text-muted">
                 <p>single mode</p>
                 <single-select

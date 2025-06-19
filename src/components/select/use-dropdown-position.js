@@ -1,11 +1,9 @@
 import { ref, nextTick } from 'vue'
 
-export function useDropdownPosition(
-    containerRef,
-    dropdownRef
-) {
+export function useDropdownPosition(containerRef, dropdownRef) {
     const dropdownAbove = ref(false)
     const dropdownLeft = ref(false)
+    const dropdownStyles = ref({})
 
     async function updateDropdownPosition() {
         await nextTick()
@@ -15,21 +13,29 @@ export function useDropdownPosition(
             if (!container || !dropdown) return
 
             const rect = container.getBoundingClientRect()
-            const dropdownHeight = dropdown.offsetHeight
-            const dropdownWidth = dropdown.offsetWidth
-
+            
             const spaceBelow = window.innerHeight - rect.bottom
-            dropdownAbove.value = spaceBelow < dropdownHeight
+            const dropdownHeight = dropdown.offsetHeight
 
-            const spaceLeft = window.innerWidth - rect.left
-            dropdownLeft.value = spaceLeft < dropdownWidth
+            const shouldOpenAbove = spaceBelow < dropdownHeight
+            dropdownAbove.value = shouldOpenAbove
+
+            dropdownStyles.value = {
+                position: 'absolute',
+                left: `${rect.left + window.scrollX}px`,
+                top: shouldOpenAbove
+                    ? `${rect.top + window.scrollY - dropdownHeight}px`
+                    : `${rect.bottom + window.scrollY}px`,
+                width: `${rect.width}px`,
+                zIndex: 501
+            }
         })
     }
 
     return {
         dropdownAbove,
         dropdownLeft,
-        updateDropdownPosition
+        updateDropdownPosition,
+        dropdownStyles
     }
-
 }
