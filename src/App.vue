@@ -268,7 +268,7 @@ const dropdownModel = ref(null)
         <div class="p-4"></div>
         <div class="flex flex-col gap-2 m-0 p-0 text-default">
             <div class="border border-border rounded-sm p-4">
-                <h1 class="header-1">Heading 1</h1>
+                <h1 class="header-1">Heading 1: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod</h1>
                 <p class="leading-7">
                     Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
                     tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
@@ -281,7 +281,7 @@ const dropdownModel = ref(null)
                 </p>
             </div>
             <div class="border border-border rounded-sm p-4">
-                <h2 class="header-2">Heading 2</h2>
+                <h2 class="header-2">Heading 2: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod</h2>
                 <p class="leading-7">
                     Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
                     tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
@@ -294,7 +294,7 @@ const dropdownModel = ref(null)
                 </p>
             </div>
             <div class="border border-border rounded-sm p-4">
-                <h3 class="header-3">Heading 3</h3>
+                <h3 class="header-3">Heading 3: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod</h3>
                 <p class="leading-7">
                     Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
                     tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
@@ -310,23 +310,23 @@ const dropdownModel = ref(null)
                 <div>
                     <p>on surface</p>
                     <div class="card p-4">
-                        <h1 class="header-1">Header 1</h1>
-                        <h2 class="header-2">Header 2</h2>
-                        <h3 class="header-3">Header 3</h3>
-                        <h4 class="header-4">Header 4</h4>
-                        <h5 class="header-5">Header 5</h5>
-                        <h6 class="header-6">Header 6</h6>
+                        <h1 class="header-1">Heading 1</h1>
+                        <h2 class="header-2">Heading 2</h2>
+                        <h3 class="header-3">Heading 3</h3>
+                        <h4 class="header-4">Heading 4</h4>
+                        <h5 class="header-5">Heading 5</h5>
+                        <h6 class="header-6">Heading 6</h6>
                     </div>
                 </div>
                 <div>
                     <p>on background</p>
                     <div class="p-4">
-                        <h1 class="header-1">Header 1</h1>
-                        <h2 class="header-2">Header 2</h2>
-                        <h3 class="header-3">Header 3</h3>
-                        <h4 class="header-4">Header 4</h4>
-                        <h5 class="header-5">Header 5</h5>
-                        <h6 class="header-6">Header 6</h6>
+                        <h1 class="header-1">Heading 1</h1>
+                        <h2 class="header-2">Heading 2</h2>
+                        <h3 class="header-3">Heading 3</h3>
+                        <h4 class="header-4">Heading 4</h4>
+                        <h5 class="header-5">Heading 5</h5>
+                        <h6 class="header-6">Heading 6</h6>
                     </div>
                 </div>
             </div>

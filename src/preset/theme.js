@@ -31,12 +31,12 @@ const shortcuts = [
             'bg-inputfield border border-border rounded focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
         'form-inputfield-within':
             'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring focus-within:ring-primary/30 focus-within:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
-        'header-1': 'text-3xl font-semibold leading-relaxed',
-        'header-2': 'text-2xl font-semibold leading-relaxed',
-        'header-3': 'text-xl font-medium leading-relaxed',
-        'header-4': 'text-lg font-medium leading-relaxed',
-        'header-5': 'text-base font-medium leading-relaxed',
-        'header-6': 'text-sm font-medium leading-relaxed',
+        'header-1': 'text-3xl font-semibold leading-tight pb-4',
+        'header-2': 'text-2xl font-semibold leading-snug pb-2',
+        'header-3': 'text-xl font-medium leading-relaxed pb-1',
+        'header-4': 'text-lg font-medium leading-relaxed pb-1',
+        'header-5': 'text-base font-medium leading-relaxed pb-1',
+        'header-6': 'text-sm font-medium leading-relaxed pb-1',
         'color-transition': 'transition-colors duration-150 ease-in-out',
 
     },
