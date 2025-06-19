@@ -93,7 +93,7 @@ const props = defineProps({
     multiple: {
         type: Boolean,
         required: true
-    },
+    }
 })
 
 const options = toRef(props, 'options')
@@ -116,8 +116,6 @@ const { focusedIndex, onArrowKey, resetFocus } = useListKeyboardNavigation({
     listTemplateRef
 })
 
-
-
 watch(
     () => props.open,
     newVal => {
@@ -126,6 +124,4 @@ watch(
         }
     }
 )
-
-
 </script>
