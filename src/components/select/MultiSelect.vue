@@ -9,10 +9,7 @@
         tabindex="0"
         class="form-inputfield"
     >
-        <label
-            class="selectcomponent__label flex items-center"
-                    @click.prevent="toggleOpen"
-        >
+        <label class="selectcomponent__label flex items-center" @click.prevent="toggleOpen">
             <input
                 :value="modelText"
                 readonly
@@ -28,10 +25,15 @@
                 ></span>
             </div>
         </label>
-        <div class="relative w-full">
+        <div class="relative w-full" ref="dropdown-container">
             <div
-                class="p-3 absolute top-[-2.31rem] right-auto bg-surface rounded min-w-[15.75rem] w-full max-h-50rem overflow-auto with-scrollbar border border-border shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] z-501"
+                class="p-3 absolute bg-surface rounded min-w-[15.75rem] w-full max-h-50rem overflow-auto with-scrollbar border border-border shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] z-501"
                 v-if="open"
+                :class="[
+                    dropdownAbove ? 'bottom-full' : 'top-full',
+                    dropdownLeft ? 'right-0' : 'left-0'
+                ]"
+                ref="dropdown"
             >
                 <ul
                     ref="listRef"
@@ -42,14 +44,7 @@
                 >
                     <li
                         v-for="(option, i) in options"
-                        class="multi-select-item 
-                        leading-none flex items-center pl-8 
-                        outline-none select-none py-1 data-[disabled]:cursor-not-allowed
-                        text-default
-                        highlighted-major
-                        [&[data-state=checked][data-highlighted]]:selected-hovered-major
-                        
-                        "
+                        class="multi-select-item leading-none flex items-center pl-8 outline-none select-none py-1 data-[disabled]:cursor-not-allowed text-default highlighted-major [&[data-state=checked][data-highlighted]]:selected-hovered-major"
                         :class="[focusedIndex === i ? 'bg-primary text-onprimary' : '']"
                         :id="'option-' + idFunction(option)"
                         :key="idFunction(option)"
@@ -78,10 +73,11 @@
 </template>
 
 <script setup>
-import { computed, toRef, toValue, ref, useTemplateRef, useId } from 'vue'
+import { computed, toRef, toValue, ref, useTemplateRef, useId, nextTick } from 'vue'
 import { useSmartMultiSelect } from './useSmartSelect'
 import { useListKeyboardNavigation } from './useListKeyboardNavigation'
 import { clickOutside } from '@/directives/click-outside'
+import { useDropdownPosition } from './use-dropdown-position'
 
 const vClickOutside = clickOutside
 
@@ -144,9 +140,7 @@ const options = toRef(props, 'options')
 const modelText = computed(() => {
     const value = modelValue.value
     if (props.placeholderFunction) return props.placeholderFunction(value)
-    return value.length === 1
-        ? props.labelFunction(value[0])
-        : `${value.length} selected`
+    return value.length === 1 ? props.labelFunction(value[0]) : `${value.length} selected`
 })
 
 const closeDropdown = () => {
@@ -163,6 +157,7 @@ const handleEnter = event => {
 const toggleOpen = () => {
     open.value = !open.value
     if (open.value) {
+        updateDropdownPosition()
         resetFocus()
     }
 }
@@ -182,4 +177,12 @@ const { focusedIndex, onArrowKey, resetFocus } = useListKeyboardNavigation({
     itemsRef: options,
     listTemplateRef
 })
+
+const containerRef = useTemplateRef('dropdown-container')
+const dropdownRef = useTemplateRef('dropdown')
+
+const { dropdownAbove, dropdownLeft, updateDropdownPosition } = useDropdownPosition(
+    containerRef,
+    dropdownRef
+)
 </script>
