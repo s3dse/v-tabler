@@ -7,7 +7,6 @@
         <ul
             ref="listRef"
             role="listbox"
-            @keydown="onArrowKey"
             aria-multiselectable="true"
             :aria-activedescendant="'option-' + idFunction(options[focusedIndex])"
             @keydown.esc.prevent="closeDropdown"
@@ -111,7 +110,7 @@ const dropdownRef = useTemplateRef('dropdown')
 
 defineExpose({ dropdownRef })
 
-const { focusedIndex, onArrowKey, resetFocus } = useListKeyboardNavigation({
+const { focusedIndex, resetFocus, onGlobalArrowKey } = useListKeyboardNavigation({
     itemsRef: options,
     listTemplateRef
 })
@@ -120,8 +119,12 @@ watch(
     () => props.open,
     newVal => {
         if (newVal) {
+            window.addEventListener('keydown', onGlobalArrowKey)
             resetFocus()
+        } else {
+            window.removeEventListener('keydown', onGlobalArrowKey)
         }
-    }
+    },
+    { immediate: true }
 )
 </script>

@@ -13,6 +13,7 @@ export function useListKeyboardNavigation({ itemsRef, listTemplateRef }) {
     const focusedIndex = ref(0)
 
     const moveFocus = direction => {
+        console.log('moveFocus', direction)
         const items = itemsRef.value
         if (!items.length) return
 
@@ -39,14 +40,30 @@ export function useListKeyboardNavigation({ itemsRef, listTemplateRef }) {
         }
     }
 
+    const globalHandlers = {
+        ArrowDown: () => onArrowKey({ key: 'ArrowDown', preventDefault: () => {} }),
+        ArrowUp: () => onArrowKey({ key: 'ArrowUp', preventDefault: () => {} })
+    }
+
     const resetFocus = () => {
         focusedIndex.value = 0
         focusCurrentItem()
     }
 
+    const onGlobalArrowKey = kbdEvent => {
+        if (!listTemplateRef?.value) return
+        const handler = globalHandlers[kbdEvent.key]
+        if (handler) {
+            kbdEvent.preventDefault()
+            kbdEvent.stopPropagation()
+            handler()
+        }
+    }
+
     return {
         focusedIndex,
         onArrowKey,
+        onGlobalArrowKey,
         resetFocus
     }
 }
