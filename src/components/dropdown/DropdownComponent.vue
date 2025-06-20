@@ -1,9 +1,5 @@
 <template>
-    <div
-        v-click-outside="closeDropdown"
-        class="dropdown-component relative"
-        ref="dropdown-container"
-    >
+    <div v-click-outside="closeDropdown" class="dropdown-component relative">
         <div
             @click="toggleDropdown"
             :class="[
@@ -13,6 +9,7 @@
                     : 'btn-base-default rounded-sm border px-4 py-1 w-full'
             ]"
             type="button"
+            ref="dropdown-container"
         >
             <slot name="toggle-label" v-bind="{ currentItem }">
                 {{ currentItem }}
@@ -61,7 +58,7 @@
 <script>
 import '@unocss/reset/tailwind-compat.css'
 import 'virtual:uno.css'
-import { useTemplateRef, Teleport } from 'vue'
+import { useTemplateRef, Teleport, nextTick } from 'vue'
 import { clickOutside } from '@/directives/click-outside'
 import { useDropdownPosition } from '../select/use-dropdown-position'
 export default {

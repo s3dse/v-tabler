@@ -2,7 +2,6 @@
     <div
         v-click-outside="closeDropdown"
         class="dropdown-component action-dropdown-component relative"
-        ref="dropdown-container"
     >
         <div
             @click="toggleDropdown"
@@ -13,6 +12,7 @@
                     : 'btn-base-default rounded-sm py-1 text-center w-full'
             ]"
             type="button"
+            ref="dropdown-container"
         >
             <slot name="toggle-label" />
             <span class="ms-2 chevron" :class="[show ? upIcon : downIcon]"></span>
@@ -21,7 +21,7 @@
             <div
                 v-show="show"
                 :class="[
-                    'dropdown-container z-600',
+                    'dropdown-container absolute z-600',
                     dropdownContainerClassList
                         ? dropdownContainerClassList
                         : ' w-fit bg-surface text-default divide-y divide-border border border border-1 border-solid border-border rounded-sm shadow-lg w-44'
@@ -52,7 +52,7 @@
 <script>
 import '@unocss/reset/tailwind-compat.css'
 import 'virtual:uno.css'
-import { useTemplateRef, Teleport } from 'vue'
+import { useTemplateRef, Teleport, nextTick } from 'vue'
 import { clickOutside } from '@/directives/click-outside'
 import { useDropdownPosition } from '../select/use-dropdown-position'
 export default {

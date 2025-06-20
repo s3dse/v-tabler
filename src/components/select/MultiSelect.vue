@@ -1,6 +1,5 @@
 <template>
     <div
-        ref="multiSelectWrapper"
         @keydown.space="!open && toggleOpen()"
         @keydown.arrow-down="!open && toggleOpen()"
         @keydown.arrow-up="!open && toggleOpen()"
@@ -8,7 +7,9 @@
         @keydown.tab="closeDropdown"
         tabindex="0"
         class="form-inputfield"
+        ref="multiSelectWrapper"
     >
+        <!-- ref="dropdown-container" -->
         <label class="selectcomponent__label flex items-center" @click.prevent="toggleOpen">
             <input
                 :value="modelText"
@@ -25,10 +26,11 @@
                 ></span>
             </div>
         </label>
-        <div class="relative w-full" ref="dropdown-container">
+        <div class="relative w-full">
             <Teleport to="body">
                 <MultiSelectContent
                     ref="dropdownContent"
+                    class="invisible"
                     :disabled="!open"
                     v-on-click-outside="onClickOutsideHandler"
                     v-model="modelValue"
@@ -88,8 +90,8 @@ const props = defineProps({
         type: Function
     }
 })
-const containerRef = useTemplateRef('dropdown-container')
 const dropdownContentRef = useTemplateRef('dropdownContent')
+const multiSelectWrapperRef = useTemplateRef('multiSelectWrapper')
 
 const modelText = computed(() => {
     const value = modelValue.value
@@ -101,7 +103,9 @@ const toggleOpen = () => {
     open.value = !open.value
     if (open.value) {
         nextTick().then(() => {
-            updateDropdownPosition(ref(dropdownContentRef?.value?.dropdownRef))
+            requestAnimationFrame(() => {
+                updateDropdownPosition(ref(dropdownContentRef?.value?.dropdownRef))
+            })
         })
     }
 }
@@ -109,8 +113,7 @@ const toggleOpen = () => {
 const closeDropdown = () => {
     open.value = false
 }
-const multiSelectWrapperRef = useTemplateRef('multiSelectWrapper')
 const onClickOutsideHandler = [closeDropdown, { ignore: [multiSelectWrapperRef] }]
 
-const { updateDropdownPosition, dropdownStyles } = useDropdownPosition(containerRef)
+const { updateDropdownPosition, dropdownStyles } = useDropdownPosition(multiSelectWrapperRef)
 </script>
