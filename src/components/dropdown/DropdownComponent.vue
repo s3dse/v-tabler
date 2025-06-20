@@ -58,15 +58,17 @@
 <script>
 import '@unocss/reset/tailwind-compat.css'
 import 'virtual:uno.css'
-import { useTemplateRef, Teleport, nextTick } from 'vue'
+import { useTemplateRef, Teleport } from 'vue'
 import { clickOutside } from '@/directives/click-outside'
-import { useDropdownPosition } from '../select/use-dropdown-position'
+import { useDropdownPosition, POSITION_RELATIVE_TO_TRIGGER } from '../select/use-dropdown-position'
 export default {
     setup() {
         const containerRef = useTemplateRef('dropdown-container')
         const dropdownContentRef = useTemplateRef('dropdown-content')
 
-        const { updateDropdownPosition, dropdownStyles } = useDropdownPosition(containerRef)
+        const { updateDropdownPosition, dropdownStyles } = useDropdownPosition(containerRef, {
+            positionToTrigger: POSITION_RELATIVE_TO_TRIGGER.ADJACENT
+        })
         return {
             updateDropdownPosition,
             dropdownStyles,
