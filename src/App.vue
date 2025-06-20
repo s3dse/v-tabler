@@ -147,10 +147,7 @@ const dropdownModel = ref(null)
 </script>
 
 <template>
-    <CollapsibleCard class="my-4">
-        <template #header>
-            <h1 class="header-1 pt-2 px-4 text-default">Buttons</h1>
-        </template>
+    <CollapsibleCard class="my-4" heading="Buttons">
         <div class="p-4 flex flex-col gap-2">
             <h1 class="header-2 text-default">Basic Buttons</h1>
             <pre class="text-default text-base">btn-base-(sm|md|lg|default)</pre>
@@ -190,7 +187,10 @@ const dropdownModel = ref(null)
                     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.</p>
                 </span>
             </div>
-            <loading-overlay :show="isLoading" class="p-3 card grid grid-cols-8 gap-4 justify-between">
+            <loading-overlay
+                :show="isLoading"
+                class="p-3 card grid grid-cols-8 gap-4 justify-between"
+            >
                 <span class="gap-4 col-span-4 grid grid-cols-2">
                     <p class="text-default">Busy Indicator Component</p>
                     <pre>LoadingOverlay</pre>
@@ -267,7 +267,7 @@ const dropdownModel = ref(null)
                     <div class="text-disabled">Disabled...</div>
                     <pre class="text-disabled">text-disabled</pre>
                 </div>
-                <div class="grid grid-cols-2 gap-4 p-3">
+                <div class="grid grid-cols-2 gap-4 p-3 card bg-background">
                     <div class="text-default">Default...</div>
                     <pre class="text-default">text-default</pre>
                     <div class="text-muted">Muted...</div>
@@ -278,7 +278,7 @@ const dropdownModel = ref(null)
                     <pre class="text-disabled">text-disabled</pre>
                 </div>
                 <h2 class="header-2 text-default">Tinted Text Color</h2>
-                <div class="col-span-2">
+                <div class="flex flex-col gap-y-4 col-span-2">
                     <pre class="text-mix:txt-DEFAULT@80:green-500">
 text-mix:txt-DEFAULT@80:green-500
 </pre
@@ -289,6 +289,9 @@ text-mix:txt-DEFAULT@70:amber-500
                     >
                     <pre class="text-mix:txt-DEFAULT@50:red-500">
 text-mix:txt-DEFAULT@50:red-500</pre
+                    >
+                    <pre class="text-mix:txt-DEFAULT@50:primary-DEFAULT">
+text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                     >
                 </div>
             </div>
