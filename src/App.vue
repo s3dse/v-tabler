@@ -347,7 +347,7 @@ text-mix:txt-DEFAULT@50:red-500</pre
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <p>on surface</p>
+                        <h4 class="header-4 px-1 py-2">on surface</h4>
                         <div class="card p-4">
                             <h1 class="header-1">Heading 1</h1>
                             <h2 class="header-2">Heading 2</h2>
@@ -358,8 +358,8 @@ text-mix:txt-DEFAULT@50:red-500</pre
                         </div>
                     </div>
                     <div>
-                        <p>on background</p>
-                        <div class="p-4">
+                        <h4 class="header-4 px-1 py-2">on background</h4>
+                        <div class="p-4 card bg-background">
                             <h1 class="header-1">Heading 1</h1>
                             <h2 class="header-2">Heading 2</h2>
                             <h3 class="header-3">Heading 3</h3>
@@ -400,61 +400,68 @@ text-mix:txt-DEFAULT@50:red-500</pre
         </loading-overlay>
     </card-component>
 
-    <div class="p-4">
-        <h1 class="header-1 text-default">Selections for large option lists (virtualized)</h1>
-        <div class="p-2 text-muted">single mode</div>
-        <div class="pl-8">
-            <list-select
-                class="w-fit"
-                :options="listSelectOptions"
-                :dropdownClasses="`right-0 min-w-50 w-fit`"
-                :multiple="false"
-                :label-fn="e => e.name"
-                v-model="listSelectionSingle"
-                @update:modelValue="e => console.log(e)"
-                :truncate-items="true"
-            ></list-select>
-        </div>
-        <div class="p-2 text-muted">multiple mode</div>
-        <div class="pl-8">
-            <list-select
-                class="w-fit"
-                :options="listSelectOptions"
-                :dropdownClasses="`right-0 min-w-50 w-fit`"
-                :multiple="true"
-                :label-fn="e => e.name"
-                v-model="listSelectionMultiple"
-                @update:modelValue="e => console.log(e)"
-                :truncate-items="true"
-            ></list-select>
-        </div>
-
-        <h1 class="header-1 text-default">Selections for small option lists (un-virtualized)</h1>
-        <div class="flex flex-row overflow-hidden gap-8">
-            <div class="text-muted">
-                <p>single mode</p>
-                <single-select
-                    :options="singleSelectOptions"
-                    v-model="singleSelectValue"
-                    label-key="name"
-                    class="w-fit mb-2"
-                ></single-select>
+    <CollapsibleCard class="my-4">
+        <template #header>
+            <h1 class="header-1 pt-2 px-4 text-default">Selects</h1>
+        </template>
+        <div class="p-4">
+            <h1 class="header-1 text-default">Selections for large option lists (virtualized)</h1>
+            <div class="p-2 text-muted">single mode</div>
+            <div class="pl-8">
+                <list-select
+                    class="w-fit"
+                    :options="listSelectOptions"
+                    :dropdownClasses="`right-0 min-w-50 w-fit`"
+                    :multiple="false"
+                    :label-fn="e => e.name"
+                    v-model="listSelectionSingle"
+                    @update:modelValue="e => console.log(e)"
+                    :truncate-items="true"
+                ></list-select>
             </div>
-            <div class="text-muted">
-                <p>multiple mode</p>
+            <div class="p-2 text-muted">multiple mode</div>
+            <div class="pl-8">
+                <list-select
+                    class="w-fit"
+                    :options="listSelectOptions"
+                    :dropdownClasses="`right-0 min-w-50 w-fit`"
+                    :multiple="true"
+                    :label-fn="e => e.name"
+                    v-model="listSelectionMultiple"
+                    @update:modelValue="e => console.log(e)"
+                    :truncate-items="true"
+                ></list-select>
+            </div>
 
-                <multi-select
-                    :options="multiSelectOptions"
-                    v-model="multiSelectValue"
-                    :id-function="x => x.value"
-                    :label-function="x => x.name"
-                    :is-default-option="x => x.value === 'all'"
-                    :placeholder-function="
-                        v => (v.length === 1 ? v[0].name : v.length + ' are selected')
-                    "
-                    class="w-[200px] mb-2"
-                ></multi-select>
+            <h1 class="header-1 text-default">
+                Selections for small option lists (un-virtualized)
+            </h1>
+            <div class="flex flex-row overflow-hidden gap-8">
+                <div class="text-muted">
+                    <p>single mode</p>
+                    <single-select
+                        :options="singleSelectOptions"
+                        v-model="singleSelectValue"
+                        label-key="name"
+                        class="w-fit mb-2"
+                    ></single-select>
+                </div>
+                <div class="text-muted">
+                    <p>multiple mode</p>
+
+                    <multi-select
+                        :options="multiSelectOptions"
+                        v-model="multiSelectValue"
+                        :id-function="x => x.value"
+                        :label-function="x => x.name"
+                        :is-default-option="x => x.value === 'all'"
+                        :placeholder-function="
+                            v => (v.length === 1 ? v[0].name : v.length + ' are selected')
+                        "
+                        class="w-[200px] mb-2"
+                    ></multi-select>
+                </div>
             </div>
         </div>
-    </div>
+    </CollapsibleCard>
 </template>
