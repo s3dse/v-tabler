@@ -16,3 +16,4 @@ export default VTail
 
 export * as components from './components'
 export * as directives from './directives'
+export * as composables from './composables'

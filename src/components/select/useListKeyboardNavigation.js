@@ -13,7 +13,6 @@ export function useListKeyboardNavigation({ itemsRef, listTemplateRef }) {
     const focusedIndex = ref(0)
 
     const moveFocus = direction => {
-        console.log('moveFocus', direction)
         const items = itemsRef.value
         if (!items.length) return
 

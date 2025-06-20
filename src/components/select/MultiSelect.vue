@@ -9,7 +9,6 @@
         class="form-inputfield"
         ref="multiSelectWrapper"
     >
-        <!-- ref="dropdown-container" -->
         <label class="selectcomponent__label flex items-center" @click.prevent="toggleOpen">
             <input
                 :value="modelText"
@@ -51,7 +50,7 @@
 
 <script setup>
 import { computed, ref, useTemplateRef, useId, nextTick } from 'vue'
-import { useDropdownPosition } from './use-dropdown-position'
+import { useDropdownPosition } from '../../composables/use-dropdown-position'
 import MultiSelectContent from './MultiSelectContent.vue'
 import { vOnClickOutside } from '@vueuse/components'
 
