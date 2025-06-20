@@ -181,21 +181,21 @@ const dropdownModel = ref(null)
                 left-label="Toggle Loading"
                 v-model="isLoading"
             ></ToggleComponent>
-            <div v-busy="isLoading" class="p-3 card flex gap-4 justify-between">
-                <span class="flex gap-4">
+            <div v-busy="isLoading" class="p-3 card grid grid-cols-8 gap-4 justify-between">
+                <span class="gap-4 col-span-4 grid grid-cols-2">
                     <p class="text-default">Busy Indicator Directive</p>
                     <pre>v-busy</pre>
                 </span>
-                <span class="flex">
+                <span class="flex col-span-4">
                     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.</p>
                 </span>
             </div>
-            <loading-overlay :show="isLoading" class="p-3 card flex gap-4 justify-between">
-                <span class="flex gap-4">
+            <loading-overlay :show="isLoading" class="p-3 card grid grid-cols-8 gap-4 justify-between">
+                <span class="gap-4 col-span-4 grid grid-cols-2">
                     <p class="text-default">Busy Indicator Component</p>
                     <pre>LoadingOverlay</pre>
                 </span>
-                <span class="flex">
+                <span class="flex col-span-4">
                     <p class="text-default">
                         Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, dolore.
                     </p>
