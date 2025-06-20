@@ -62,7 +62,7 @@ const shortcuts = [
                 sm: 'px-3 py-1.5 text-xs font-semibold tracking-wide',
                 md: 'px-4 py-2 text-sm font-semibold tracking-wide',
                 lg: 'px-5 py-2.5 text-base font-semibold tracking-wide',
-                default: 'px-4 text-sm font-semibold tracking-wide'
+                default: 'px-4 text-sm'
             }
             const size = sizes[sizeOption] || sizes.default
             const layout = 'inline-flex items-center justify-center gap-1'
