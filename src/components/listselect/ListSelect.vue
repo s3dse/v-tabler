@@ -10,7 +10,6 @@ import {
     ComboboxVirtualizer
 } from 'reka-ui'
 import { computed, ref, toValue, useTemplateRef, watch } from 'vue'
-import { vOnClickOutside } from '@vueuse/components'
 import ListSelectInput from './ListSelectInput.vue'
 import ListSelectItem from './ListSelectItem.vue'
 import ListSelectExcessIndicator from './ListSelectExcessIndicator.vue'
@@ -111,9 +110,6 @@ const close = () => {
     open.value = false
 }
 
-const listselectInputRef = useTemplateRef('listselectInput')
-const onClickOutsideHandler = [close, { ignore: [listselectInputRef] }]
-
 const filteredOptions = computed(() =>
     searchTerm.value === ''
         ? props.options
@@ -160,7 +156,7 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
         :multiple
         as="div"
         :by="props.trackBy"
-        :open="open"
+        v-model:open="open"
         @keydown.esc="close"
         :resetSearchTermOnBlur="true"
     >
@@ -187,7 +183,6 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
                 position="popper"
                 align="start"
                 @keydown.esc="close"
-                v-on-click-outside="onClickOutsideHandler"
             >
                 <slot name="list-excess" v-if="listLengthExceeded">
                     <ListSelectExcessIndicator

@@ -189,7 +189,7 @@ describe('ListSelect', () => {
         it('emits an update event when the value changes', async () => {
             const { wrapper, modelValue } = mountListSelect({ multiple: false })
             await wrapper.find('.listselect--dropdown-toggle').trigger('click')
-
+            
             const content = wrapper.findComponent(ComboboxContent)
             await content.findAll('.listselect__option').at(1).trigger('click')
             expect(wrapper.emitted('update:modelValue')).toBeTruthy()
@@ -197,7 +197,8 @@ describe('ListSelect', () => {
                 [{ id: '2', label: 'option2' }]
             ])
             expect(modelValue.value).toStrictEqual([{ id: '2', label: 'option2' }])
-
+            
+            await wrapper.find('.listselect--dropdown-toggle').trigger('click')
             await content.findAll('.listselect__option').at(2).trigger('click')
             expect(wrapper.emitted('update:modelValue').length).toBe(2)
             expect(wrapper.emitted('update:modelValue')[1]).toEqual([
