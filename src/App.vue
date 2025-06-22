@@ -436,6 +436,19 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 ></list-select>
             </div>
 
+            <div class="pl-50">
+            <ListSelect
+                class="w-fit"
+                :options="listSelectOptions"
+                :dropdownClasses="`right-0 min-w-50 w-fit`"
+                :multiple="true"
+                :label-fn="e => e.name"
+                v-model="listSelectionSingle"
+                @update:modelValue="e => console.log(e)"
+                :truncate-items="true"
+            ></ListSelect>
+            </div>
+
             <h1 class="header-1 text-default">
                 Selections for small option lists (un-virtualized)
             </h1>
