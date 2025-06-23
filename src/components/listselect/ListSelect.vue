@@ -38,7 +38,8 @@ const props = defineProps({
     searchFn: { type: Function, required: false },
     dropDownZIndex: { type: Number, default: 9999 },
     dropDownWidth: { type: String, default: '30rem' },
-    truncateItems: { type: Boolean, default: false }
+    truncateItems: { type: Boolean, default: false },
+    portal: { type: Boolean, default: true }
 })
 
 const listLengthExceeded = ref(false)
@@ -174,12 +175,12 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
                 />
             </ComboboxInput>
         </ComboboxAnchor>
-        <ComboboxPortal>
+        <ComboboxPortal :disabled="!props.portal">
             <ComboboxContent
-                class="min-w-20 w-fit h-100 bg-surface shadow-lg rounded border border-border"
+                class="min-w-20 fixed left-0 w-fit h-100 bg-surface shadow-lg rounded border border-border"
                 :class="props.dropdownClasses"
                 :style="{ width: props.dropDownWidth, zIndex: props.dropDownZIndex }"
-                position-strategy="absolute"
+                position-strategy="fixed" 
                 position="popper"
                 align="start"
                 @keydown.esc="close"
