@@ -15,6 +15,7 @@ import SingleSelect from './components/select/SingleSelect.vue'
 import MultiSelect from './components/select/MultiSelect.vue'
 import ToggleComponent from './components/toggle/ToggleComponent.vue'
 import CollapsibleCard from './components/card/CollapsibleCard.vue'
+import CheckboxComponent from './components/checkbox/CheckboxComponent.vue'
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -144,6 +145,10 @@ const multiSelectOptions = [
 const multiSelectValue = ref([multiSelectOptions[0], multiSelectOptions[1]])
 
 const dropdownModel = ref(null)
+
+const singleChecked = ref(false)
+const checkableNames = ['Checkbox 1', 'Checkbox 2', 'Checkbox 3']
+const checkedValues = ref([])
 </script>
 
 <template>
@@ -389,7 +394,9 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 class="w-[100%] bg-surface text-inverted"
             >
                 <template #table-top-controls>
-                    <div class="btn-transparent-default table-top-control ms-auto">some control</div>
+                    <div class="btn-transparent-default table-top-control ms-auto">
+                        some control
+                    </div>
                 </template>
                 <template #page-size-label="{ pageSize }">
                     Einträge pro Seite: {{ pageSize }}
@@ -437,16 +444,16 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
             </div>
 
             <div class="pl-50">
-            <ListSelect
-                class="w-fit"
-                :options="listSelectOptions"
-                :dropdownClasses="`right-0 min-w-50 w-fit`"
-                :multiple="true"
-                :label-fn="e => e.name"
-                v-model="listSelectionSingle"
-                @update:modelValue="e => console.log(e)"
-                :truncate-items="true"
-            ></ListSelect>
+                <ListSelect
+                    class="w-fit"
+                    :options="listSelectOptions"
+                    :dropdownClasses="`right-0 min-w-50 w-fit`"
+                    :multiple="true"
+                    :label-fn="e => e.name"
+                    v-model="listSelectionSingle"
+                    @update:modelValue="e => console.log(e)"
+                    :truncate-items="true"
+                ></ListSelect>
             </div>
 
             <h1 class="header-1 text-default">
@@ -477,6 +484,32 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                         class="w-[200px] mb-2"
                     ></multi-select>
                 </div>
+            </div>
+        </div>
+    </CollapsibleCard>
+    <CollapsibleCard class="my-4">
+        <template #header>
+            <h1 class="header-1 pt-2 px-4 text-default">Checkboxes</h1>
+        </template>
+        <div class="p-4 flex flex-col gap-y-4">
+            <div class="grid grid-cols-2 gap-4 items-center">
+                <CheckboxComponent :label="'Single Checkbox'" v-model="singleChecked" />
+                <pre class="text-sm">{{ singleChecked }}</pre>
+            </div>
+            <div class="grid grid-cols-2 gap-4 items-baseline">
+                <div>
+                    <CheckboxComponent
+                        v-for="(name, index) in checkableNames"
+                        :key="index"
+                        :id="name"
+                        :label="name"
+                        :value="name"
+                        v-model="checkedValues"
+                    />
+                </div>
+                <pre class="text-sm">
+                    {{ checkedValues }}
+                </pre>
             </div>
         </div>
     </CollapsibleCard>

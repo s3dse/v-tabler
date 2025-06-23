@@ -9,6 +9,7 @@ import { SingleSelect, MultiSelect } from './select'
 import { ListSelect, ListSelectPreview } from './listselect'
 import { ToggleComponent } from './toggle'
 import { Collapse } from './transition'
+import { CheckboxComponent } from './checkbox'
 
 export {
     TableComponent,
@@ -26,5 +27,6 @@ export {
     ListSelect,
     ListSelectPreview,
     ToggleComponent,
-    Collapse
+    Collapse,
+    CheckboxComponent
 }
