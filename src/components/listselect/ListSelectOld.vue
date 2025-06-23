@@ -1,19 +1,22 @@
 <script setup>
+import { computed, toValue, ref, watch, useTemplateRef } from 'vue'
 import {
-    ComboboxContent,
-    ComboboxAnchor,
-    ComboboxInput,
-    ComboboxItem,
-    ComboboxPortal,
-    ComboboxRoot,
-    ComboboxViewport,
-    ComboboxVirtualizer
+    ListboxContent,
+    ListboxFilter,
+    ListboxItem,
+    ListboxRoot,
+    ListboxVirtualizer,
+    ScrollAreaCorner,
+    ScrollAreaRoot,
+    ScrollAreaScrollbar,
+    ScrollAreaThumb,
+    ScrollAreaViewport
 } from 'reka-ui'
-import { computed, ref, toValue, useTemplateRef, watch } from 'vue'
-import ListSelectInput from './ListSelectInput.vue'
+import { vOnClickOutside } from '@vueuse/components'
 import ListSelectItem from './ListSelectItem.vue'
-import ListSelectExcessIndicator from './ListSelectExcessIndicator.vue'
 import ListSelectPreview from './ListSelectPreview.vue'
+import ListSelectExcessIndicator from './ListSelectExcessIndicator.vue'
+import ListSelectInput from './ListSelectInput.vue'
 import delay from '@/utils/delay.js'
 
 const props = defineProps({
@@ -38,8 +41,7 @@ const props = defineProps({
     searchFn: { type: Function, required: false },
     dropDownZIndex: { type: Number, default: 9999 },
     dropDownWidth: { type: String, default: '30rem' },
-    truncateItems: { type: Boolean, default: false },
-    portal: { type: Boolean, default: true }
+    truncateItems: { type: Boolean, default: false }
 })
 
 const listLengthExceeded = ref(false)
@@ -89,27 +91,36 @@ const removeFromSelection = index => {
 }
 
 const open = ref(false)
-const searchTerm = ref('')
-
 const toggleOpen = () => {
     open.value = !open.value
 }
 
+const searchTerm = ref('')
 watch(searchTerm, newVal => {
     if (newVal.length > 0 && !open.value) {
         open.value = true
     }
 })
 
+
+const listboxRootRef = useTemplateRef('listboxRoot')
 watch(open, newVal => {
     if (!newVal) {
         searchTerm.value = ''
+    } else {
+        listboxRootRef.value?.highlightSelected()
     }
 })
+
+const searchInput = ref(null)
+const clearSearchButton = ref(null)
+const dropdownToggle = ref(null)
 
 const close = () => {
     open.value = false
 }
+
+const onClickOutsideHandler = [close, { ignore: [dropdownToggle, searchInput, clearSearchButton] }]
 
 const filteredOptions = computed(() =>
     searchTerm.value === ''
@@ -150,41 +161,36 @@ const $inputPlaceholder = computed(() => {
 
 const showFooter = computed(() => props.multiple && open.value && selectedOptions.value?.length)
 </script>
+
 <template>
-    <ComboboxRoot
+    <ListboxRoot
         class="flex flex-col text-nowrap relative"
         v-model="selectedOptions"
-        :multiple
+        :multiple="props.multiple"
         as="div"
         :by="props.trackBy"
-        v-model:open="open"
-        @keydown.esc="close"
-        :resetSearchTermOnBlur="true"
+        v-on-click-outside="onClickOutsideHandler"
+        @keydown.enter.prevent="() => {}"
+        ref="listboxRoot"
     >
-        <ComboboxAnchor asChild>
-            <ComboboxInput v-model:searchTerm="searchTerm" asChild>
-                <ListSelectInput
-                    :inputClasses="props.inputClasses"
-                    :optionsLoading="props.optionsLoading"
-                    :inputPlaceholder="$inputPlaceholder"
-                    :toggleOpen="toggleOpen"
-                    @keydown.arrow-down="open = true"
-                    @keydown.arrow-up="open = true"
-                    class="form-inputfield-within"
-                    ref="listselectInput"
-                />
-            </ComboboxInput>
-        </ComboboxAnchor>
-        <ComboboxPortal :disabled="!props.portal">
-            <ComboboxContent
-                class="min-w-20 fixed left-0 w-fit h-100 bg-surface shadow-lg rounded border border-border"
-                :class="props.dropdownClasses"
-                :style="{ width: props.dropDownWidth, zIndex: props.dropDownZIndex }"
-                position-strategy="fixed" 
-                position="popper"
-                align="start"
-                @keydown.esc="close"
-            >
+        <ListboxFilter v-model:searchTerm="searchTerm" @keydown.esc="close" asChild>
+            <ListSelectInput
+                :inputClasses="props.inputClasses"
+                :optionsLoading="props.optionsLoading"
+                :inputPlaceholder="$inputPlaceholder"
+                :toggleOpen="toggleOpen"
+                @keydown.arrow-down="open = true"
+                @keydown.arrow-up="open = true"
+                class="form-inputfield-within"
+            />
+        </ListboxFilter>
+        <div
+            v-if="open"
+            class="min-w-fit absolute z-10 top-[39px] left-0 bg-surface shadow-lg rounded"
+            :class="props.dropdownClasses"
+            :style="{ 'z-index': props.dropDownZIndex, width: props.dropDownWidth }"
+        >
+            <ScrollAreaRoot :scrollHideDelay="50" class="h-100 overflow-hidden">
                 <slot name="list-excess" v-if="listLengthExceeded">
                     <ListSelectExcessIndicator
                         :listLengthExceeded="listLengthExceeded"
@@ -192,27 +198,51 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
                         :maxSelectionLengthTextFn="props.maxSelectionLengthTextFn"
                     />
                 </slot>
-                <ComboboxViewport>
-                    <ComboboxVirtualizer
-                        v-slot="{ option }"
-                        :options="filteredOptions"
-                        :text-content="props.labelFn"
-                        :estimate-size="props.optionSize"
-                    >
-                        <ComboboxItem
-                            :value="option"
-                            asChild
-                            class="listselect__option flex items-center justify-start w-full min-h-[38px] max-h-[38px] p-0"
+                <ScrollAreaViewport
+                    @keydown.esc="close"
+                    class="w-full border-t border-l border-r border-border rounded-t h-full"
+                    :class="{ 'border-b rounded-b': !showFooter }"
+                    asChild
+                >
+                    <ListboxContent asChild>
+                        <ListboxVirtualizer
+                            v-slot="{ option }"
+                            :options="filteredOptions"
+                            :textContent="props.labelFn"
+                            :estimateSize="props.optionSize"
+                            class=""
                         >
-                            <ListSelectItem
-                                :option="option"
-                                :labelFn="props.labelFn"
-                                :truncateItems="props.truncateItems"
-                            />
-                        </ComboboxItem>
-                    </ComboboxVirtualizer>
-                </ComboboxViewport>
-                <slot name="footer" v-if="showFooter" :selection="{ selectedOptions }">
+                            <ListboxItem
+                                :value="option"
+                                class="listselect__option flex items-center justify-start w-full min-h-[38px] max-h-[38px] p-0"
+                                asChild
+                            >
+                                <slot name="option" :option="option">
+                                    <ListSelectItem
+                                        :option="option"
+                                        :labelFn="props.labelFn"
+                                        :truncateItems="props.truncateItems"
+                                    />
+                                </slot>
+                            </ListboxItem>
+                        </ListboxVirtualizer>
+                    </ListboxContent>
+                </ScrollAreaViewport>
+                <ScrollAreaScrollbar
+                    class="flex select-none touch-none p-0.5 bg-inherit hover:bg-inherit data-[orientation=vertical]:w-3 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-3"
+                    orientation="vertical"
+                >
+                    <ScrollAreaThumb
+                        class="flex-1 w-full bg-scrollbar-thumb hover:bg-scrollbar-thumb-hover rounded-sm relative before:content-[''] before:absolute before:top-1/2 before:left-1/2"
+                    />
+                </ScrollAreaScrollbar>
+                <ScrollAreaCorner />
+            </ScrollAreaRoot>
+            <div
+                class="border border-border rounded-b min-h-25 max-h-fit p-2"
+                v-if="showFooter"
+            >
+                <slot name="footer" :selection="{ selectedOptions }">
                     <ListSelectPreview
                         :selectedOptions="selectedOptions"
                         :labelFn="props.labelFn"
@@ -220,7 +250,7 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
                         @remove-option="removeFromSelection"
                     ></ListSelectPreview>
                 </slot>
-            </ComboboxContent>
-        </ComboboxPortal>
-    </ComboboxRoot>
+            </div>
+        </div>
+    </ListboxRoot>
 </template>
