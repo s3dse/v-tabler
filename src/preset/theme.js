@@ -40,7 +40,7 @@ const shortcuts = [
         'header-6': 'text-sm font-medium leading-relaxed pb-1',
         'color-transition': 'transition-colors duration-150 ease-in-out',
         'table-top-control': `flex rounded-sm text-default text-sm px-2 h-[1.625rem]`,
-        'formfield': `bg-inputfield border border-border focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none transition-colors duration-150 ease-in-out`
+        'formfield': `bg-inputfield border border-border disabled:bg-disabled focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none transition-colors duration-150 ease-in-out`
 
     },
     [

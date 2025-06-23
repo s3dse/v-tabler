@@ -493,7 +493,14 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
         </template>
         <div class="p-4 flex flex-col gap-y-4">
             <div class="grid grid-cols-2 gap-4 items-center">
-                <CheckboxComponent :label="'Single Checkbox'" v-model="singleChecked" />
+                <div>
+                    <CheckboxComponent :label="'Single Checkbox'" v-model="singleChecked" />
+                    <CheckboxComponent
+                        :disabled="true"
+                        :label="'Single Checkbox disabled'"
+                        v-model="singleChecked"
+                    />
+                </div>
                 <pre class="text-sm">{{ singleChecked }}</pre>
             </div>
             <div class="grid grid-cols-2 gap-4 items-baseline">
@@ -507,9 +514,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                         v-model="checkedValues"
                     />
                 </div>
-                <pre class="text-sm">
-                    {{ checkedValues }}
-                </pre>
+                <pre class="text-sm">{{ checkedValues }}</pre>
             </div>
         </div>
     </CollapsibleCard>
