@@ -262,19 +262,11 @@ export default {
         pageSizeButtonClassList: {
             type: String,
             default: joinLines(`btn-transparent-default 
-                                rounded-sm
-                                h-[100%]`)
+                                table-top-control`)
         },
         searchInputClassList: {
             type: String,
-            default: joinLines(`form-inputfield
-                                rounded-sm
-                                placeholder:text-muted
-                                text-default
-                                px-2
-                                text-sm
-                                flex
-                                h-auto`)
+            default: joinLines(`form-inputfield-sm`)
         },
         paginate: {
             type: Boolean,

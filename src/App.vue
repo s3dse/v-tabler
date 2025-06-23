@@ -389,7 +389,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 class="w-[100%] bg-surface text-inverted"
             >
                 <template #table-top-controls>
-                    <div class="border border-border text-default px-4 ms-auto">some control</div>
+                    <div class="btn-transparent-default table-top-control ms-auto">some control</div>
                 </template>
                 <template #page-size-label="{ pageSize }">
                     Einträge pro Seite: {{ pageSize }}
