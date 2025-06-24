@@ -179,12 +179,14 @@ const fieldVisibility = ref([
                 <button class="btn-primary-lg">Primary LG</button>
                 <button class="btn-primary-default">Primary Default</button>
             </div>
+                <button class="btn-primary-formfield rounded">Primary FormField</button>
             <div class="flex flex-row gap-8">
                 <button class="btn-primary-sm" disabled>Primary SM</button>
                 <button class="btn-primary-md" disabled>Primary MD</button>
                 <button class="btn-primary-lg" disabled>Primary LG</button>
                 <button class="btn-primary-default" disabled>Primary Default</button>
             </div>
+                <button class="btn-primary-formfield rounded" disabled>Primary FormField</button>
         </div>
     </CollapsibleCard>
 

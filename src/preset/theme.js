@@ -66,7 +66,7 @@ const shortcuts = [
         'form-inputfield': 'form-inputfield-md'
     },
     [
-        /^btn-(base|primary|transparent)-(sm|md|lg|default)$/,
+        /^btn-(base|primary|transparent)-(sm|md|lg|formfield|default)$/,
         ([, colorOption, sizeOption]) => {
             const colors = {
                 base: `bg-surface text-default hover:bg-surface-hover 
@@ -87,6 +87,7 @@ const shortcuts = [
                 sm: 'px-3 py-1.5 text-xs font-semibold tracking-wide',
                 md: 'px-4 py-2 text-sm font-semibold tracking-wide',
                 lg: 'px-5 py-2.5 text-base font-semibold tracking-wide',
+                formfield: 'h-[2.375rem] px-2 text-base font-semibold tracking-wide',
                 default: 'px-4 text-sm'
             }
             const size = sizes[sizeOption] || sizes.default
