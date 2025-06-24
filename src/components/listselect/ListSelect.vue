@@ -101,9 +101,12 @@ watch(searchTerm, newVal => {
     }
 })
 
+const listselectRootRef = useTemplateRef('listselectRoot')
 watch(open, newVal => {
     if (!newVal) {
         searchTerm.value = ''
+    } else {
+        listselectRootRef.value?.highlightSelected()
     }
 })
 
@@ -160,6 +163,7 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
         v-model:open="open"
         @keydown.esc="close"
         :resetSearchTermOnBlur="true"
+        ref="listselectRoot"
     >
         <ComboboxAnchor asChild>
             <ComboboxInput v-model:searchTerm="searchTerm" asChild>

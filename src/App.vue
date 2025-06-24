@@ -179,14 +179,14 @@ const fieldVisibility = ref([
                 <button class="btn-primary-lg">Primary LG</button>
                 <button class="btn-primary-default">Primary Default</button>
             </div>
-                <button class="btn-primary-formfield rounded">Primary FormField</button>
+            <button class="btn-primary-formfield rounded">Primary FormField</button>
             <div class="flex flex-row gap-8">
                 <button class="btn-primary-sm" disabled>Primary SM</button>
                 <button class="btn-primary-md" disabled>Primary MD</button>
                 <button class="btn-primary-lg" disabled>Primary LG</button>
                 <button class="btn-primary-default" disabled>Primary Default</button>
             </div>
-                <button class="btn-primary-formfield rounded" disabled>Primary FormField</button>
+            <button class="btn-primary-formfield rounded" disabled>Primary FormField</button>
         </div>
     </CollapsibleCard>
 
@@ -249,6 +249,7 @@ const fieldVisibility = ref([
                         <div>select</div>
                     </template>
                 </dropdown-component>
+
                 <dialog-component
                     title="Testing Dialog"
                     description="A dialog..."
@@ -266,6 +267,17 @@ const fieldVisibility = ref([
                             <option>a</option>
                             <option>b</option>
                         </select>
+                        <list-select
+                            class="w-fit"
+                            :options="listSelectOptions"
+                            :dropdownClasses="`right-0 min-w-50 w-fit`"
+                            :multiple="false"
+                            :label-fn="e => e.name"
+                            v-model="listSelectionSingle"
+                            @update:modelValue="e => console.log(e)"
+                            :truncate-items="true"
+                            :portal="false"
+                        ></list-select>
                     </template>
                 </dialog-component>
             </div>
