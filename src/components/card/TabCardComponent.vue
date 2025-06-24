@@ -6,9 +6,9 @@
         </div>
 
         <keep-alive v-if="keepAlive">
-            <component :is="component" v-bind="componentProps"></component>
+            <component :is="component" v-bind="componentProps" v-on="componentEvents"></component>
         </keep-alive>
-        <component v-else :is="component" v-bind="componentProps"></component>
+        <component v-else :is="component" v-bind="componentProps" v-on="componentEvents"></component>
 
     </div>
 </template>
@@ -31,6 +31,7 @@ const props = defineProps({
 })
 const component = computed(() => props.tabs[tabIndex.value].component)
 const componentProps = computed(() => props.tabs[tabIndex.value].props)
+const componentEvents = computed(() => props.tabs[tabIndex.value].events || {})
 const tabIndex = ref(props.currentTabIndex)
 const selectTab = index => {
     tabIndex.value = index
