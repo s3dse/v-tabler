@@ -71,12 +71,12 @@ const shortcuts = [
             const colors = {
                 base: `bg-surface text-default hover:bg-surface-hover 
                 border border-solid border-border
-            active:bg-muted 
-            disabled:bg-disabled disabled:text-subtle`,
+                active:bg-muted 
+                disabled:bg-disabled disabled:text-subtle`,
                 primary: `bg-primary text-onprimary hover:bg-primary-hover 
                 border border-solid border-primary
-            active:bg-primary/80 
-            disabled:bg-disabled disabled:text-subtle`,
+                active:bg-primary/80 
+                disabled:bg-disabled disabled:border-border disabled:text-subtle`,
                 transparent: `bg-transparent text-default hover:bg-surface-hover
                 border border-solid border-border
                 active:bg-muted

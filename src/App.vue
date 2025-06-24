@@ -149,6 +149,15 @@ const dropdownModel = ref(null)
 const singleChecked = ref(false)
 const checkableNames = ['Checkbox 1', 'Checkbox 2', 'Checkbox 3']
 const checkedValues = ref([])
+
+const fieldVisibility = ref([
+    {
+        key: 'id',
+        visible: true
+    },
+    { key: 'first_name', visible: true },
+    { key: 'last_name', visible: true }
+])
 </script>
 
 <template>
@@ -169,6 +178,12 @@ const checkedValues = ref([])
                 <button class="btn-primary-md">Primary MD</button>
                 <button class="btn-primary-lg">Primary LG</button>
                 <button class="btn-primary-default">Primary Default</button>
+            </div>
+            <div class="flex flex-row gap-8">
+                <button class="btn-primary-sm" disabled>Primary SM</button>
+                <button class="btn-primary-md" disabled>Primary MD</button>
+                <button class="btn-primary-lg" disabled>Primary LG</button>
+                <button class="btn-primary-default" disabled>Primary Default</button>
             </div>
         </div>
     </CollapsibleCard>
@@ -518,4 +533,15 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
             </div>
         </div>
     </CollapsibleCard>
+    <div class="card p-4">
+        <CheckboxComponent
+            v-for="field in fieldVisibility"
+            :key="field.key"
+            :id="field.key"
+            :label="field.key"
+            :value="field.key"
+            v-model="field.visible"
+        />
+        <div>{{ fieldVisibility }}</div>
+    </div>
 </template>
