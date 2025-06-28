@@ -1,6 +1,6 @@
 import { definePreset, presetIcons } from 'unocss'
 import { icons } from './icons.js'
-import { theme as baseTheme, shortcuts, rules, autocompletions } from './theme.js'
+import { theme as baseTheme, shortcuts, rules, preflights, autocompletions } from './theme.js'
 import presetTheme from 'unocss-preset-theme'
 import merge from 'lodash.merge'
 import { getSafelist } from './safelist.js'
@@ -48,6 +48,7 @@ const presetVTabler = definePreset(options => {
             }),
             presetTheme({ theme: mergedTheme })
         ],
+        preflights,
         safelist: ['text-moon-500'],
         variants: [...generateAttributeVariants(CUSTOM_VARIANTS)],
         autocomplete: {

@@ -241,4 +241,16 @@ const theme = {
     }
 }
 
-export { theme, shortcuts, rules, autocompletions }
+const preflights = [
+    {
+        getCSS: () => `
+    html.disable-transitions *,
+    html.disable-transitions *::before,
+    html.disable-transitions *::after {
+    transition: none !important;
+    }
+    `
+    }
+]
+
+export { theme, shortcuts, rules, preflights, autocompletions }
