@@ -65,20 +65,28 @@ const shortcuts = [
         /^btn-(base|primary|transparent)-(sm|md|lg|formfield|default)$/,
         ([, colorOption, sizeOption]) => {
             const colors = {
-                base: `bg-surface text-default hover:bg-surface-hover 
+                base: `bg-surface text-default
                 border border-solid border-border
-                active:bg-muted 
                 disabled:bg-disabled disabled:text-subtle`,
-                primary: `bg-primary text-onprimary hover:bg-primary-hover 
+                primary: `bg-primary text-onprimary
                 border border-solid border-primary
-                active:bg-primary/80 
                 disabled:bg-disabled disabled:border-border disabled:text-subtle`,
-                transparent: `bg-transparent text-default hover:bg-surface-hover
+                transparent: `bg-transparent text-default
                 border border-solid border-border
-                active:bg-muted
                 disabled:bg-disabled disabled:text-subtle`
             }
-            const color = colors[colorOption]
+            const hoverColors = {
+                primary: 'hover:bg-primary-hover',
+                default: 'hover:bg-surface-hover'
+            }
+            const activeColors = {
+                primary: 'active:bg-primary/80',
+                default: 'active:bg-muted'
+            }
+            const disabledColors = {
+                primary: 'disabled:bg-disabled disabled:border-border disabled:text-subtle',
+                default: 'disabled:bg-disabled disabled:text-subtle'
+            }
             const sizes = {
                 sm: 'px-3 py-1.5 text-xs font-semibold tracking-wide',
                 md: 'px-4 py-2 text-sm font-semibold tracking-wide',
@@ -86,13 +94,29 @@ const shortcuts = [
                 formfield: 'h-[2.375rem] px-2 text-base font-semibold tracking-wide',
                 default: 'px-4 text-sm'
             }
+            const color = colors[colorOption]
+            const hoverColor = hoverColors[colorOption] || hoverColors.default
+            const activeColor = activeColors[colorOption] || activeColors.default
+            const disabledColor = disabledColors[colorOption] || disabledColors.default
             const size = sizes[sizeOption] || sizes.default
             const layout = 'inline-flex items-center justify-center gap-1'
             const disabledCursor = 'disabled:hover:cursor-default disabled:pointer-events-none'
             const focus = 'focus:outline-none focus-visible:ring focus-visible:ring-primary/30'
             const hoverCursor = 'hover:cursor-pointer'
             const transition = 'transition-colors duration-150 ease-in-out'
-            return `${layout} ${color} ${size} ${hoverCursor} ${disabledCursor} ${focus} ${transition}`
+            const styles = [
+                layout,
+                color,
+                hoverColor,
+                activeColor,
+                disabledColor,
+                size,
+                hoverCursor,
+                disabledCursor,
+                focus,
+                transition
+            ]
+            return styles.join(' ')
         }
     ],
     {
