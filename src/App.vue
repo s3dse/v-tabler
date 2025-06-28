@@ -165,11 +165,17 @@ const fieldVisibility = ref([
         <div class="p-4 flex flex-col gap-2">
             <h1 class="header-2 text-default">Basic Buttons</h1>
             <pre class="text-default text-base">btn-base-(sm|md|lg|default)</pre>
-            <div class="flex flex-row gap-8 pb-4">
+            <div class="flex flex-row gap-8">
                 <button class="btn-base-sm">Base SM</button>
                 <button class="btn-base-md">Base MD</button>
                 <button class="btn-base-lg">Base LG</button>
                 <button class="btn-base-default">Base Default</button>
+            </div>
+            <div class="flex flex-row gap-8 pb-4">
+                <button disabled class="btn-base-sm">Base SM</button>
+                <button disabled class="btn-base-md">Base MD</button>
+                <button disabled class="btn-base-lg">Base LG</button>
+                <button disabled class="btn-base-default">Base Default</button>
             </div>
             <h3 class="header-2 text-default">Primary Buttons</h3>
             <pre class="text-default text-base">btn-primary-(sm|md|lg|default)</pre>
@@ -291,25 +297,31 @@ const fieldVisibility = ref([
         <div class="p-4 w-full">
             <h2 class="header-2 text-default">Semantic Text Color</h2>
             <div class="grid grid-cols-2 gap-4">
-                <div class="grid grid-cols-2 gap-4 card p-3">
-                    <div class="text-default">Default...</div>
-                    <pre class="text-default">text-default</pre>
-                    <div class="text-muted">Muted...</div>
-                    <pre class="text-muted">text-muted</pre>
-                    <div class="text-subtle">Subtle...</div>
-                    <pre class="text-subtle">text-subtle</pre>
-                    <div class="text-disabled">Disabled...</div>
-                    <pre class="text-disabled">text-disabled</pre>
+                <div>
+                    <h4 class="header-4">on surface</h4>
+                    <div class="grid grid-cols-2 gap-4 card p-3">
+                        <div class="text-default">Default...</div>
+                        <pre class="text-default">text-default</pre>
+                        <div class="text-muted">Muted...</div>
+                        <pre class="text-muted">text-muted</pre>
+                        <div class="text-subtle">Subtle...</div>
+                        <pre class="text-subtle">text-subtle</pre>
+                        <div class="text-disabled">Disabled...</div>
+                        <pre class="text-disabled">text-disabled</pre>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 p-3 card bg-background">
-                    <div class="text-default">Default...</div>
-                    <pre class="text-default">text-default</pre>
-                    <div class="text-muted">Muted...</div>
-                    <pre class="text-muted">text-muted</pre>
-                    <div class="text-subtle">Subtle...</div>
-                    <pre class="text-subtle">text-subtle</pre>
-                    <div class="text-disabled">Disabled...</div>
-                    <pre class="text-disabled">text-disabled</pre>
+                <div>
+                    <h4 class="header-4">on background</h4>
+                    <div class="grid grid-cols-2 gap-4 p-3 card bg-background">
+                        <div class="text-default">Default...</div>
+                        <pre class="text-default">text-default</pre>
+                        <div class="text-muted">Muted...</div>
+                        <pre class="text-muted">text-muted</pre>
+                        <div class="text-subtle">Subtle...</div>
+                        <pre class="text-subtle">text-subtle</pre>
+                        <div class="text-disabled">Disabled...</div>
+                        <pre class="text-disabled">text-disabled</pre>
+                    </div>
                 </div>
                 <h2 class="header-2 text-default">Tinted Text Color</h2>
                 <div class="flex flex-col gap-y-4 col-span-2">
@@ -445,46 +457,34 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
         </template>
         <div class="p-4">
             <h1 class="header-1 text-default">Selections for large option lists (virtualized)</h1>
-            <div class="p-2 text-muted">single mode</div>
-            <div class="pl-8">
-                <list-select
-                    class="w-fit"
-                    :options="listSelectOptions"
-                    :dropdownClasses="`right-0 min-w-50 w-fit`"
-                    :multiple="false"
-                    :label-fn="e => e.name"
-                    v-model="listSelectionSingle"
-                    @update:modelValue="e => console.log(e)"
-                    :truncate-items="true"
-                ></list-select>
+            <div class="flex flex-row overflow-hidden gap-8">
+                <div>
+                    <div class="text-muted">single mode</div>
+                    <list-select
+                        class="w-fit"
+                        :options="listSelectOptions"
+                        :dropdownClasses="`right-0 min-w-50 w-fit`"
+                        :multiple="false"
+                        :label-fn="e => e.name"
+                        v-model="listSelectionSingle"
+                        @update:modelValue="e => console.log(e)"
+                        :truncate-items="true"
+                    ></list-select>
+                </div>
+                <div>
+                    <div class="text-muted">multiple mode</div>
+                        <list-select
+                            class="w-fit"
+                            :options="listSelectOptions"
+                            :dropdownClasses="`right-0 min-w-50 w-fit`"
+                            :multiple="true"
+                            :label-fn="e => e.name"
+                            v-model="listSelectionMultiple"
+                            @update:modelValue="e => console.log(e)"
+                            :truncate-items="true"
+                        ></list-select>
+                </div>
             </div>
-            <div class="p-2 text-muted">multiple mode</div>
-            <div class="pl-8">
-                <list-select
-                    class="w-fit"
-                    :options="listSelectOptions"
-                    :dropdownClasses="`right-0 min-w-50 w-fit`"
-                    :multiple="true"
-                    :label-fn="e => e.name"
-                    v-model="listSelectionMultiple"
-                    @update:modelValue="e => console.log(e)"
-                    :truncate-items="true"
-                ></list-select>
-            </div>
-
-            <div class="pl-50">
-                <ListSelect
-                    class="w-fit"
-                    :options="listSelectOptions"
-                    :dropdownClasses="`right-0 min-w-50 w-fit`"
-                    :multiple="true"
-                    :label-fn="e => e.name"
-                    v-model="listSelectionSingle"
-                    @update:modelValue="e => console.log(e)"
-                    :truncate-items="true"
-                ></ListSelect>
-            </div>
-
             <h1 class="header-1 text-default">
                 Selections for small option lists (un-virtualized)
             </h1>
@@ -520,9 +520,10 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
         <template #header>
             <h1 class="header-1 pt-2 px-4 text-default">Checkboxes</h1>
         </template>
-        <div class="p-4 flex flex-col gap-y-4">
+        <div class="p-4 flex flex-col gap-y-8">
             <div class="grid grid-cols-2 gap-4 items-center">
                 <div>
+                    <h3 class="header-3">Bind to single value</h3>
                     <CheckboxComponent :label="'Single Checkbox'" v-model="singleChecked" />
                     <CheckboxComponent
                         :disabled="true"
@@ -534,6 +535,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
             </div>
             <div class="grid grid-cols-2 gap-4 items-baseline">
                 <div>
+                    <h3 class="header-3">Bind to list</h3>
                     <CheckboxComponent
                         v-for="(name, index) in checkableNames"
                         :key="index"
@@ -545,17 +547,21 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 </div>
                 <pre class="text-sm">{{ checkedValues }}</pre>
             </div>
+            <div class="grid grid-cols-2 gap-4 items-baseline">
+                <div>
+                    <h3 class="header-3">Bind to object property in list</h3>
+                    <CheckboxComponent
+                        v-for="field in fieldVisibility"
+                        :key="field.key"
+                        :id="field.key"
+                        :label="field.key"
+                        :value="field.key"
+                        v-model="field.visible"
+                    />
+                </div>
+
+                <div>{{ fieldVisibility }}</div>
+            </div>
         </div>
     </CollapsibleCard>
-    <div class="card p-4">
-        <CheckboxComponent
-            v-for="field in fieldVisibility"
-            :key="field.key"
-            :id="field.key"
-            :label="field.key"
-            :value="field.key"
-            v-model="field.visible"
-        />
-        <div>{{ fieldVisibility }}</div>
-    </div>
 </template>
