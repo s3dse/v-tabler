@@ -235,15 +235,15 @@ const theme = {
                 thumbHover: '#5c6b8a'
             },
             primary: {
-                DEFAULT: '#206bc4',
-                hover: '#1a5bb0',
-                active: '#154f9c',
-                lt: allColors['star-of-life']['lt-dark']
-            },
-            error: {
                 DEFAULT: allColors['star-of-life'].DEFAULT,
                 hover: allColors['star-of-life'].hover,
                 active: allColors['star-of-life'].active,
+                lt: allColors['star-of-life']['lt-dark']
+            },
+            error: {
+                DEFAULT: '#ef5350',
+                bg: '#7f1d1d',
+                border: '#ef5350',
                 hover: '#b71c1c'
             },
             gray: allColors.gray,
