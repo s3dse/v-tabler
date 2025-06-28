@@ -27,9 +27,6 @@ const shortcuts = [
         'page-header': 'text-xl font-semibold my-3',
         card: 'bg-surface text-default border border-solid border-border rounded-sm',
         'card-title': 'text-base text-default font-medium',
-        // 'form-inputfield':
-        //     'bg-inputfield border border-border rounded focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
-        // 'form-inputfield-sm': `bg-inputfield border border-border rounded-sm focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none h-6.5 transition-colors duration-150 ease-in-out`,
         'form-inputfield-within':
             'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring focus-within:ring-primary/30 focus-within:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
         'header-1': 'text-3xl font-semibold leading-tight pb-4',
@@ -40,8 +37,7 @@ const shortcuts = [
         'header-6': 'text-sm font-medium leading-relaxed pb-1',
         'color-transition': 'transition-colors duration-150 ease-in-out',
         'table-top-control': `flex rounded-sm text-default text-sm px-2 h-[1.625rem]`,
-        'formfield': `bg-inputfield border border-border disabled:bg-disabled focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none transition-colors duration-150 ease-in-out`
-
+        formfield: `bg-inputfield border border-border disabled:bg-disabled focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none transition-colors duration-150 ease-in-out`
     },
     [
         /^form-inputfield-(sm|md)$/,
