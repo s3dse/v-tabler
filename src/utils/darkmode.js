@@ -5,9 +5,13 @@ const switchToDarkClasses = ["i-tabler-moon", "hover:i-tabler-moon-filled"]
 
 function toggleDocDark() {
     const html = document.getElementsByTagName('HTML')[0]
+    document.documentElement.classList.add('disable-transitions')
     const settingDark = html.classList.toggle('dark')
     const widget = document.getElementById('darkmodetoggle')
     applyWidgetIcon(widget, settingDark)
+    requestAnimationFrame(() =>{
+        document.documentElement.classList.remove('disable-transitions')
+    })
     return settingDark
 }
 
