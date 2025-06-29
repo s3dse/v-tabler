@@ -422,7 +422,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
         </div>
     </CollapsibleCard>
 
-    <div class="p-3">
+    <div class="my-4">
         <tab-card-component :tabs="tabs" :current-tab-index="0"></tab-card-component>
     </div>
     <card-component class="mt-5">
@@ -455,64 +455,62 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
         <template #header>
             <h1 class="header-1 pt-2 px-4 text-default">Selects</h1>
         </template>
-        <div class="p-4">
-            <h1 class="header-1 text-default">Selections for large option lists (virtualized)</h1>
-            <div class="flex flex-row overflow-hidden gap-8">
-                <div>
-                    <div class="text-muted">single mode</div>
-                    <list-select
-                        class="w-fit"
-                        :options="listSelectOptions"
-                        :dropdownClasses="`right-0 min-w-50 w-fit`"
-                        :multiple="false"
-                        :label-fn="e => e.name"
-                        v-model="listSelectionSingle"
-                        @update:modelValue="e => console.log(e)"
-                        :truncate-items="true"
-                    ></list-select>
-                </div>
-                <div>
-                    <div class="text-muted">multiple mode</div>
-                        <list-select
-                            class="w-fit"
-                            :options="listSelectOptions"
-                            :dropdownClasses="`right-0 min-w-50 w-fit`"
-                            :multiple="true"
-                            :label-fn="e => e.name"
-                            v-model="listSelectionMultiple"
-                            @update:modelValue="e => console.log(e)"
-                            :truncate-items="true"
-                        ></list-select>
-                </div>
+        <div class="p-4 grid grid-cols-2 gap-4">
+            <h2 class="header-2 text-default col-span-2">
+                Selections for large option lists (virtualized)
+            </h2>
+            <div>
+                <h3 class="header-3 text-muted">single mode</h3>
+                <list-select
+                    class="w-fit"
+                    :options="listSelectOptions"
+                    :dropdownClasses="`right-0 min-w-50 w-fit`"
+                    :multiple="false"
+                    :label-fn="e => e.name"
+                    v-model="listSelectionSingle"
+                    @update:modelValue="e => console.log(e)"
+                    :truncate-items="true"
+                ></list-select>
             </div>
-            <h1 class="header-1 text-default">
+            <div>
+                <h3 class="header-3 text-muted">multiple mode</h3>
+                <list-select
+                    class="w-fit"
+                    :options="listSelectOptions"
+                    :dropdownClasses="`right-0 min-w-50 w-fit`"
+                    :multiple="true"
+                    :label-fn="e => e.name"
+                    v-model="listSelectionMultiple"
+                    @update:modelValue="e => console.log(e)"
+                    :truncate-items="true"
+                ></list-select>
+            </div>
+            <h2 class="header-2 text-default col-span-2">
                 Selections for small option lists (un-virtualized)
-            </h1>
-            <div class="flex flex-row overflow-hidden gap-8">
-                <div class="text-muted">
-                    <p>single mode</p>
-                    <single-select
-                        :options="singleSelectOptions"
-                        v-model="singleSelectValue"
-                        label-key="name"
-                        class="w-fit mb-2"
-                    ></single-select>
-                </div>
-                <div class="text-muted">
-                    <p>multiple mode</p>
+            </h2>
+            <div class="text-muted">
+                <h3 class="header-3">single mode</h3>
+                <single-select
+                    :options="singleSelectOptions"
+                    v-model="singleSelectValue"
+                    label-key="name"
+                    class="w-fit mb-2"
+                ></single-select>
+            </div>
+            <div class="text-muted">
+                <h3 class="header-3">multiple mode</h3>
 
-                    <multi-select
-                        :options="multiSelectOptions"
-                        v-model="multiSelectValue"
-                        :id-function="x => x.value"
-                        :label-function="x => x.name"
-                        :is-default-option="x => x.value === 'all'"
-                        :placeholder-function="
-                            v => (v.length === 1 ? v[0].name : v.length + ' are selected')
-                        "
-                        class="w-[200px] mb-2"
-                    ></multi-select>
-                </div>
+                <multi-select
+                    :options="multiSelectOptions"
+                    v-model="multiSelectValue"
+                    :id-function="x => x.value"
+                    :label-function="x => x.name"
+                    :is-default-option="x => x.value === 'all'"
+                    :placeholder-function="
+                        v => (v.length === 1 ? v[0].name : v.length + ' are selected')
+                    "
+                    class="w-[200px] mb-2"
+                ></multi-select>
             </div>
         </div>
     </CollapsibleCard>
