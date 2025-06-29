@@ -4,10 +4,14 @@
     </component>
 </template>
 <script setup>
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 const props = defineProps({
-    tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+    tag: {
+        type: String,
+        default: '',
+        validator: value => ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(value)
+    }
 })
 
 const headingClasses = {
@@ -21,7 +25,6 @@ const headingClasses = {
 }
 
 const classes = computed(() => {
-    return headingClasses[props.tag] || headingClasses.default;
+    return headingClasses[props.tag] || headingClasses.default
 })
-
 </script>

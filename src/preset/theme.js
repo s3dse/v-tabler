@@ -282,4 +282,19 @@ const preflights = [
     }
 ]
 
-export { theme, shortcuts, rules, preflights, autocompletions }
+const spacing = {
+    5: '1.5rem',
+    6: '2rem',
+    7: '3rem',
+    8: '4rem',
+    9: '6rem',
+    10: '8rem',
+    11: '12rem',
+    12: '16rem',
+    13: '24rem',
+    14: '32rem',
+    15: '40rem',
+    16: '48rem'
+}
+
+export { theme, shortcuts, rules, preflights, autocompletions, spacing }

@@ -289,40 +289,88 @@ const fieldVisibility = ref([
             </div>
         </div>
     </CollapsibleCard>
-    <CollapsibleCard heading="Spacing" class="my-4">
-        <div class="grid grid-cols-12 gap-y-4 gap-x-1 p-3">
-            <p>4px</p>
-            <div class="col-span-11 w-1 bg-red-400"></div>
-            <p>8px</p>
-            <div class="col-span-11 w-2 bg-red-400"></div>
-            <p>12px</p>
-            <div class="col-span-11 w-3 bg-red-400"></div>
-            <p>16px</p>
-            <div class="col-span-11 w-4 bg-red-400"></div>
-            <p>24px</p>
-            <div class="col-span-11 w-6 bg-red-400"></div>
-            <p>32px</p>
-            <div class="col-span-11 w-8 bg-red-400"></div>
-            <p>48px</p>
-            <div class="col-span-11 w-12 bg-red-400"></div>
-            <p>64px</p>
-            <div class="col-span-11 w-16 bg-red-400"></div>
-            <p>96px</p>
-            <div class="col-span-11 w-24 bg-red-400"></div>
-            <p>128px</p>
-            <div class="col-span-11 w-32 bg-red-400"></div>
-            <p>192px</p>
-            <div class="col-span-11 w-48 bg-red-400"></div>
-            <p>256px</p>
-            <div class="col-span-11 w-64 bg-red-400"></div>
-            <p>384px</p>
-            <div class="col-span-11 w-96 bg-red-400"></div>
-            <p>512px</p>
-            <div class="col-span-11 w-128 bg-red-400"></div>
-            <p>640px</p>
-            <div class="col-span-11 w-160 bg-red-400"></div>
-            <p>768px</p>
-            <div class="col-span-11 w-192 bg-red-400"></div>
+    <CollapsibleCard heading="Spacing" class="my-4 text-sm">
+        <div class="grid grid-cols-12 gap-y-5 gap-x-1 p-4">
+            <div class="col-span-2 flex flex-col">
+                <p>4px</p>
+                <pre>p-1 m-1 gap-1</pre>
+            </div>
+            <div class="col-span-10 w-1 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>8px</p>
+                <pre>p-2 m-2 gap-2</pre>
+            </div>
+            <div class="col-span-10 w-2 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>12px</p>
+                <pre>p-3 m-3 gap-3</pre>
+            </div>
+            <div class="col-span-10 w-3 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>16px</p>
+                <pre>p-4 m-4 gap-4</pre>
+            </div>
+            <div class="col-span-10 w-4 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>24px</p>
+                <pre>p-5 m-5 gap-5</pre>
+            </div>
+            <div class="col-span-10 w-6 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>32px</p>
+                <pre>p-6 m-6 gap-6</pre>
+            </div>
+            <div class="col-span-10 w-8 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>48px</p>
+                <pre>p-7 m-7 gap-7</pre>
+            </div>
+            <div class="col-span-10 w-12 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>64px</p>
+                <pre>p-8 m-8 gap-8</pre>
+            </div>
+            <div class="col-span-10 w-16 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>96px</p>
+                <pre>p-9 m-9 gap-9</pre>
+            </div>
+            <div class="col-span-10 w-24 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>128px</p>
+                <pre>p-10 m-10 gap-10</pre>
+            </div>
+            <div class="col-span-10 w-32 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>192px</p>
+                <pre>p-11 m-11 gap-11</pre>
+            </div>
+            <div class="col-span-10 w-48 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>256px</p>
+                <pre>p-12 m-12 gap-12</pre>
+            </div>
+            <div class="col-span-10 w-64 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>384px</p>
+                <pre>p-13 m-13 gap-13</pre>
+            </div>
+            <div class="col-span-10 w-96 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>512px</p>
+                <pre>p-14 m-14 gap-14</pre>
+            </div>
+            <div class="col-span-10 w-128 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>640px</p>
+                <pre>p-15 m-15 gap-15</pre>
+            </div>
+            <div class="col-span-10 w-160 bg-red-400"></div>
+            <div class="flex flex-col col-span-2">
+                <p>768px</p>
+                <pre>p-16 m-16 gap-16</pre>
+            </div>
+            <div class="col-span-10 w-192 bg-red-400"></div>
         </div>
     </CollapsibleCard>
 
@@ -458,7 +506,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
     <div class="my-4">
         <tab-card-component :tabs="tabs" :current-tab-index="0"></tab-card-component>
     </div>
-    <card-component class="mt-5">
+    <card-component class="my-4">
         <loading-overlay :show="tableStatus.busy">
             <table-component
                 :items="items"

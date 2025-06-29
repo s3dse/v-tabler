@@ -8,7 +8,7 @@
             @keydown.space.prevent="toggle"
             :class="[isOpen && horizontalRule ? 'border-b border-border' : '']"
         >
-            <div class="group-hover/header:text-primary-hover color-transition py-1 px-2">
+            <div class="flex flex-row group-hover/header:text-primary-hover color-transition py-2 px-2">
                 <slot name="header">
                     <Heading tag="h2">{{ heading }}</Heading>
                 </slot>

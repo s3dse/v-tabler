@@ -1,6 +1,13 @@
 import { definePreset, presetIcons } from 'unocss'
 import { icons } from './icons.js'
-import { theme as baseTheme, shortcuts, rules, preflights, autocompletions } from './theme.js'
+import {
+    theme as baseTheme,
+    shortcuts,
+    rules,
+    preflights,
+    autocompletions,
+    spacing
+} from './theme.js'
 import presetTheme from 'unocss-preset-theme'
 import merge from 'lodash.merge'
 import { getSafelist } from './safelist.js'
@@ -27,8 +34,8 @@ const generateVariantsAutocomplete = variants => Object.keys(variants).map(name 
 
 const safelist = getSafelist(shortcuts)
 
-const presetVTabler = definePreset(options => {
-    const themeOverrides = options || {}
+const presetVTabler = definePreset((options = {}) => {
+    const { enableSemanticSpacing = true, theme: themeOverrides = {} } = options
 
     const mergedTheme = merge({}, baseTheme, themeOverrides)
 
@@ -36,7 +43,8 @@ const presetVTabler = definePreset(options => {
         name: 'v-tabler-preset',
         theme: {
             colors: mergedTheme.light.colors,
-            fontFamily: { sans: '"Inter", system-ui, sans-serif' }
+            fontFamily: { sans: '"Inter", system-ui, sans-serif' },
+            ...(enableSemanticSpacing ? { spacing } : {})
         },
         shortcuts,
         rules,
