@@ -289,6 +289,42 @@ const fieldVisibility = ref([
             </div>
         </div>
     </CollapsibleCard>
+    <CollapsibleCard heading="Spacing" class="my-4">
+        <div class="grid grid-cols-12 gap-y-4 gap-x-1 p-3">
+            <p>4px</p>
+            <div class="col-span-11 w-1 bg-red-400"></div>
+            <p>8px</p>
+            <div class="col-span-11 w-2 bg-red-400"></div>
+            <p>12px</p>
+            <div class="col-span-11 w-3 bg-red-400"></div>
+            <p>16px</p>
+            <div class="col-span-11 w-4 bg-red-400"></div>
+            <p>24px</p>
+            <div class="col-span-11 w-6 bg-red-400"></div>
+            <p>32px</p>
+            <div class="col-span-11 w-8 bg-red-400"></div>
+            <p>48px</p>
+            <div class="col-span-11 w-12 bg-red-400"></div>
+            <p>64px</p>
+            <div class="col-span-11 w-16 bg-red-400"></div>
+            <p>96px</p>
+            <div class="col-span-11 w-24 bg-red-400"></div>
+            <p>128px</p>
+            <div class="col-span-11 w-32 bg-red-400"></div>
+            <p>192px</p>
+            <div class="col-span-11 w-48 bg-red-400"></div>
+            <p>256px</p>
+            <div class="col-span-11 w-64 bg-red-400"></div>
+            <p>384px</p>
+            <div class="col-span-11 w-96 bg-red-400"></div>
+            <p>512px</p>
+            <div class="col-span-11 w-128 bg-red-400"></div>
+            <p>640px</p>
+            <div class="col-span-11 w-160 bg-red-400"></div>
+            <p>768px</p>
+            <div class="col-span-11 w-192 bg-red-400"></div>
+        </div>
+    </CollapsibleCard>
 
     <CollapsibleCard heading="Typography">
         <div class="p-4 w-full">

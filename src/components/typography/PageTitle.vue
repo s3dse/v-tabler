@@ -3,7 +3,7 @@ import Heading from './Heading.vue'
 </script>
 
 <template>
-    <Heading tag="h1" v-bind="$attrs">
+    <Heading tag="h1" class="text-default" v-bind="$attrs">
         <slot />
     </Heading>
 </template>
