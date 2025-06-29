@@ -10,6 +10,7 @@ import { ListSelect, ListSelectPreview } from './listselect'
 import { ToggleComponent } from './toggle'
 import { Collapse } from './transition'
 import { CheckboxComponent } from './checkbox'
+import { Heading, PageTitle } from './typography'
 
 export {
     TableComponent,
@@ -28,5 +29,7 @@ export {
     ListSelectPreview,
     ToggleComponent,
     Collapse,
-    CheckboxComponent
+    CheckboxComponent,
+    Heading,
+    PageTitle
 }

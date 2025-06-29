@@ -16,6 +16,8 @@ import MultiSelect from './components/select/MultiSelect.vue'
 import ToggleComponent from './components/toggle/ToggleComponent.vue'
 import CollapsibleCard from './components/card/CollapsibleCard.vue'
 import CheckboxComponent from './components/checkbox/CheckboxComponent.vue'
+import Heading from './components/typography/Heading.vue'
+import PageTitle from './components/typography/PageTitle.vue'
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -117,7 +119,7 @@ const listSelectOptions = [...new Array(99999).keys()].map(k => ({
 }))
 listSelectOptions.unshift({
     id: 0,
-    name: 'first option is a very long name that should be handled'
+    name: 'first option is a very long name that should be displayed'
 })
 
 const listSelectionMultiple = ref([])
@@ -161,6 +163,7 @@ const fieldVisibility = ref([
 </script>
 
 <template>
+    <PageTitle tag="h1">Theme & Components</PageTitle>
     <CollapsibleCard class="my-4" heading="Buttons">
         <div class="p-4 flex flex-col gap-2">
             <h1 class="header-2 text-default">Basic Buttons</h1>
@@ -198,7 +201,7 @@ const fieldVisibility = ref([
 
     <CollapsibleCard class="my-4">
         <template #header>
-            <h1 class="header-1 pt-2 px-4 text-default">Busy Indicators</h1>
+            <Heading tag="h2">Busy Indicators</Heading>
         </template>
         <div class="p-4 flex flex-col gap-2">
             <ToggleComponent
@@ -232,10 +235,7 @@ const fieldVisibility = ref([
         </div>
     </CollapsibleCard>
 
-    <CollapsibleCard class="my-4">
-        <template #header>
-            <h1 class="header-1 pt-2 px-4 text-default">Dialogues and Dropdowns</h1>
-        </template>
+    <CollapsibleCard class="my-4" heading="Dialogs and Dropdowns">
         <div class="p-4">
             <div class="flex flex-row gap-4">
                 <action-dropdown-component
@@ -290,10 +290,7 @@ const fieldVisibility = ref([
         </div>
     </CollapsibleCard>
 
-    <CollapsibleCard>
-        <template #header>
-            <h1 class="header-1 pt-2 px-4 text-default">Typography</h1>
-        </template>
+    <CollapsibleCard heading="Typography">
         <div class="p-4 w-full">
             <h2 class="header-2 text-default">Semantic Text Color</h2>
             <div class="grid grid-cols-2 gap-4">
@@ -453,7 +450,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
 
     <CollapsibleCard class="my-4">
         <template #header>
-            <h1 class="header-1 pt-2 px-4 text-default">Selects</h1>
+            <Heading tag="h2">Selects</Heading>
         </template>
         <div class="p-4 grid grid-cols-2 gap-4">
             <h2 class="header-2 text-default col-span-2">
@@ -514,10 +511,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
             </div>
         </div>
     </CollapsibleCard>
-    <CollapsibleCard class="my-4">
-        <template #header>
-            <h1 class="header-1 pt-2 px-4 text-default">Checkboxes</h1>
-        </template>
+    <CollapsibleCard class="my-4" heading="Checkboxes">
         <div class="p-4 flex flex-col gap-y-8">
             <div class="grid grid-cols-2 gap-4 items-center">
                 <div>

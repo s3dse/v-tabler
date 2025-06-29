@@ -8,9 +8,11 @@
             @keydown.space.prevent="toggle"
             :class="[isOpen && horizontalRule ? 'border-b border-border' : '']"
         >
-            <slot name="header" :classes="'group-hover/header:text-primary-hover color-transition'">
-                <h1 class="pt-2 px-4 header-1">{{ heading }}</h1>
-            </slot>
+            <div class="group-hover/header:text-primary-hover! color-transition py-1 px-2">
+                <slot name="header">
+                    <Heading tag="h2">{{ heading }}</Heading>
+                </slot>
+            </div>
             <slot v-if="showToggleIcon" name="toggle-icon">
                 <span
                     class="pt-2 px-8 header-2 flex"
@@ -30,6 +32,7 @@
 <script setup>
 import { ref } from 'vue'
 import Collapse from '../transition/Collapse.vue'
+import { Heading } from '../typography'
 
 const props = defineProps({
     heading: {

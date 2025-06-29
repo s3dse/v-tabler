@@ -6,7 +6,8 @@
             data-[active=true]:border-b-none 
             data-[active=true]:text-default
             -mb-px py-3 px-4 inline-flex items-center gap-x-2 
-            text-sm font-medium text-center 
+            tab-heading
+            text-center 
             data-[active=false]:border-t-transparent
             data-[active=false]:border-l-transparent
             data-[active=false]:border-r-transparent

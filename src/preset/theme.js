@@ -24,17 +24,11 @@ const shortcuts = [
         'with-scrollbar': `scrollbar scrollbar-thumb-color-scrollbar-thumb hover:scrollbar-thumb-color-scrollbar-thumbHover
                 scrollbar-track-color-inherit scrollbar-rounded scrollbar-thumb-radius-2px`,
         'form-help': `inline-flex ml-2 items-center justify-center w-5 h-5 bg-subtle text-muted rounded-full cursor-pointer transition duration-150 ease-in-out hover:text-onprimary hover:bg-primary hover:ease-linear`,
-        'page-header': 'text-xl font-semibold my-3',
         card: 'bg-surface text-default border border-solid border-border rounded-sm',
         'card-title': 'text-base text-default font-medium',
         'form-inputfield-within':
             'bg-inputfield border border-border rounded focus-within:border-primary focus-within:ring focus-within:ring-primary/30 focus-within:outline-none h-[2.375rem] transition-colors duration-150 ease-in-out',
-        'header-1': 'text-3xl font-semibold leading-tight pb-4',
-        'header-2': 'text-2xl font-semibold leading-snug pb-2',
-        'header-3': 'text-xl font-medium leading-relaxed pb-1',
-        'header-4': 'text-lg font-medium leading-relaxed pb-1',
-        'header-5': 'text-base font-medium leading-relaxed pb-1',
-        'header-6': 'text-sm font-medium leading-relaxed pb-1',
+
         'color-transition': 'transition-colors duration-150 ease-in-out',
         'table-top-control': `flex rounded-sm text-default text-sm px-2 h-[1.625rem]`,
         formfield: `bg-inputfield border border-border disabled:bg-disabled focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none transition-colors duration-150 ease-in-out`
@@ -121,6 +115,21 @@ const shortcuts = [
     ],
     {
         'btn-base': 'btn-base-default'
+    },
+    {
+        'header-1': 'text-3xl font-semibold leading-tight pb-4',
+        'header-2': 'text-2xl font-semibold leading-snug pb-2',
+        'header-3': 'text-xl font-medium leading-relaxed pb-1',
+        'header-4': 'text-lg font-medium leading-relaxed pb-1',
+        'header-5': 'text-base font-medium leading-relaxed pb-1',
+        'header-6': 'text-sm font-medium leading-relaxed pb-1',
+        'heading-1': 'header-1',
+        'heading-2': 'header-2',
+        'heading-3': 'header-3',
+        'heading-4': 'header-4',
+        'heading-5': 'header-5',
+        'heading-6': 'header-6',
+        'tab-heading': 'header-6'
     }
 ]
 
