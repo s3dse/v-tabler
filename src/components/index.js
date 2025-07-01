@@ -11,6 +11,7 @@ import { ToggleComponent } from './toggle'
 import { Collapse } from './transition'
 import { CheckboxComponent } from './checkbox'
 import { Heading, PageTitle } from './typography'
+import { TableSkeleton } from './skeleton'
 
 export {
     TableComponent,
@@ -31,5 +32,6 @@ export {
     Collapse,
     CheckboxComponent,
     Heading,
-    PageTitle
+    PageTitle,
+    TableSkeleton
 }

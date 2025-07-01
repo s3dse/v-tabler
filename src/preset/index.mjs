@@ -6,7 +6,8 @@ import {
     rules,
     preflights,
     autocompletions,
-    spacing
+    spacing,
+    animation
 } from './theme.js'
 import presetTheme from 'unocss-preset-theme'
 import merge from 'lodash.merge'
@@ -44,7 +45,8 @@ const presetVTabler = definePreset((options = {}) => {
         theme: {
             colors: mergedTheme.light.colors,
             fontFamily: { sans: '"Inter", system-ui, sans-serif' },
-            ...(enableSemanticSpacing ? { spacing } : {})
+            ...(enableSemanticSpacing ? { spacing } : {}),
+            animation
         },
         shortcuts,
         rules,

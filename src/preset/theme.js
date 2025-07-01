@@ -130,6 +130,13 @@ const shortcuts = [
         'heading-5': 'header-5',
         'heading-6': 'header-6',
         'tab-heading': 'header-6'
+    },
+    {
+        'shimmer-bg-light':
+            'bg-gradient-to-r from-muted/80  to-muted/80 via-primary/15 bg-[length:200%_100%]',
+        'shimmer-bg-dark':
+            'bg-gradient-to-r from-muted/80  to-muted/80 via-primary/10 bg-[length:200%_100%]',
+        'shimmer-bg': 'dark:shimmer-bg-dark shimmer-bg-light'
     }
 ]
 
@@ -297,4 +304,28 @@ const spacing = {
     16: '48rem'
 }
 
-export { theme, shortcuts, rules, preflights, autocompletions, spacing }
+const animation = {
+    keyframes: {
+        shimmer: '{0% { background-position: -200% 0;} 100% { background-position: 200% 0; }}',
+        'shimmer-slow':
+            '{0% { background-position: -200% 0;} 100% { background-position: 200% 0; }}'
+    },
+    durations: {
+        shimmer: '1.5s',
+        'shimmer-slow': '3s'
+    },
+    timingFns: {
+        shimmer: 'linear',
+        'shimmer-slow': 'linear'
+    },
+    counts: {
+        shimmer: 'infinite',
+        'shimmer-slow': 'infinite'
+    },
+    names: {
+        shimmer: 'shimmer',
+        'shimmer-slow': 'shimmer-slow'
+    }
+}
+
+export { theme, shortcuts, rules, preflights, autocompletions, spacing, animation }

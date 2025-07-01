@@ -18,6 +18,7 @@ import CollapsibleCard from './components/card/CollapsibleCard.vue'
 import CheckboxComponent from './components/checkbox/CheckboxComponent.vue'
 import Heading from './components/typography/Heading.vue'
 import PageTitle from './components/typography/PageTitle.vue'
+import TableSkeleton from './components/skeleton/TableSkeleton.vue'
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -638,6 +639,16 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
 
                 <div>{{ fieldVisibility }}</div>
             </div>
+        </div>
+    </CollapsibleCard>
+
+    <CollapsibleCard class="my-4" heading="Skeletons">
+        <div class="p-4">
+            <TableSkeleton
+                :rows="5"
+                :columns="6"
+                :animation="{ type: 'all', speed: 'normal' }"
+            ></TableSkeleton>
         </div>
     </CollapsibleCard>
 </template>
