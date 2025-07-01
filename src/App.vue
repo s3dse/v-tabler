@@ -646,7 +646,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
         <div class="p-4">
             <TableSkeleton
                 :rows="5"
-                :columns="6"
+                :columns="5"
                 :animation="{ type: 'all', speed: 'normal' }"
             ></TableSkeleton>
         </div>

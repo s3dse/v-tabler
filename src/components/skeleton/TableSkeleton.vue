@@ -41,7 +41,7 @@
                     class="w-fit flex items-center p-4 gap-2 text-nowrap text-default  border border-border bg-surface rounded-sm shadow-lg"
                 >
                     <span
-                        class="i-tabler-hourglass-high flex text-2xl"
+                        class="i-tabler-hourglass-high flex text-2xl animate-[spin_2s_ease-in-out_infinite]"
                     ></span>
                     <span class="text-xl">Fetching data. This may take a while.</span>
                 </div>
