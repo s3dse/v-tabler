@@ -647,7 +647,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
             <TableSkeleton
                 :rows="5"
                 :columns="5"
-                :animation="{ type: 'all', speed: 'normal' }"
+                :animation="{ type: 'all', speed: 'slow' }"
             ></TableSkeleton>
         </div>
     </CollapsibleCard>
