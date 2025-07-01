@@ -161,6 +161,8 @@ const fieldVisibility = ref([
     { key: 'first_name', visible: true },
     { key: 'last_name', visible: true }
 ])
+
+const showTableSkeleton = ref(true)
 </script>
 
 <template>
@@ -644,11 +646,39 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
 
     <CollapsibleCard class="my-4" heading="Skeletons">
         <div class="p-4">
+            <ToggleComponent
+                class="flex gap-5 pb-4"
+                left-label="Busy Table"
+                v-model="showTableSkeleton"
+            ></ToggleComponent>
             <TableSkeleton
                 :rows="5"
                 :columns="5"
                 :animation="{ type: 'all', speed: 'slow' }"
-            ></TableSkeleton>
+                :show="showTableSkeleton"
+            >
+            <table-component
+                :items="items"
+                :fields="fields"
+                :top-rows="topRows"
+                title="Test"
+                class="w-[100%] bg-surface text-inverted"
+            >
+                <template #table-top-controls>
+                    <div class="btn-transparent-default table-top-control ms-auto">
+                        some control
+                    </div>
+                </template>
+                <template #page-size-label="{ pageSize }">
+                    Einträge pro Seite: {{ pageSize }}
+                </template>
+                <template #cell(share)="data">
+                    <div :title="data.unformatted">
+                        {{ data.value }}
+                    </div>
+                </template>
+            </table-component>
+            </TableSkeleton>
         </div>
     </CollapsibleCard>
 </template>

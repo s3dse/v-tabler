@@ -1,5 +1,6 @@
 <template>
     <div
+        v-if="show"
         role="status"
         aria-live="polite"
         aria-busy="true"
@@ -48,6 +49,7 @@
             </div>
         </slot>
     </div>
+    <slot v-else></slot>
 </template>
 <script>
 const defaultAnimation = {
@@ -101,6 +103,10 @@ const props = defineProps({
                 ['normal', 'slow'].includes(value.speed)
             )
         }
+    },
+    show: {
+        type: Boolean,
+        default: false
     }
 })
 </script>
