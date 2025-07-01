@@ -8,7 +8,7 @@ import { DialogComponent } from './dialog'
 import { SingleSelect, MultiSelect } from './select'
 import { ListSelect, ListSelectPreview } from './listselect'
 import { ToggleComponent } from './toggle'
-import { Collapse } from './transition'
+import { Collapse, Fade } from './transition'
 import { CheckboxComponent } from './checkbox'
 import { Heading, PageTitle } from './typography'
 import { TableSkeleton } from './skeleton'
@@ -30,6 +30,7 @@ export {
     ListSelectPreview,
     ToggleComponent,
     Collapse,
+    Fade,
     CheckboxComponent,
     Heading,
     PageTitle,

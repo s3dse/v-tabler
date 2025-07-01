@@ -1,3 +1,4 @@
-import Collapse from "./Collapse.vue";
+import Collapse from './Collapse.vue'
+import Fade from './Fade.vue'
 
-export { Collapse };
+export { Collapse, Fade }

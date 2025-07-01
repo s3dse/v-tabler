@@ -19,6 +19,7 @@ import CheckboxComponent from './components/checkbox/CheckboxComponent.vue'
 import Heading from './components/typography/Heading.vue'
 import PageTitle from './components/typography/PageTitle.vue'
 import TableSkeleton from './components/skeleton/TableSkeleton.vue'
+import Fade from './components/transition/Fade.vue'
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -651,34 +652,40 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 left-label="Busy Table"
                 v-model="showTableSkeleton"
             ></ToggleComponent>
-            <TableSkeleton
-                :rows="5"
-                :columns="5"
-                :animation="{ type: 'all', speed: 'slow' }"
-                :show="showTableSkeleton"
-            >
-            <table-component
-                :items="items"
-                :fields="fields"
-                :top-rows="topRows"
-                title="Test"
-                class="w-[100%] bg-surface text-inverted"
-            >
-                <template #table-top-controls>
-                    <div class="btn-transparent-default table-top-control ms-auto">
-                        some control
-                    </div>
-                </template>
-                <template #page-size-label="{ pageSize }">
-                    Einträge pro Seite: {{ pageSize }}
-                </template>
-                <template #cell(share)="data">
-                    <div :title="data.unformatted">
-                        {{ data.value }}
-                    </div>
-                </template>
-            </table-component>
-            </TableSkeleton>
+            <div class="relative">
+                
+                <table-component
+                    :class="[showTableSkeleton ? 'opacity-0' : 'opacity-100']"
+                    v-if="items.length"
+                    :items="items"
+                    :fields="fields"
+                    :top-rows="topRows"
+                    title="Test"
+                    class="w-[100%] bg-surface text-inverted"
+                >
+                    <template #table-top-controls>
+                        <div class="btn-transparent-default table-top-control ms-auto">
+                            some control
+                        </div>
+                    </template>
+                    <template #page-size-label="{ pageSize }">
+                        Einträge pro Seite: {{ pageSize }}
+                    </template>
+                    <template #cell(share)="data">
+                        <div :title="data.unformatted">
+                            {{ data.value }}
+                        </div>
+                    </template>
+                </table-component>
+                <TableSkeleton
+                    :rows="5"
+                    :columns="5"
+                    :animation="{ type: 'all', speed: 'slow' }"
+                    :show="showTableSkeleton"
+                    class="absolute inset-0"
+                >
+                </TableSkeleton>
+            </div>
         </div>
     </CollapsibleCard>
 </template>
