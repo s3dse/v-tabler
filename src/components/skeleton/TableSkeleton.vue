@@ -1,59 +1,54 @@
 <template>
-    <Fade :show="show">
+    <div
+        v-if="show"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        class="border rounded-sm overflow-hidden relative bg-surface border-border"
+    >
         <div
-            role="status"
-            aria-live="polite"
-            aria-busy="true"
-            class="border rounded-sm overflow-hidden relative bg-surface border-border transition-opacity duration-300 ease-in-out"
-        >
-            <div
-                v-if="_animation.type === 'all'"
-                class="absolute inset-0 pointer-events-none shimmer-bg z-0 cursor-wait"
-                :class="{ [animations[_animation.speed]]: _animation.type === 'all' }"
-            ></div>
+            v-if="_animation.type === 'all'"
+            class="absolute inset-0 pointer-events-none shimmer-bg z-0 cursor-wait"
+            :class="{ [animations[_animation.speed]]: _animation.type === 'all' }"
+        ></div>
 
-            <div class="relative cursor-wait pointer-events-none">
-                <div class="grid gap-4 p-4 border-b z-10 border-border" :class="gridCols[columns]">
+        <div class="relative cursor-wait pointer-events-none">
+            <div class="grid gap-4 p-4 border-b z-10 border-border" :class="gridCols[columns]">
+                <div v-for="n in columns" :key="'header-' + n" class="h-6 rounded-sm bg-muted" />
+            </div>
+
+            <div class="space-y-3 p-4 z-10">
+                <div
+                    v-for="row in rows"
+                    :key="'row-' + row"
+                    class="grid gap-4"
+                    :class="gridCols[columns]"
+                >
                     <div
-                        v-for="n in columns"
-                        :key="'header-' + n"
-                        class="h-6 rounded-sm bg-muted"
+                        v-for="col in columns"
+                        :key="`cell-${row}-${col}`"
+                        class="h-5 rounded-sm bg-muted"
+                        :class="{
+                            'shimmer-bg': _animation.type === 'per-row',
+                            [animations[_animation.speed]]: _animation.type === 'per-row'
+                        }"
                     />
                 </div>
-
-                <div class="space-y-3 p-4 z-10">
-                    <div
-                        v-for="row in rows"
-                        :key="'row-' + row"
-                        class="grid gap-4"
-                        :class="gridCols[columns]"
-                    >
-                        <div
-                            v-for="col in columns"
-                            :key="`cell-${row}-${col}`"
-                            class="h-5 rounded-sm bg-muted"
-                            :class="{
-                                'shimmer-bg': _animation.type === 'per-row',
-                                [animations[_animation.speed]]: _animation.type === 'per-row'
-                            }"
-                        />
-                    </div>
+            </div>
+        </div>
+        <slot name="message">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div
+                    class="w-fit flex items-center p-4 gap-2 text-nowrap text-default border border-border bg-surface rounded-sm shadow-lg"
+                >
+                    <span
+                        class="i-tabler-hourglass-high flex text-2xl animate-[spin_2s_ease-in-out_infinite]"
+                    ></span>
+                    <span class="text-xl">Fetching data. This may take a while.</span>
                 </div>
             </div>
-            <slot name="message">
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div
-                        class="w-fit flex items-center p-4 gap-2 text-nowrap text-default border border-border bg-surface rounded-sm shadow-lg"
-                    >
-                        <span
-                            class="i-tabler-hourglass-high flex text-2xl animate-[spin_2s_ease-in-out_infinite]"
-                        ></span>
-                        <span class="text-xl">Fetching data. This may take a while.</span>
-                    </div>
-                </div>
-            </slot>
-        </div>
-    </Fade>
+        </slot>
+    </div>
 </template>
 <script>
 const defaultAnimation = {
@@ -63,7 +58,6 @@ const defaultAnimation = {
 </script>
 <script setup>
 import { computed, toValue } from 'vue'
-import { Fade } from '@/components/transition'
 const gridCols = {
     1: 'grid-cols-1',
     2: 'grid-cols-2',

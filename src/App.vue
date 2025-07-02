@@ -653,10 +653,8 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 v-model="showTableSkeleton"
             ></ToggleComponent>
             <div class="relative">
-                
                 <table-component
-                    :class="[showTableSkeleton ? 'opacity-0' : 'opacity-100']"
-                    v-if="items.length"
+                    v-show="!showTableSkeleton"
                     :items="items"
                     :fields="fields"
                     :top-rows="topRows"
