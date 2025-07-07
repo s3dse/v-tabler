@@ -121,13 +121,13 @@ export default {
                 this.maxVisibleButtons - 2,
                 this.totalPages
             )
-            return [...new Set([1, ...intermediateRange, this.totalPages])]
+            return [...new Set([1, ...intermediateRange, ...(this.totalPages > 0 ? [this.totalPages] : [])])]
         },
         isInFirstPage() {
             return this.currentPage === 1
         },
         isInLastPage() {
-            return this.currentPage === this.totalPages
+            return this.currentPage === this.totalPages || this.totalPages === 0
         },
         last() {
             return this.lastLabel === '' ? this.totalPages : this.lastLabel

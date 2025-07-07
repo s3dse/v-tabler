@@ -533,6 +533,27 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                     </div>
                 </template>
             </table-component>
+            <table-component
+                :items="[]"
+                :fields="fields"
+                :top-rows="[]"
+                title="Test"
+                class="w-[100%] bg-surface text-inverted"
+            >
+                <template #table-top-controls>
+                    <div class="btn-transparent-default table-top-control ms-auto">
+                        some control
+                    </div>
+                </template>
+                <template #page-size-label="{ pageSize }">
+                    Einträge pro Seite: {{ pageSize }}
+                </template>
+                <template #cell(share)="data">
+                    <div :title="data.unformatted">
+                        {{ data.value }}
+                    </div>
+                </template>
+            </table-component>
         </loading-overlay>
     </card-component>
 

@@ -44,6 +44,43 @@ describe('PaginationComponent', () => {
         expectedPaginationLabels.every(label => expect(paginationLabels).toContain(label))
         wrapper.unmount()
     })
+    it('renders previous and next buttons disabled when data is empty', () => {
+        const wrapper = shallowMount(PaginationComponent, {
+            props: {
+                totalPages: 0,
+                totalEntries: 0,
+                perPage: 5,
+                currentPage: 1
+            }
+        })
+
+        console.log(wrapper.html())
+        const paginationLabels = wrapper.findAll('ul.pagination li').map(w => w.text()).filter(e => e)
+        const expectedPaginationLabels = ['Previous', '1', 'Next']
+        expect(paginationLabels).toStrictEqual(expectedPaginationLabels)
+        expect(wrapper.find('ul.pagination li:first-child button').isDisabled()).toBe(true)
+        expect(wrapper.find('ul.pagination li:last-child button').isDisabled()).toBe(true)
+        wrapper.unmount()
+    })
+    it('renders previous and next buttons disabled when data fits on first pageis', () => {
+        const wrapper = shallowMount(PaginationComponent, {
+            props: {
+                totalPages: 1,
+                totalEntries: 2,
+                perPage: 5,
+                currentPage: 1
+            }
+        })
+
+        console.log(wrapper.html())
+        const paginationLabels = wrapper.findAll('ul.pagination li').map(w => w.text()).filter(e => e)
+        const expectedPaginationLabels = ['Previous', '1', 'Next']
+        expect(paginationLabels).toStrictEqual(expectedPaginationLabels)
+        expect(wrapper.find('ul.pagination li:first-child button').isDisabled()).toBe(true)
+        expect(wrapper.find('ul.pagination li:last-child button').isDisabled()).toBe(true)
+        wrapper.unmount()
+    })
+
     it('changes pagination forwards correctly', async () => {
         const wrapper = shallowMount(PaginationComponent, {
             props: {
