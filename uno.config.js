@@ -79,7 +79,7 @@ export default defineConfig({
         ],
         [/^busy-bg-(.*)$/, ([, c]) => `after:bg-${c}/70`]
     ],
-    presets: [presetWind3(), presetScrollbar(), presetVTabler()],
+    presets: [presetWind3(), presetScrollbar(), presetVTabler({enableSemanticSpacing: false})],
     transformers: [transformerVariantGroup(), transformerDirectives()],
     // safelist: safelist,
     autocomplete: [
