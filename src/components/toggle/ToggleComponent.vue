@@ -1,5 +1,5 @@
 <template>
-    <div class="flex items-center">
+    <div class="flex items-center" :class="[$attrs.disabled ? 'pointer-events-none cursor-default' : '']">
         <slot name="leftLabel" v-bind="{ isChecked }">
             <span v-if="leftLabel" class="text-default">{{ leftLabel }}</span>
         </slot>
@@ -15,7 +15,9 @@
             <input type="checkbox" class="sr-only" v-model="isChecked" />
             <div
                 class="w-10 h-6 data-[checked=true]:bg-primary data-[checked=false]:bg-inputfield border border-border rounded-full shadow-inner transition duration-150 ease-in-out"
+                :class="[$attrs.disabled ? 'bg-disabled!' : '']"
                 :data-checked="isChecked"
+
             ></div>
             <div
                 class="absolute left-0.5 w-5 h-5 bg-surface border border-2 border-border text-default  rounded-full shadow transform transition-transform duration-150 ease-in-out"
@@ -32,7 +34,9 @@
     </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, useAttrs } from 'vue'
+const $attrs = useAttrs()
+
 const isChecked = defineModel({
     type: Boolean,
     default: false
