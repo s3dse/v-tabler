@@ -14,7 +14,7 @@ import { toRefs, ref } from 'vue';
 
 const defaultClasses = {
     trigger: 'text-default',
-    overlay: 'fixed inset-0 bg-background bg-opacity-25 dark:bg-opacity-85 z-499 backdrop-filter backdrop-blur-sm',
+    overlay: 'fixed inset-0 bg-background/50 dark:bg-background/85 z-499 backdrop-filter backdrop-blur-sm',
     title: `bg-surface text-default text-xl font-semibold leading-6 border-b border-border p-4 rounded-t`,
     content: `fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[28rem] translate-x-[-50%] translate-y-[-50%]
         rounded bg-gray-50 dark:bg-moon-800
