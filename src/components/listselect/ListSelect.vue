@@ -64,6 +64,10 @@ const handleListLengthExceeded = value => {
     return [...value].splice(0, props.maxSelectionLength)
 }
 
+const equals = (a, b) => {
+    return a[props.trackBy] === b[props.trackBy]
+}
+
 const selectedOptions = defineModel({
     type: [Object, Array],
     get(value) {
@@ -71,6 +75,9 @@ const selectedOptions = defineModel({
         return preserveArray(val, props.multiple)
     },
     set(newValue) {
+        if (!props.multiple && props.modelValue.length === 1 &&equals(props.modelValue[0], newValue)) {
+            return []
+        }
         const value = preserveArray(newValue, props.multiple)
         if (props.multiple && value.length > props.maxSelectionLength) {
             return handleListLengthExceeded(value)
