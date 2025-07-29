@@ -68,6 +68,14 @@ const equals = (a, b) => {
     return a[props.trackBy] === b[props.trackBy]
 }
 
+const isSingleModeDeselect = newValue => {
+    const isSingleMode = !props.multiple
+    const currentModelValue = toValue(props.modelValue)
+    const oldValueNotEmpty = Array.isArray(currentModelValue) && currentModelValue.length > 0
+    const oldValueIsSelectedAgain = oldValueNotEmpty && equals(currentModelValue[0], newValue)
+    return isSingleMode && oldValueIsSelectedAgain
+}
+
 const selectedOptions = defineModel({
     type: [Object, Array],
     get(value) {
@@ -75,7 +83,7 @@ const selectedOptions = defineModel({
         return preserveArray(val, props.multiple)
     },
     set(newValue) {
-        if (!props.multiple && props.modelValue.length === 1 &&equals(props.modelValue[0], newValue)) {
+        if (isSingleModeDeselect(newValue)) {
             return []
         }
         const value = preserveArray(newValue, props.multiple)

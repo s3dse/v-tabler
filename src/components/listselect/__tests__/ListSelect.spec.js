@@ -206,6 +206,20 @@ describe('ListSelect', () => {
             ])
             expect(modelValue.value).toStrictEqual([{ id: '3', label: 'option3' }])
         })
+
+        it('allows deselection of the selected option', async () => {
+            const { wrapper, modelValue } = mountListSelect({ multiple: false })
+            await wrapper.find('.listselect--dropdown-toggle').trigger('click')
+            
+            const content = wrapper.findComponent(ComboboxContent)
+            await content.findAll('.listselect__option').at(1).trigger('click')
+            expect(modelValue.value).toStrictEqual([{ id: '2', label: 'option2' }])
+            
+            // Deselecting the option
+            await wrapper.find('.listselect--dropdown-toggle').trigger('click')
+            await content.findAll('.listselect__option').at(1).trigger('click')
+            expect(modelValue.value).toStrictEqual([])
+        })
     })
 
     describe('in multiple mode', () => {
