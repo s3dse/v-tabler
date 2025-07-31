@@ -533,11 +533,15 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                     </div>
                 </template>
             </table-component>
+        </loading-overlay>
+    </card-component>
+    <card-component class="my-4">
+        <loading-overlay :show="tableStatus.busy">
             <table-component
                 :items="[]"
                 :fields="fields"
                 :top-rows="[]"
-                title="Test"
+                title="Empty Table"
                 class="w-[100%] bg-surface text-inverted"
             >
                 <template #table-top-controls>
