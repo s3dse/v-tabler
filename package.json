@@ -3,10 +3,12 @@
     "version": "1.10.7",
     "private": true,
     "type": "module",
-    "workspaces": [
-        "packages/*",
-        "apps/*"
-    ],
+    "workspaces": {
+        "packages": [
+            "packages/*",
+            "apps/*"
+        ]
+    },
     "scripts": {
         "build": "npm run build:packages && npm run build:demo",
         "build:packages": "npm run build --workspace=packages/v-tabler",
@@ -14,7 +16,8 @@
         
         "dev": "npm run dev --workspace=apps/demo",
         "dev:demo": "npm run dev --workspace=apps/demo",
-        
+        "serve": "npm run serve --workspace=apps/demo",
+
         "test": "npm run test:unit --workspace=packages/v-tabler",
         "test:packages": "npm run test:unit --workspace=packages/v-tabler",
         "test:watch": "npm run test:unit:watch --workspace=packages/v-tabler",
@@ -28,7 +31,11 @@
         "story:preview": "npm run story:preview --workspace=packages/v-tabler",
         
         "publish:library": "npm run build:packages && npm publish --workspace=packages/v-tabler",
-        "publish:dry-run": "npm run build:packages && npm publish --dry-run --workspace=packages/v-tabler"
+        "publish:dry-run": "npm run build:packages && npm publish --dry-run --workspace=packages/v-tabler",
+        
+        "version:patch": "npm version patch --workspace=packages/v-tabler",
+        "version:minor": "npm version minor --workspace=packages/v-tabler",
+        "version:major": "npm version major --workspace=packages/v-tabler"
     },
     "devDependencies": {
         "@rushstack/eslint-patch": "^1.11.0",
