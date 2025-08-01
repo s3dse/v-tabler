@@ -55,6 +55,7 @@ const fieldDefinitions = ref([
 | Prop | Type | Description |
 |------|------|-------------|
 | `items` | `Array` | The array of data objects to display in the table |
+| `fields` | `Array` | Column definitions array. Each field must have a `key` property |
 
 ### Optional Props
 
@@ -64,7 +65,6 @@ const fieldDefinitions = ref([
 | `totalItems` | `Number` | `undefined` | Total number of items (required for remote pagination) |
 | `topRows` | `Array` | `[]` | Special rows displayed at the top of the table (e.g., summary rows) |
 | `bottomRows` | `Array` | `[]` | Special rows displayed at the bottom of the table (e.g., totals) |
-| `fields` | `Array` | `[]` | Column definitions array. Each field must have a `key` property |
 | `perPage` | `Number` | `5` | Number of items to display per page |
 | `configurablePageSize` | `Boolean` | `true` | Whether users can change the page size |
 | `pageSizes` | `Array` | `[5, 10, 25, 50]` | Available page size options |

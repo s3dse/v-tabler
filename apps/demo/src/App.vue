@@ -1,5 +1,7 @@
 <script setup>
 import data from './assets/MOCK_DATA-2.json'
+import TestOne from './components/TestOne.vue'
+import TestTwo from './components/TestTwo.vue'
 import { ref } from 'vue'
 import {
     TableComponent,
