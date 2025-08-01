@@ -1,498 +1,379 @@
 <template>
     <div>
-        <div
-            v-if="title && !hasTitleSlot"
-            class="vt-title-border border-b border-border bg-surface my-3"
+        <table-title 
+            :title="title"
         >
-            <div class="vt-title card-title mx-4 my-3">
-                {{ title }}
-            </div>
-        </div>
-        <div
-            v-if="!title && hasTitleSlot"
-            class="vt-title-border border-b border-border my-3"
+            <template v-if="slots.title" #title>
+                <slot name="title" />
+            </template>
+        </table-title>
+
+        <table-header
+            :enable-search="enableSearch"
+            :search-placeholder="searchPlaceholder"
+            :filter-input-id="filterInputId"
+            v-model:search-term="searchTerm"
+            :search-input-class-list="searchInputClassList"
+            :configurable-page-size="configurablePageSize"
+            v-model:page-size="pageSize"
+            :page-sizes="pageSizes"
+            :top-rows-length="topRows.length"
+            :page-size-button-class-list="pageSizeButtonClassList"
+            :table-data="tableData"
+            :top-rows="topRows"
+            :fields="fields"
+            @filter-data="handleFilterInternal"
         >
-            <slot name="title" />
-        </div>
-        <div class="vt-table-header flex flex-wrap mx-4 my-3 gap-2 justify-start">
-            <input
-                v-if="enableSearch"
-                name="search"
-                :placeholder="searchPlaceholder"
-                :id="filterInputId"
-                @input="filterData"
-                v-model="searchTerm"
-                :class="searchInputClassList"
-            />
-            <dropdown-component
-                class="flex"
-                v-model="pageSize"
-                :options="pageSizes.filter(e => e > topRows.length)"
-                :default-item="5"
-                :button-class-list="pageSizeButtonClassList"
-            >
-                <template #toggle-label="{ currentItem }">
-                    <slot name="page-size-label" v-bind="{ pageSize: currentItem }"></slot>
-                </template>
-            </dropdown-component>
-            <slot
-                name="table-top-controls"
-                :data="tableData"
-                :top-rows="topRows"
-                :fields="fields"
-            ></slot>
-        </div>
-        <div
-            class="mt-2 pb-2 border-t border-border overflow-x-auto with-scrollbar"
-        >
+            <template #page-size-label="{ pageSize: currentPageSize }">
+                <slot name="page-size-label" v-bind="{ pageSize: currentPageSize }"></slot>
+            </template>
+            <template #table-top-controls="slotProps">
+                <slot name="table-top-controls" v-bind="slotProps"></slot>
+            </template>
+        </table-header>
+
+        <div class="mt-2 pb-2 border-t border-border overflow-x-auto with-scrollbar">
             <table
                 class="w-full text-default"
                 :class="{ 'table-fixed whitespace-normal break-words': fixed }"
             >
-                <thead
-                    class="bg-thead-background font-semibold text-[0.625rem] text-thead-text"
-                    v-if="tableData.length || topRows.length"
+                <table-head
+                    :visible-fields="visibleFields"
+                    :table-data="tableData"
+                    :top-rows="topRows"
+                    :underscores-to-spaces="underscoresToSpaces"
+                    :get-column-label="getColumnLabel"
+                    :get-sort-icon-class="getSortIconClass"
+                    :left-pad-first-col="leftPadFirstCol"
+                    :right-pad-last-col="(index) => rightPadLastCol(index, visibleFields.length)"
+                    @sort-table="handleSortInternal"
                 >
-                    <th
-                        v-for="(col, index) in visibleFields"
-                        :key="index"
-                        @click="sortTable(col)"
-                        :class="[col.thClassList, leftPadFirstCol(index), rightPadLastCol(index)]"
-                        class="hover:cursor-pointer p-2 first:ps-6 last:pe-6 uppercase"
-                    >
-                        <slot :name="`th(${col.key})`" :field="col">
-                            <div class="">
-                                {{ underscoresToSpaces(getColumnLabel(col)) }}
-                                <div
-                                    class="inline-block"
-                                    :class="{
-                                        'i-tabler-arrows-sort': col.key !== sortColumnKey,
-                                        'i-tabler-sort-ascending':
-                                            col.key === sortColumnKey && ascending,
-                                        'i-tabler-sort-descending':
-                                            col.key === sortColumnKey && !ascending
-                                    }"
-                                ></div>
-                            </div>
-                        </slot>
-                    </th>
-                </thead>
-                <tbody v-if="topRows.length">
-                    <tr
-                        :data-top-row="rowIndex"
-                        v-for="(item, rowIndex) in getRows(topRows, false)"
-                        :key="`top_row_${rowIndex}`"
-                        class=""
-                    >
-                        <td
-                            v-for="(column, fieldIndex) in visibleFields"
-                            :key="`top_row_column_${fieldIndex}`"
-                            class="p-2 first:ps-6 last:pe-6"
-                            :class="[getTopRowClassList(column)]"
-                        >
-                            <slot
-                                :name="`cell(${column.key})`"
-                                :value="getValue(item, column)"
-                                :unformatted="getUnformattedValue(item, column)"
-                                :item="item"
-                                :field="column"
-                            >
-                                {{ getValue(item, column) }}
-                            </slot>
-                        </td>
-                    </tr>
-                </tbody>
-                <tbody>
-                    <tr
-                        v-for="(item, rowIndex) in getRows()"
-                        :key="rowIndex"
-                        class="border-y border-border"
-                    >
-                        <td
-                            v-for="(column, fieldIndex) in visibleFields"
-                            :key="fieldIndex"
-                            class="p-2 first:ps-6 last:pe-6"
-                            :class="[getClassList(column)]"
-                        >
-                            <slot
-                                :name="`cell(${column.key})`"
-                                :value="getValue(item, column)"
-                                :unformatted="getUnformattedValue(item, column)"
-                                :item="item"
-                                :field="column"
-                            >
-                                {{ getValue(item, column) }}
-                            </slot>
-                        </td>
-                    </tr>
-                </tbody>
-                <tbody v-if="bottomRows.length" class="">
-                    <tr
-                        v-for="(item, rowIndex) in getRows(bottomRows, false)"
-                        :key="rowIndex"
-                        class="border-t border-border"
-                    >
-                        <td
-                            v-for="(column, fieldIndex) in visibleFields"
-                            :key="fieldIndex"
-                            class="p-2 first:ps-6 last:pe-6"
-                            :class="[getBottomRowClassList(column)]"
-                        >
-                            <slot
-                                :name="`cell(${column.key})`"
-                                :value="getValue(item, column)"
-                                :unformatted="getUnformattedValue(item, column)"
-                                :item="item"
-                                :field="column"
-                            >
-                                {{ getValue(item, column) }}
-                            </slot>
-                        </td>
-                    </tr>
-                </tbody>
+                    <template v-for="field in visibleFields" :key="field.key" #[`th(${field.key})`]="slotProps">
+                        <slot :name="`th(${field.key})`" v-bind="slotProps"></slot>
+                    </template>
+                </table-head>
+
+                <table-body
+                    v-if="topRows.length"
+                    :rows="getRows(topRows, false)"
+                    :visible-fields="visibleFields"
+                    row-type="top"
+                    :get-value="getValue"
+                    :get-unformatted-value="getUnformattedValue"
+                    :get-cell-class-list="getTopRowClassList"
+                >
+                    <template v-for="field in visibleFields" :key="field.key" #[`cell(${field.key})`]="slotProps">
+                        <slot :name="`cell(${field.key})`" v-bind="slotProps"></slot>
+                    </template>
+                </table-body>
+
+                <table-body
+                    :rows="getRows()"
+                    :visible-fields="visibleFields"
+                    row-type="regular"
+                    row-class="border-y border-border"
+                    :get-value="getValue"
+                    :get-unformatted-value="getUnformattedValue"
+                    :get-cell-class-list="getClassList"
+                >
+                    <template v-for="field in visibleFields" :key="field.key" #[`cell(${field.key})`]="slotProps">
+                        <slot :name="`cell(${field.key})`" v-bind="slotProps"></slot>
+                    </template>
+                </table-body>
+
+                <table-body
+                    v-if="bottomRows.length"
+                    :rows="getRows(bottomRows, false)"
+                    :visible-fields="visibleFields"
+                    row-type="bottom"
+                    row-class="border-t border-border"
+                    :get-value="getValue"
+                    :get-unformatted-value="getUnformattedValue"
+                    :get-cell-class-list="getBottomRowClassList"
+                >
+                    <template v-for="field in visibleFields" :key="field.key" #[`cell(${field.key})`]="slotProps">
+                        <slot :name="`cell(${field.key})`" v-bind="slotProps"></slot>
+                    </template>
+                </table-body>
             </table>
         </div>
-        <div class="vt-table-footer flex flex-wrap gap-2 mx-4 my-2 pb-1">
-            <pagination-component
-                v-if="paginate"
-                :per-page="itemsPerPage"
-                :current-page="currentPage"
-                :total-pages="numberOfPages"
-                :total-entries="remotePagination ? totalItems : tableData.length"
-                :previous-label="paginationPreviousLabel"
-                :next-label="paginationNextLabel"
-                @page-changed="changePage"
-                class="text-default"
-            >
-                <template #pagination-label="{ data }">
-                    <slot name="pagination-label" v-bind="data"></slot>
-                </template>
-            </pagination-component>
-            <slot
-                name="table-bottom-controls"
-                :fields="fields"
-                :data="tableData"
-                :summary-rows="bottomRows"
-            ></slot>
-        </div>
+
+        <table-footer
+            :paginate="paginate"
+            :items-per-page="itemsPerPage"
+            :current-page="currentPage"
+            :number-of-pages="numberOfPages"
+            :remote-pagination="remotePagination"
+            :total-items="totalItems"
+            :table-data-length="tableData.length"
+            :pagination-previous-label="paginationPreviousLabel"
+            :pagination-next-label="paginationNextLabel"
+            :fields="fields"
+            :table-data="tableData"
+            :bottom-rows="bottomRows"
+            @page-changed="changePage"
+        >
+            <template #pagination-label="{ data }">
+                <slot name="pagination-label" v-bind="data || { perPage: 0, currentPage: 1, totalEntries: 0 }"></slot>
+            </template>
+            <template #table-bottom-controls="slotProps">
+                <slot name="table-bottom-controls" v-bind="slotProps || {}"></slot>
+            </template>
+        </table-footer>
     </div>
 </template>
-<script>
+<script setup>
 import '@unocss/reset/tailwind-compat.css'
 import 'virtual:uno.css'
-import { ref, useId } from 'vue'
-import PaginationComponent from '@/components/pagination/PaginationComponent.vue'
-import DropdownComponent from '@/components/dropdown/DropdownComponent.vue'
+import { computed, useId, useSlots, watch, onMounted } from 'vue'
 import { joinLines } from '@/utils/string-join-lines.js'
-import { useDebounceFn } from '@vueuse/core'
-import { sortTable } from './table-sort'
 
-function textMatch(needle, haystack) {
-    const lowerCasedNeedle = needle.toLowerCase()
-    return haystack.toLowerCase().indexOf(lowerCasedNeedle) !== -1
+import {
+    useTableData,
+    useTableSorting,
+    useTablePagination,
+    useTableFiltering,
+    useTableValidation,
+    useTableStyles
+} from './composables/index.js'
+
+import {
+    TableTitle,
+    TableHeader,
+    TableHead,
+    TableBody,
+    TableFooter
+} from './components/index.js'
+
+const props = defineProps({
+    title: {
+        type: String,
+        required: false
+    },
+    items: {
+        type: Array,
+        required: true
+    },
+    totalItems: {
+        type: Number,
+        required: false
+    },
+    topRows: {
+        type: Array,
+        default: () => []
+    },
+    bottomRows: {
+        type: Array,
+        default: () => []
+    },
+    fields: {
+        type: Array,
+        default: () => [],
+        validator: v => v.every(e => e.key)
+    },
+    perPage: {
+        type: Number,
+        default: 5
+    },
+    configurablePageSize: {
+        type: Boolean,
+        default: true
+    },
+    pageSizes: {
+        type: Array,
+        default: () => [5, 10, 25, 50]
+    },
+    pageSizeButtonClassList: {
+        type: String,
+        default: joinLines(`btn-transparent-default 
+                            table-top-control`)
+    },
+    searchInputClassList: {
+        type: String,
+        default: joinLines(`form-inputfield-sm text-default`)
+    },
+    paginate: {
+        type: Boolean,
+        default: true
+    },
+    enableSearch: {
+        type: Boolean,
+        default: true
+    },
+    searchPlaceholder: {
+        type: String,
+        default: 'Search'
+    },
+    paginationPreviousLabel: {
+        type: String,
+        required: false
+    },
+    paginationNextLabel: {
+        type: String,
+        required: false
+    },
+    fixed: {
+        type: Boolean,
+        default: false
+    },
+    remotePagination: {
+        type: Boolean,
+        default: false
+    },
+    filterDebounce: {
+        type: Number,
+        default: 250
+    },
+    filterMaxWait: {
+        type: Number,
+        default: 2000
+    },
+    sortNullsFirst: {
+        type: Boolean,
+        default: null
+    }
+})
+
+const emit = defineEmits([
+    'per-page-change',
+    'sort-change',
+    'after-sort',
+    'page-change',
+    'after-page-change',
+    'filter-change',
+    'filter-change-debounced',
+    'after-filter'
+])
+
+const id = useId()
+const slots = useSlots()
+
+const { 
+    tableData, 
+    visibleFields, 
+    getValue, 
+    getUnformattedValue, 
+    getColumnLabel, 
+    underscoresToSpaces 
+} = useTableData(props)
+
+const itemsPerPage = computed(() => {
+    const safePageSize = pageSize.value || 5
+    const safeTopRowsLength = props.topRows?.length || 0
+    return Math.max(1, safePageSize - safeTopRowsLength)
+})
+const { 
+    currentPage, 
+    pageSize, 
+    numberOfPages, 
+    changePage: changePageInternal, 
+    getRows 
+} = useTablePagination(props, itemsPerPage, tableData)
+
+const { 
+    handleSort, 
+    getSortIconClass 
+} = useTableSorting(tableData, props.remotePagination, props.sortNullsFirst)
+
+const { 
+    searchTerm, 
+    filterData,
+    setupDebouncedEmission
+} = useTableFiltering(props, props.items, tableData, (page) => {
+    const result = changePageInternal(page)
+    if (result?.shouldEmitPageChange) {
+        emit('page-change', result.eventData.page)
+    }
+    if (result?.shouldEmitAfterPageChange) {
+        emit('after-page-change', { 
+            oldPage: result.eventData.oldPage, 
+            newPage: result.eventData.newPage 
+        })
+    }
+})
+
+const { validateProps } = useTableValidation()
+
+const { 
+    getClassList, 
+    getTopRowClassList, 
+    getBottomRowClassList, 
+    leftPadFirstCol, 
+    rightPadLastCol 
+} = useTableStyles()
+
+const filterInputId = computed(() => `filter_input_${id}`)
+
+const changePage = (page) => {
+    const result = changePageInternal(page)
+    if (result?.shouldEmitPageChange) {
+        emit('page-change', result.eventData.page)
+    }
+    if (result?.shouldEmitAfterPageChange) {
+        emit('after-page-change', { 
+            oldPage: result.eventData.oldPage, 
+            newPage: result.eventData.newPage 
+        })
+    }
+    return result
 }
 
-function toSearchableRow(row) {
-    const normalized = Object.values(row).join('') + ' ' + Object.values(row).join(' ')
-    return {
-        row,
-        normalized
+const handleSortInternal = (column) => {
+    const result = handleSort(column, (page) => {
+        const pageResult = changePageInternal(page)
+        if (pageResult?.shouldEmitPageChange) {
+            emit('page-change', pageResult.eventData.page)
+        }
+        if (pageResult?.shouldEmitAfterPageChange) {
+            emit('after-page-change', { 
+                oldPage: pageResult.eventData.oldPage, 
+                newPage: pageResult.eventData.newPage 
+            })
+        }
+    })
+    
+    if (result?.shouldEmitSortChange) {
+        emit('sort-change', result.eventData)
+    }
+    if (result?.shouldEmitAfterSort) {
+        emit('after-sort', result.eventData)
     }
 }
-export default {
-    name: 'table-component',
-    components: {
-        PaginationComponent,
-        DropdownComponent
-    },
-    setup(props, context) {
-        const id = useId()
-        const searchTerm = ref(null)
-        const emitFilterDebounced = useDebounceFn(
-            () => {
-                context.emit('filter-change-debounced', searchTerm.value)
-            },
-            props.filterDebounce,
-            { maxWait: props.filterMaxWait }
-        )
-        return {
-            id,
-            searchTerm,
-            emitFilterDebounced
-        }
-    },
-    props: {
-        title: {
-            type: String,
-            required: false
-        },
-        items: {
-            type: Array,
-            required: true
-        },
-        totalItems: {
-            type: Number,
-            required: false
-        },
-        topRows: {
-            type: Array,
-            default: () => []
-        },
-        bottomRows: {
-            type: Array,
-            default: () => []
-        },
-        fields: {
-            type: Array,
-            default: () => [],
-            validator: v => v.every(e => e.key)
-        },
-        perPage: {
-            type: Number,
-            default: 5
-        },
-        configurablePageSize: {
-            type: Boolean,
-            default: true
-        },
-        pageSizes: {
-            type: Array,
-            default: () => [5, 10, 25, 50]
-        },
-        pageSizeButtonClassList: {
-            type: String,
-            default: joinLines(`btn-transparent-default 
-                                table-top-control`)
-        },
-        searchInputClassList: {
-            type: String,
-            default: joinLines(`form-inputfield-sm`)
-        },
-        paginate: {
-            type: Boolean,
-            default: true
-        },
-        enableSearch: {
-            type: Boolean,
-            default: true
-        },
-        searchPlaceholder: {
-            type: String,
-            default: 'Search'
-        },
-        paginationPreviousLabel: {
-            type: String,
-            required: false
-        },
-        paginationNextLabel: {
-            type: String,
-            required: false
-        },
-        fixed: {
-            type: Boolean,
-            default: false
-        },
-        remotePagination: {
-            type: Boolean,
-            default: false
-        },
-        filterDebounce: {
-            type: Number,
-            default: 250
-        },
-        filterMaxWait: {
-            type: Number,
-            default: 2000
-        },
-        sortNullsFirst: {
-            type: Boolean,
-            default: null
-        }
-    },
-    data() {
-        return {
-            ascending: false,
-            sortColumnKey: '',
-            tableData: [...this.items],
-            currentPage: 1,
-            filterInputId: `filter_input_${this.id}`,
-            filterInputSelector: `#filter_input_${this.id}`,
-            thePageSize:
-                this.perPage > this.topRows.length
-                    ? this.perPage
-                    : this.pageSizes.find(e => e > this.topRows.length),
-            componentValidation: false
-        }
-    },
-    computed: {
-        visibleFields: {
-            get() {
-                return this.fields.map(f => ({ visible: true, ...f })).filter(e => e.visible)
-            },
-            set(value) {
-                return value
-            }
-        },
-        pageSize: {
-            get() {
-                return this.thePageSize > this.topRows.length
-                    ? this.thePageSize
-                    : this.pageSizes.find(e => e > this.topRows.length)
-            },
-            set(v) {
-                const alternative =
-                    v > this.topRows.length ? v : this.pageSizes.find(e => e > this.topRows.length)
-                this.thePageSize = alternative
-                return this.thePageSize
-            }
-        },
-        itemsPerPage() {
-            return this.pageSize - this.topRows.length
-        },
-        numberOfPages() {
-            if (this.remotePagination) {
-                return Math.ceil(this.totalItems / this.itemsPerPage)
-            } else {
-                return Math.ceil(this.tableData.length / this.itemsPerPage)
-            }
-        },
-        underscoresToSpaces() {
-            return v => (v ? v.replaceAll('_', ' ') : v)
-        },
-        hasTitleSlot() {
-            return !!this.$slots.title
-        }
-    },
-    watch: {
-        items: function (newItems) {
-            this.tableData = newItems
-        },
-        itemsPerPage: function (newItemsPerPage) {
-            this.$emit('per-page-change', newItemsPerPage)
-        },
-        perPage: function (newPerPage) {
-            if (newPerPage > this.topRows.length) {
-                this.pageSize = newPerPage
-            } else {
-                this.pageSize = this.pageSizes.find(e => e > this.topRows.length)
-            }
-        },
-        searchTerm: function (newSearchTerm) {
-            this.emitFilterDebounced()
-        }
-    },
-    emits: [
-        'per-page-change',
-        'sort-change',
-        'after-sort',
-        'page-change',
-        'after-page-change',
-        'filter-change',
-        'filter-change-debounced',
-        'after-filter'
-    ],
-    methods: {
-        validateProps() {
-            if (this.pageSize <= this.topRows.length) {
-                this.componentValidation = false
-                console.error("'pageSize' must be higher than length of 'topRows'.")
-                return false
-            }
-            if (this.remotePagination && (this.totalItems === undefined || this.totalItems === null) ) {
-                this.componentValidation = false
-                console.error("'remotePagination === true' requires a 'totalItems' (int) prop")
-                return false
-            } else {
-                this.componentValidation = true
-                return true
-            }
-        },
-        getValue(record, column) {
-            if (!record) return ''
-            const value = record[column.key]
-            if (column.formatter) {
-                return column.formatter(value)
-            } else {
-                return value
-            }
-        },
-        getUnformattedValue(record, column) {
-            if (!record) return ''
-            return record[column.key]
-        },
-        sortTable(col) {
-            if (this.sortColumnKey === col.key) {
-                this.ascending = !this.ascending
-            } else {
-                this.ascending = true
-                this.sortColumnKey = col.key
-            }
 
-            this.$emit('sort-change', { column: col, ascending: this.ascending })
-            if (!this.remotePagination) {
-                sortTable(this.tableData, col, { ascending: this.ascending, nullsFirst: this.sortNullsFirst })
-                if (this.paginate) {
-                    this.changePage(1)
-                }
-                this.$emit('after-sort', { column: col, ascending: this.ascending })
-            }
-        },
-        changePage(page) {
-            if (page === this.currentPage) return
-            const oldPage = this.currentPage
-
-            this.$emit('page-change', page)
-            this.currentPage = page
-
-            this.$emit('after-page-change', { oldPage, newPage: this.currentPage })
-        },
-        getRows(data = this.tableData, paginate = this.paginate) {
-            if (paginate && !this.remotePagination) {
-                const start = (this.currentPage - 1) * this.itemsPerPage
-                const end = start + this.itemsPerPage
-                return data.slice(start, end)
-            } else {
-                return data
-            }
-        },
-        findItems(searchableRow) {
-            const needle = this.$el.querySelector(this.filterInputSelector).value
-            return textMatch(needle, searchableRow.normalized)
-        },
-        filterData(event) {
-            this.$emit('filter-change', event.target.value)
-            if (!this.remotePagination) {
-                if (this.paginate) this.changePage(1)
-                const searchableData = this.items.map(toSearchableRow)
-                const filteredData = searchableData.filter(this.findItems)
-                this.tableData = filteredData.map(e => (e ? e.row : []))
-                this.$emit('after-filter', { searchTerm: event.target.value })
-            }
-        },
-        getClassList(column) {
-            return column.tdClassList || ''
-        },
-        getTopRowClassList(column) {
-            return column.tdTopRowClassList || this.getClassList(column)
-        },
-        getBottomRowClassList(column) {
-            return column.tdBottomRowClassList || this.getClassList(column)
-        },
-        setPageSize(size) {
-            this.pageSize = size
-        },
-        leftPadFirstCol(index) {
-            return index === 0 ? 'pe-6' : ''
-        },
-        rightPadLastCol(index) {
-            return index === this.visibleFields.length - 1 ? 'pe-6' : ''
-        },
-        getColumnLabel(column) {
-            return column.label ? column.label : column.key
-        }
-    },
-    mounted() {
-        this.validateProps()
+const handleFilterInternal = (event) => {
+    const result = filterData(event)
+    if (result?.shouldEmitFilterChange) {
+        emit('filter-change', result.eventData.searchValue)
+    }
+    if (result?.shouldEmitAfterFilter) {
+        emit('after-filter', { searchTerm: result.eventData.searchTerm })
     }
 }
+
+setupDebouncedEmission((result) => {
+    if (result?.shouldEmitFilterChangeDebounced) {
+        emit('filter-change-debounced', result.eventData.searchTerm)
+    }
+})
+
+watch(() => itemsPerPage.value, (newItemsPerPage) => {
+    emit('per-page-change', newItemsPerPage)
+})
+
+watch(() => props.perPage, (newPerPage) => {
+    if (newPerPage > props.topRows.length) {
+        pageSize.value = newPerPage
+    } else {
+        pageSize.value = props.pageSizes.find(e => e > props.topRows.length)
+    }
+})
+
+onMounted(() => {
+    validateProps(
+        pageSize.value, 
+        props.topRows.length, 
+        props.remotePagination, 
+        props.totalItems
+    )
+})
 </script>

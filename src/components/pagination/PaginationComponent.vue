@@ -1,7 +1,7 @@
 <template>
     <div class="flex gap-4 flex-wrap justify-between w-[100%]" data-pagination-component>
         <div class="pagination-label text-muted">
-            <slot name="pagination-label" :data="{ perPage, currentPage, totalEntries }">
+            <slot name="pagination-label" :data="{ perPage: perPage || 0, currentPage: currentPage || 1, totalEntries: totalEntries || 0 }">
                 {{ paginationLabel }}
             </slot>
         </div>
@@ -43,21 +43,10 @@
         </div>
     </div>
 </template>
-<script>
-const PAGE_CHANGED_EVENT = 'page-changed'
-const createIntermediateIndexRange = (currentPage, maxIntermediateButtons, totalPages) => {
-    if (totalPages < maxIntermediateButtons) return [...Array(totalPages).keys()].map(i => i + 1)
 
-    if (currentPage <= Math.ceil((maxIntermediateButtons - 1) / 2) || currentPage === 1) {
-        return [...Array(maxIntermediateButtons).keys()].map(i => i + 1)
-    } else if (currentPage === totalPages) {
-        return [...Array(maxIntermediateButtons).keys()].map(i => totalPages - i).reverse()
-    } else {
-        return [...Array(maxIntermediateButtons).keys()].map(
-            i => i + currentPage - Math.ceil((maxIntermediateButtons - 1) / 2)
-        )
-    }
-}
+<script>
+import { usePagination } from '@/composables/usePagination'
+
 export default {
     name: 'pagination-component',
     props: {
@@ -111,53 +100,69 @@ export default {
             default: 'text-disabled bg-inherit'
         }
     },
-    data() {
-        return {}
-    },
-    computed: {
-        pages() {
-            const intermediateRange = createIntermediateIndexRange(
-                this.currentPage,
-                this.maxVisibleButtons - 2,
-                this.totalPages
-            )
-            return [...new Set([1, ...intermediateRange, ...(this.totalPages > 0 ? [this.totalPages] : [])])]
-        },
-        isInFirstPage() {
-            return this.currentPage === 1
-        },
-        isInLastPage() {
-            return this.currentPage === this.totalPages || this.totalPages === 0
-        },
-        last() {
-            return this.lastLabel === '' ? this.totalPages : this.lastLabel
-        },
-        paginationLabel() {
-            return `Showing entries ${this.perPage * this.currentPage - this.perPage + 1} to ${
-                this.perPage * this.currentPage
-            } of ${this.totalEntries} entries`
+    emits: ['page-changed'],
+    setup(props, { emit }) {
+        const {
+            pages,
+            isInFirstPage,
+            isInLastPage,
+            last,
+            paginationLabel,
+            onClickFirstPage,
+            onClickPreviousPage,
+            onClickPage,
+            onClickNextPage,
+            onClickLastPage,
+            isPageSelected
+        } = usePagination(props)
+
+        const handleFirstPageClick = () => {
+            const result = onClickFirstPage()
+            if (result?.shouldEmitPageChanged) {
+                emit(result.eventName, result.eventData)
+            }
         }
-    },
-    methods: {
-        onCLickFirstPage() {
-            this.$emit(PAGE_CHANGED_EVENT, 1)
-        },
-        onClickPreviousPage() {
-            if (this.currentPage === 1) return
-            this.$emit(PAGE_CHANGED_EVENT, this.currentPage - 1)
-        },
-        onClickPage(page) {
-            this.$emit(PAGE_CHANGED_EVENT, page)
-        },
-        onClickNextPage() {
-            if (this.currentPage === this.totalPages) return
-            this.$emit(PAGE_CHANGED_EVENT, this.currentPage + 1)
-        },
-        onClickLastPage() {
-            this.$emit(PAGE_CHANGED_EVENT, this.totalPages)
-        },
-        isPageSelected(page) {
-            return this.currentPage === page
+
+        const handlePreviousPageClick = () => {
+            const result = onClickPreviousPage()
+            if (result?.shouldEmitPageChanged) {
+                emit(result.eventName, result.eventData)
+            }
+        }
+
+        const handlePageClick = (page) => {
+            const result = onClickPage(page)
+            if (result?.shouldEmitPageChanged) {
+                emit(result.eventName, result.eventData)
+            }
+        }
+
+        const handleNextPageClick = () => {
+            const result = onClickNextPage()
+            if (result?.shouldEmitPageChanged) {
+                emit(result.eventName, result.eventData)
+            }
+        }
+
+        const handleLastPageClick = () => {
+            const result = onClickLastPage()
+            if (result?.shouldEmitPageChanged) {
+                emit(result.eventName, result.eventData)
+            }
+        }
+
+        return {
+            pages,
+            isInFirstPage,
+            isInLastPage,
+            last,
+            paginationLabel,
+            onClickFirstPage: handleFirstPageClick,
+            onClickPreviousPage: handlePreviousPageClick,
+            onClickPage: handlePageClick,
+            onClickNextPage: handleNextPageClick,
+            onClickLastPage: handleLastPageClick,
+            isPageSelected
         }
     }
 }

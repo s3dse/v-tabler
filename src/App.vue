@@ -544,6 +544,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 title="Empty Table"
                 class="w-[100%] bg-surface text-inverted"
             >
+                <template #title><div class="card-title text-default!">XYZ</div></template>
                 <template #table-top-controls>
                     <div class="btn-transparent-default table-top-control ms-auto">
                         some control

@@ -1,0 +1,5 @@
+export { default as TableTitle } from './TableTitle.vue'
+export { default as TableHeader } from './TableHeader.vue'
+export { default as TableHead } from './TableHead.vue'
+export { default as TableBody } from './TableBody.vue'
+export { default as TableFooter } from './TableFooter.vue'
