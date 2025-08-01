@@ -1,6 +1,6 @@
 {
     "name": "v-tabler-workspace",
-    "version": "1.10.7",
+    "version": "1.10.8",
     "private": true,
     "type": "module",
     "workspaces": [
@@ -11,22 +11,17 @@
         "build": "npm run build:packages && npm run build:demo",
         "build:packages": "npm run build --workspace=packages/v-tabler",
         "build:demo": "npm run build --workspace=apps/demo",
-        
         "dev": "npm run dev --workspace=apps/demo",
         "dev:demo": "npm run dev --workspace=apps/demo",
-        
         "test": "npm run test:unit --workspace=packages/v-tabler",
         "test:packages": "npm run test:unit --workspace=packages/v-tabler",
         "test:watch": "npm run test:unit:watch --workspace=packages/v-tabler",
         "test:coverage": "npm run test:coverage --workspace=packages/v-tabler",
-        
         "lint": "npm run lint --workspaces",
         "format": "npm run format --workspaces",
-        
         "story:dev": "npm run story:dev --workspace=packages/v-tabler",
         "story:build": "npm run story:build --workspace=packages/v-tabler",
         "story:preview": "npm run story:preview --workspace=packages/v-tabler",
-        
         "publish:library": "npm run build:packages && npm publish --workspace=packages/v-tabler",
         "publish:dry-run": "npm run build:packages && npm publish --dry-run --workspace=packages/v-tabler"
     },
