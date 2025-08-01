@@ -30,7 +30,7 @@ app.mount('#app')
 # Components
 ## Table Component
 A table that supports
-* filtering
+* filtering (global search and per-column filtering)
 * pagination
 * custom column and cell rendering
 * fixed top row(s) (e.g. for comparisons)
@@ -123,6 +123,8 @@ We pass the table data as an array of objects via the `:items` attribute. The sa
  * `tdBottomRowClassList`: classes for styling the column's `<td>` content (only applied to `:bottom-rows` records)
  * `formatter`: a function defining a formatting logic for the values of that field/column
  * `type`: Either `numeric` or `alphanumeric`, explicitly influences sort behaviour
+ * `filterType`: Explicitly set the column filter type: `'text'`, `'numeric'`, `'date'`, or `'select'` (auto-detected if not specified)
+ * `filterOptions`: Array of options for select-type filters. Format: `[{ value: 'option1', label: 'Option 1' }, ...]`
 
 Only those attributes present in the field array will be displayed in the resulting table.
 
@@ -133,6 +135,16 @@ If the pagination is done outside of the component, e.g. server side pagination,
 
 ### Cell Rendering
 The above example shows how to use the `#cell()` slot to customize the rendering of individual cells. The slot is dynamic and takes a field key as argument. It provides an object holding the actual cell `value`, the `item` (or record) of the `:items` array, and the `field` of the `:fields` array.
+
+### Column Filtering
+The table supports per-column filtering in addition to the global search. Each column header displays a filter button (🔍) that opens a dropdown with the appropriate filter type:
+
+* **Text filters**: Contains-text search (case-insensitive)
+* **Numeric filters**: Comparison operators (`=`, `!=`, `>`, `>=`, `<`, `<=`)
+* **Date filters**: Date comparison operators
+* **Select filters**: Multiple selection from available values
+
+Filter types are auto-detected based on data content, or can be explicitly set using the `filterType` field property. Column filtering can be disabled by setting `:enable-column-filters="false"`.
 
 ### Props
 | Prop        | Description                                                                                                                                   |
@@ -150,6 +162,7 @@ The above example shows how to use the `#cell()` slot to customize the rendering
 | searchInputClassList    | Configure styling of search input. String. |
 | paginate    | Whether pagination is enabled or not. |
 | enableSearch    | Whether searching (filtering) within records is enabled or not. |
+| enableColumnFilters    | Whether per-column filtering is enabled or not. Default is `true`. |
 | searchPlaceholder    | The placeholder for the search input. Default is `'Search'`. |
 | paginationPreviousLabel    | The label for the 'previous page' button |
 | paginationNextLabel    | The label for the 'next page' button |
@@ -167,6 +180,8 @@ The above example shows how to use the `#cell()` slot to customize the rendering
 | sort-change | Emits an object with sorting information, when data is sorted by a column. Example: `{ sortColumn: { key: 'column_a' }, ascending: false }` |
 | filter-change | Emits the current search term when it has changed.  |
 | filter-change-debounced | Emits the current search term when it was changed and a debounce interval was reached. Can help to avoid request spamming. |
+| column-filter-change | Emits when a column filter is changed. Example: `{ field: 'salary', filter: { type: 'numeric', operator: '>', value: 50000 } }` |
+| after-column-filter | Emits after column filters are applied. Example: `{ field: 'salary', filter: {...}, activeFilters: {...} }` |
 
 
 ### Credits

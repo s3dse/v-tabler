@@ -39,7 +39,7 @@ export function useTableData(props) {
     watch(
         () => props.items,
         newItemsArray => {
-            currentTableDataArray.value = newItemsArray || []
+            currentTableDataArray.value = [...(newItemsArray || [])]
         }
     )
 

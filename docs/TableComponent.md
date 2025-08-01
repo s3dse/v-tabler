@@ -79,7 +79,8 @@ const fieldDefinitions = ref([
 | `remotePagination` | `Boolean` | `false` | Whether pagination is handled remotely |
 | `filterDebounce` | `Number` | `250` | Debounce delay in milliseconds for filter operations |
 | `filterMaxWait` | `Number` | `2000` | Maximum wait time in milliseconds for filter debouncing |
-| `sortNullsFirst` | `Boolean` | `null` | Whether to sort null values first. Omit this prop for auto-detection behavior |
+| `sortNullsFirst` | `Boolean` | `null` | Whether to sort null values first (null = auto-detect based on sort direction) |
+| `enableColumnFilters` | `Boolean` | `true` | Whether to show column filter buttons in table headers |
 
 ## Events
 
@@ -93,6 +94,8 @@ const fieldDefinitions = ref([
 | `filter-change` | `String` | Emitted immediately when filter text changes |
 | `filter-change-debounced` | `String` | Emitted after debounced filter change |
 | `after-filter` | `Object` | Emitted after filtering is complete. Payload: `{ searchTerm }` |
+| `column-filter-change` | `Object` | Emitted when a column filter changes. Payload: `{ field, filter }` |
+| `after-column-filter` | `Object` | Emitted after column filtering is complete. Payload: `{ field, filter, activeFilters }` |
 
 ## Slots
 
@@ -135,6 +138,9 @@ Fields are defined as objects in the `fields` prop array. Each field object supp
 | `tdClassList` | `String` | CSS classes for regular data cells |
 | `tdTopRowClassList` | `String` | CSS classes for top row cells |
 | `tdBottomRowClassList` | `String` | CSS classes for bottom row cells |
+| `type` | `String` | Data type for filtering and sorting (`'numeric'`, `'date'`, `'text'`) |
+| `filterType` | `String` | Override auto-detected filter type (`'numeric'`, `'date'`, `'text'`, `'select'`) |
+| `filterOptions` | `Array` | Options for select filter: `[{ value, label }]` |
 
 ### Example Field Configuration
 

@@ -19,7 +19,7 @@
             :page-sizes="pageSizes"
             :top-rows-length="topRows.length"
             :page-size-button-class-list="pageSizeButtonClassList"
-            :table-data="tableData"
+            :table-data="dataForPagination"
             :top-rows="topRows"
             :fields="fields"
             @filter-data="handleFilterInternal"
@@ -39,14 +39,18 @@
             >
                 <table-head
                     :visible-fields="visibleFields"
-                    :table-data="tableData"
+                    :table-data="dataForPagination"
                     :top-rows="topRows"
                     :underscores-to-spaces="underscoresToSpaces"
                     :get-column-label="getColumnLabel"
                     :get-sort-icon-class="getSortIconClass"
                     :left-pad-first-col="leftPadFirstCol"
                     :right-pad-last-col="(index) => rightPadLastCol(index, visibleFields.length)"
+                    :enable-column-filters="enableColumnFilters"
+                    :all-data="[...(props.items || []), ...topRows, ...bottomRows]"
+                    :column-filters="columnFilters"
                     @sort-table="handleSortInternal"
+                    @column-filter="handleColumnFilterInternal"
                 >
                     <template v-for="field in visibleFields" :key="field.key" #[`th(${field.key})`]="slotProps">
                         <slot :name="`th(${field.key})`" v-bind="slotProps"></slot>
@@ -105,11 +109,11 @@
             :number-of-pages="numberOfPages"
             :remote-pagination="remotePagination"
             :total-items="totalItems"
-            :table-data-length="tableData.length"
+            :table-data-length="dataForPagination.length"
             :pagination-previous-label="paginationPreviousLabel"
             :pagination-next-label="paginationNextLabel"
             :fields="fields"
-            :table-data="tableData"
+            :table-data="dataForPagination"
             :bottom-rows="bottomRows"
             @page-changed="changePage"
         >
@@ -134,7 +138,8 @@ import {
     useTablePagination,
     useTableFiltering,
     useTableValidation,
-    useTableStyles
+    useTableStyles,
+    useColumnFiltering
 } from './composables/index.js'
 
 import {
@@ -231,6 +236,10 @@ const props = defineProps({
     sortNullsFirst: {
         type: Boolean,
         default: null
+    },
+    enableColumnFilters: {
+        type: Boolean,
+        default: true
     }
 })
 
@@ -242,7 +251,9 @@ const emit = defineEmits([
     'after-page-change',
     'filter-change',
     'filter-change-debounced',
-    'after-filter'
+    'after-filter',
+    'column-filter-change',
+    'after-column-filter'
 ])
 
 const id = useId()
@@ -257,6 +268,20 @@ const {
     underscoresToSpaces 
 } = useTableData(props)
 
+// Column filtering (new feature)
+const { 
+    columnFilters,
+    setColumnFilter,
+    clearAllColumnFilters,
+    hasActiveFilters,
+    applyColumnFilters
+} = useColumnFiltering()
+
+// Use filtered data for pagination - apply column filters to search-filtered data
+const dataForPagination = computed(() => {
+    return hasActiveFilters.value ? applyColumnFilters(tableData.value) : tableData.value
+})
+
 const itemsPerPage = computed(() => {
     const safePageSize = pageSize.value || 5
     const safeTopRowsLength = props.topRows?.length || 0
@@ -268,12 +293,12 @@ const {
     numberOfPages, 
     changePage: changePageInternal, 
     getRows 
-} = useTablePagination(props, itemsPerPage, tableData)
+} = useTablePagination(props, itemsPerPage, dataForPagination)
 
 const { 
     handleSort, 
     getSortIconClass 
-} = useTableSorting(tableData, props.remotePagination, props.sortNullsFirst)
+} = useTableSorting(dataForPagination, props.remotePagination, props.sortNullsFirst)
 
 const { 
     searchTerm, 
@@ -348,6 +373,26 @@ const handleFilterInternal = (event) => {
     if (result?.shouldEmitAfterFilter) {
         emit('after-filter', { searchTerm: result.eventData.searchTerm })
     }
+}
+
+const handleColumnFilterInternal = ({ field, filter }) => {
+    setColumnFilter(field, filter)
+    
+    // Reset to first page when filtering
+    const pageResult = changePageInternal(1)
+    if (pageResult?.shouldEmitPageChange) {
+        emit('page-change', pageResult.eventData.page)
+    }
+    if (pageResult?.shouldEmitAfterPageChange) {
+        emit('after-page-change', { 
+            oldPage: pageResult.eventData.oldPage, 
+            newPage: pageResult.eventData.newPage 
+        })
+    }
+    
+    // Emit column filter events
+    emit('column-filter-change', { field, filter })
+    emit('after-column-filter', { field, filter, activeFilters: columnFilters.value })
 }
 
 setupDebouncedEmission((result) => {

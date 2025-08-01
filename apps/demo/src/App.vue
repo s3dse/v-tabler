@@ -36,6 +36,72 @@ const nullRecord = {
 }
 const items = ref([...data, nullRecord])
 const topRows = ref([...data].slice(0, 1))
+
+// Sample data for column filtering demo
+const columnFilterDemoData = ref([
+    { id: 1, name: 'Alice Johnson', department: 'Engineering', salary: 75000, hire_date: '2023-01-15', status: 'Active' },
+    { id: 2, name: 'Bob Smith', department: 'Marketing', salary: 65000, hire_date: '2022-03-20', status: 'Active' },
+    { id: 3, name: 'Carol Davis', department: 'Engineering', salary: 85000, hire_date: '2021-07-10', status: 'Active' },
+    { id: 4, name: 'David Wilson', department: 'Sales', salary: 55000, hire_date: '2023-05-01', status: 'Inactive' },
+    { id: 5, name: 'Eva Brown', department: 'HR', salary: 70000, hire_date: '2020-11-25', status: 'Active' },
+    { id: 6, name: 'Frank Miller', department: 'Engineering', salary: 95000, hire_date: '2019-02-14', status: 'Active' },
+    { id: 7, name: 'Grace Lee', department: 'Marketing', salary: 60000, hire_date: '2023-08-30', status: 'Active' },
+    { id: 8, name: 'Henry Taylor', department: 'Sales', salary: 52000, hire_date: '2022-12-05', status: 'Inactive' },
+    { id: 9, name: 'Ivy Chen', department: 'Engineering', salary: 80000, hire_date: '2021-04-18', status: 'Active' },
+    { id: 10, name: 'Jack Robinson', department: 'HR', salary: 65000, hire_date: '2020-09-12', status: 'Active' }
+])
+
+const columnFilterDemoFields = ref([
+    {
+        key: 'id',
+        label: 'ID',
+        type: 'numeric',
+        thClassList: 'text-right px-2',
+        tdClassList: 'text-right px-2 font-mono'
+    },
+    {
+        key: 'name',
+        label: 'Employee Name',
+        filterType: 'text',
+        thClassList: 'text-left px-2',
+        tdClassList: 'text-left px-2'
+    },
+    {
+        key: 'department',
+        label: 'Department',
+        filterType: 'select',
+        filterOptions: [
+            { value: 'Engineering', label: 'Engineering' },
+            { value: 'Marketing', label: 'Marketing' },
+            { value: 'Sales', label: 'Sales' },
+            { value: 'HR', label: 'Human Resources' }
+        ],
+        thClassList: 'text-left px-2',
+        tdClassList: 'text-left px-2'
+    },
+    {
+        key: 'salary',
+        label: 'Salary',
+        type: 'numeric',
+        thClassList: 'text-right px-2',
+        tdClassList: 'text-right px-2',
+        formatter: (value) => value ? `$${value.toLocaleString()}` : '-'
+    },
+    {
+        key: 'hire_date',
+        label: 'Hire Date',
+        filterType: 'date',
+        thClassList: 'text-left px-2',
+        tdClassList: 'text-left px-2'
+    },
+    {
+        key: 'status',
+        label: 'Status',
+        filterType: 'select',
+        thClassList: 'text-center px-2',
+        tdClassList: 'text-center px-2'
+    }
+])
 const fields = ref([
     {
         key: 'id',
@@ -92,6 +158,16 @@ const tableStatus = ref({ busy: false })
 
 const logItem = item => {
     console.log(item)
+}
+
+// Column filter event handlers
+const handleColumnFilterChange = (event) => {
+    console.log('Column filter changed:', event)
+}
+
+const handleAfterColumnFilter = (event) => {
+    console.log('Active column filters:', event.activeFilters)
+    console.log('Total active filters:', Object.keys(event.activeFilters).length)
 }
 const test = () => console.log('test')
 const validateAndSubmit = () => {
@@ -559,6 +635,37 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                     <div :title="data.unformatted">
                         {{ data.value }}
                     </div>
+                </template>
+            </table-component>
+        </loading-overlay>
+    </card-component>
+
+    <!-- Column Filtering Demo -->
+    <card-component class="my-4">
+        <loading-overlay :show="tableStatus.busy">
+            <table-component
+                :items="columnFilterDemoData"
+                :fields="columnFilterDemoFields"
+                title="Column Filtering Demo"
+                class="w-[100%] bg-surface text-inverted"
+                :enable-column-filters="true"
+                @column-filter-change="handleColumnFilterChange"
+                @after-column-filter="handleAfterColumnFilter"
+            >
+                <template #table-top-controls>
+                    <div class="btn-transparent-default table-top-control ms-auto">
+                        Try the filter buttons in column headers! 🔍
+                    </div>
+                </template>
+                <template #cell(status)="{ value }">
+                    <span 
+                        :class="{
+                            'text-green-600 dark:text-green-400': value === 'Active',
+                            'text-red-600 dark:text-red-400': value === 'Inactive'
+                        }"
+                    >
+                        {{ value }}
+                    </span>
                 </template>
             </table-component>
         </loading-overlay>
