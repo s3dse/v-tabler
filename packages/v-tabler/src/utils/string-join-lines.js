@@ -1,0 +1,1 @@
+export const joinLines = str => str.split(/\r?\n|\r|\s+/g).join(' ')

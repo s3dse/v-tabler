@@ -1,0 +1,76 @@
+{
+    "name": "@s3_dse/v-tabler",
+    "version": "1.10.7",
+    "author": {
+        "name": "Sebastian Doerl",
+        "email": "sebastian.doerl@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/s3dse/v-tabler.git"
+    },
+    "type": "module",
+    "license": "MIT",
+    "private": false,
+    "publishConfig": {
+        "access": "public"
+    },
+    "main": "dist/v-tabler.cjs",
+    "module": "dist/v-tabler.js",
+    "exports": {
+        ".": {
+            "import": "./dist/v-tabler.js",
+            "require": "./dist/v-tabler.cjs"
+        },
+        "./preset": {
+            "import": "./dist/preset.js",
+            "require": "./dist/preset.cjs"
+        },
+        "./*.css": "./dist/*.css"
+    },
+    "sideEffects": false,
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "vite build && unocss \"src/**/*.{vue,js,ts}\" -o dist/styles.css",
+        "test:unit:watch": "vitest watch --environment jsdom",
+        "test:unit": "vitest run --environment jsdom",
+        "test:coverage": "vitest run --coverage",
+        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+        "format": "prettier --write src/",
+        "story:dev": "histoire dev",
+        "story:build": "histoire build",
+        "story:preview": "histoire preview"
+    },
+    "devDependencies": {
+        "@iconify-json/tabler": "^1.2.18",
+        "@rushstack/eslint-patch": "^1.11.0",
+        "@unocss/reset": "^66.1.2",
+        "@unocss/transformer-variant-group": "^66.1.2",
+        "@vitejs/plugin-vue": "^5.2.4",
+        "@vitest/coverage-v8": "^3.1.4",
+        "@vue/eslint-config-prettier": "^10.2.0",
+        "@vue/test-utils": "^2.4.6",
+        "eslint": "^9.27.0",
+        "eslint-plugin-vue": "~10.0.0",
+        "jsdom": "^26.1.0",
+        "prettier": "^3.5.3",
+        "unocss": "^66.1.2",
+        "unocss-preset-scrollbar": "^3.2.0",
+        "unocss-preset-theme": "^0.14.1",
+        "vite": "^6.3.5",
+        "vite-plugin-dts": "^4.5.4",
+        "vitest": "^3.1.4",
+        "vue": "^3.5.16",
+        "histoire": "^1.0.0-alpha.2",
+        "@histoire/plugin-vue": "^1.0.0-alpha.2"
+    },
+    "dependencies": {
+        "@vueuse/components": "^13.3.0",
+        "@vueuse/core": "^13.3.0",
+        "lodash.merge": "^4.6.2",
+        "reka-ui": "^2.3.0",
+        "vue3-popper": "^1.5.0"
+    }
+}
