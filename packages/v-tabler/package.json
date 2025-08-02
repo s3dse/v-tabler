@@ -34,6 +34,9 @@
     ],
     "scripts": {
         "build": "vite build && unocss \"src/**/*.{vue,js,ts}\" -o dist/styles.css",
+        "demo:dev": "vite --mode demo",
+        "demo:build": "vite build --mode demo",
+        "demo:preview": "vite preview --mode demo",
         "test:unit:watch": "vitest watch --environment jsdom",
         "test:unit": "vitest run --environment jsdom",
         "test:coverage": "vitest run --coverage",

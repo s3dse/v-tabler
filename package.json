@@ -10,12 +10,10 @@
         ]
     },
     "scripts": {
-        "build": "npm run build:packages && npm run build:demo",
+        "build": "npm run build:packages",
         "build:packages": "npm run build --workspace=packages/v-tabler",
-        "build:demo": "npm run build --workspace=apps/demo",
-        "dev": "npm run dev --workspace=apps/demo",
-        "dev:demo": "npm run dev --workspace=apps/demo",
-        "serve": "npm run serve --workspace=apps/demo",
+        "dev": "npm run demo:dev --workspace=packages/v-tabler",
+        "demo:dev": "npm run demo:dev --workspace=packages/v-tabler",
         "test": "npm run test:unit --workspace=packages/v-tabler",
         "test:packages": "npm run test:unit --workspace=packages/v-tabler",
         "test:watch": "npm run test:unit:watch --workspace=packages/v-tabler",
@@ -25,6 +23,9 @@
         "story:dev": "npm run story:dev --workspace=packages/v-tabler",
         "story:build": "npm run story:build --workspace=packages/v-tabler",
         "story:preview": "npm run story:preview --workspace=packages/v-tabler",
+        "docs:dev": "vitepress dev docs",
+        "docs:build": "vitepress build docs",
+        "docs:preview": "vitepress preview docs",
         "publish:library": "npm run build:packages && npm publish --workspace=packages/v-tabler",
         "publish:dry-run": "npm run build:packages && npm publish --dry-run --workspace=packages/v-tabler",
         "version:patch": "npm version patch --workspace=packages/v-tabler",
@@ -37,6 +38,8 @@
         "concurrently": "^9.2.0",
         "eslint": "^9.27.0",
         "eslint-plugin-vue": "~10.0.0",
-        "prettier": "^3.5.3"
+        "prettier": "^3.5.3",
+        "unocss": "^66.4.0",
+        "vitepress": "^1.6.3"
     }
 }

@@ -1,46 +1,65 @@
-import * as path from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
-import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import dts from 'vite-plugin-dts'
 
-// https://vitejs.dev/config/
-export default defineConfig({
-    build: {
-        lib: {
-            entry: {
-                'v-tabler': path.resolve(__dirname, 'src/install.js'),
-                preset: path.resolve(__dirname, 'src/preset/index.mjs')
+export default defineConfig(({ mode }) => {
+    const isDemoMode = mode === 'demo'
+    
+    if (isDemoMode) {
+        // Demo development configuration
+        return {
+            plugins: [vue(), UnoCSS()],
+            root: 'src/demo',
+            resolve: {
+                alias: {
+                    '@': fileURLToPath(new URL('./src', import.meta.url))
+                }
             },
-            name: 'v-tabler',
-            fileName: (format, name) => {
-                if (format === 'es') {
-                    return `${name}.js`
-                }
-                return `${name}.${format}`
-            }
-        },
-        rollupOptions: {
-            external: ['vue', 'unocss'],
-            output: {
-                exports: 'named',
-                globals: {
-                    vue: 'Vue'
-                }
+            server: {
+                port: 8080
             }
         }
-    },
-    plugins: [
-        vue(),
-        UnoCSS(),
-        dts({
-            exclude: ['**/*.stories.*', '**/*.story.*']
-        })
-    ],
-    resolve: {
-        alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+    
+    // Library build configuration
+    return {
+        plugins: [
+            vue(),
+            UnoCSS(),
+            dts({
+                exclude: ['**/*.stories.*', '**/*.story.*', 'src/demo/**/*']
+            })
+        ],
+        resolve: {
+            alias: {
+                '@': fileURLToPath(new URL('./src', import.meta.url))
+            }
+        },
+        build: {
+            lib: {
+                entry: {
+                    'v-tabler': fileURLToPath(new URL('./src/install.js', import.meta.url)),
+                    preset: fileURLToPath(new URL('./src/preset/index.mjs', import.meta.url))
+                },
+                name: 'v-tabler',
+                fileName: (format, name) => {
+                    if (format === 'es') {
+                        return `${name}.js`
+                    }
+                    return `${name}.${format}`
+                }
+            },
+            rollupOptions: {
+                external: ['vue', 'unocss'],
+                output: {
+                    exports: 'named',
+                    globals: {
+                        vue: 'Vue'
+                    }
+                }
+            }
         }
     }
 })

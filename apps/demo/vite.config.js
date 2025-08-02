@@ -11,6 +11,11 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
+            // Library package alias - must come first to take precedence
+            '@s3_dse/v-tabler': fileURLToPath(new URL('../../packages/v-tabler/src', import.meta.url)),
+            // Library's @ alias (for imports within the library)
+            '@/': fileURLToPath(new URL('../../packages/v-tabler/src/', import.meta.url)),
+            // Demo app's @ alias - use a different pattern to avoid conflicts
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
     }

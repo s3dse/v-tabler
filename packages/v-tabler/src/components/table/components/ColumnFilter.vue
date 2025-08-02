@@ -166,7 +166,7 @@ import {
     ToggleGroupRoot,
     ToggleGroupItem
 } from 'reka-ui'
-import ListSelect from '@/components/listselect/ListSelect.vue'
+import ListSelect from '../../listselect/ListSelect.vue'
 import { FILTER_OPERATORS } from '../composables/useColumnFiltering.js'
 
 const props = defineProps({

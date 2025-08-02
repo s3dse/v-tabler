@@ -14,7 +14,7 @@ import ListSelectInput from './ListSelectInput.vue'
 import ListSelectItem from './ListSelectItem.vue'
 import ListSelectExcessIndicator from './ListSelectExcessIndicator.vue'
 import ListSelectPreview from './ListSelectPreview.vue'
-import delay from '@/utils/delay.js'
+import delay from '../../utils/delay.js'
 
 const props = defineProps({
     options: { type: Array, default: () => [] },
