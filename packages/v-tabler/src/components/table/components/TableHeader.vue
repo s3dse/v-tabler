@@ -28,10 +28,10 @@
             v-if="enableColumnFilters && showClearAllFiltersButton && hasActiveFilters"
             @click="clearAllFilters"
             data-testid="clear-all-filters-button"
-            class="btn-ghost-sm gap-1.5"
+            class="btn-ghost-sm table-top-control gap-1.5"
             :title="clearAllFiltersButtonText"
         >
-            <span class="i-tabler-filter-off w-4 h-4"></span>
+            <span class="i-tabler-filter-off"></span>
             {{ clearAllFiltersButtonText }}
         </button>
         
