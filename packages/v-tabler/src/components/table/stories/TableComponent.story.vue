@@ -37,8 +37,9 @@
     </Story>
 </template>
 <script setup>
-import 'virtual:uno.css'
+
 import '@unocss/reset/tailwind-compat.css'
+import 'virtual:uno.css'
 import { TableComponent } from '..'
 import { reactive } from 'vue'
 import data from '../../../assets/MOCK_DATA-2.json'

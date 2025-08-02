@@ -17,23 +17,30 @@ const app = createApp({
                 { id: 5, name: 'Charlie Davis', age: 32, department: 'Engineering', salary: 85000, startDate: '2022-11-12' },
                 { id: 6, name: 'Eva Martinez', age: 27, department: 'Design', salary: 72000, startDate: '2023-02-28' },
             ],
+            // i18n functions for filter labels
+            singleSelectionTextFn: (value) => `Selected: ${value}`,
+            multipleSelectionTextFn: (count) => `${count} items chosen`,
             fields: [
                 { 
                     key: 'id', 
                     label: 'ID', 
                     type: 'numeric',
-                    thClassList: 'text-right',
+                    thClassList: 'table-col-right',
                     tdClassList: 'text-right font-mono'
                 },
                 { 
                     key: 'name', 
                     label: 'Name',
-                    filterType: 'text'
+                    filterType: 'text',
+                    thClassList: 'table-col-left',
+                    tdClassList: 'text-left'
                 },
                 { 
                     key: 'age', 
                     label: 'Age',
-                    type: 'numeric'
+                    type: 'numeric',
+                    thClassList: 'table-col-center',
+                    tdClassList: 'text-center'
                 },
                 { 
                     key: 'department', 
@@ -43,18 +50,24 @@ const app = createApp({
                         { value: 'Engineering', label: 'Engineering' },
                         { value: 'Design', label: 'Design' },
                         { value: 'Marketing', label: 'Marketing' }
-                    ]
+                    ],
+                    thClassList: 'table-col-left',
+                    tdClassList: 'text-left'
                 },
                 { 
                     key: 'salary', 
                     label: 'Salary',
                     type: 'numeric',
-                    formatter: (value) => '$' + value.toLocaleString()
+                    formatter: (value) => '$' + value.toLocaleString(),
+                    thClassList: 'table-col-right',
+                    tdClassList: 'text-right'
                 },
                 { 
                     key: 'startDate', 
                     label: 'Start Date',
-                    filterType: 'date'
+                    filterType: 'date',
+                    thClassList: 'table-col-center',
+                    tdClassList: 'text-center'
                 }
             ]
         }
@@ -69,17 +82,23 @@ const app = createApp({
     },
     template: `
         <div class="p-8">
-            <h1 class="text-3xl font-bold mb-6">Column Filtering Demo</h1>
+            <h1 class="text-3xl font-bold mb-6">Column Filtering & Alignment Demo</h1>
             <p class="mb-4 text-gray-600">
-                Click the filter icons next to column headers to apply filters:
+                This demo shows both column filtering and the new table column alignment shortcuts. 
+                Click the filter icons next to column headers to apply filters. 
+                When multiple filters are active, use "Clear All Filters" to reset them all at once.
             </p>
-            <ul class="mb-6 text-sm text-gray-600 list-disc list-inside">
-                <li><strong>ID & Age:</strong> Numeric filters (=, !=, >, >=, <, <=)</li>
-                <li><strong>Name:</strong> Text search (contains)</li>
-                <li><strong>Department:</strong> Select from predefined options</li>
-                <li><strong>Salary:</strong> Numeric filters with currency formatting</li>
-                <li><strong>Start Date:</strong> Date comparison filters</li>
-            </ul>
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2">Column Features:</h3>
+                <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
+                    <li><strong>ID:</strong> Numeric filters + Right-aligned (<code>table-col-right</code>)</li>
+                    <li><strong>Name:</strong> Text search + Left-aligned (<code>table-col-left</code>)</li>
+                    <li><strong>Age:</strong> Numeric filters + Center-aligned (<code>table-col-center</code>)</li>
+                    <li><strong>Department:</strong> Select from options + Left-aligned (<code>table-col-left</code>)</li>
+                    <li><strong>Salary:</strong> Numeric filters with currency formatting + Right-aligned (<code>table-col-right</code>)</li>
+                    <li><strong>Start Date:</strong> Date comparison filters + Center-aligned (<code>table-col-center</code>)</li>
+                </ul>
+            </div>
             
             <TableComponent
                 :items="items"
@@ -87,6 +106,10 @@ const app = createApp({
                 title="Employee Data with Column Filtering"
                 :per-page="10"
                 :enable-column-filters="true"
+                select-filter-placeholder="Type to search..."
+                select-filter-no-selection-text="Choose values..."
+                :select-filter-single-selection-text-fn="singleSelectionTextFn"
+                :select-filter-multiple-selection-text-fn="multipleSelectionTextFn"
                 @column-filter-change="onColumnFilterChange"
                 @after-column-filter="onAfterColumnFilter"
             />

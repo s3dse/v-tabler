@@ -9,7 +9,7 @@
             class="p-2 first:ps-6 last:pe-6 uppercase"
         >
             <slot :name="`th(${col?.key})`" :field="col">
-                <div class="flex items-center justify-between">
+                <div :class="getHeaderFlexClasses(col)">
                     <div 
                         class="hover:cursor-pointer flex items-center"
                         @click="sortTable(col)"
@@ -27,6 +27,10 @@
                         :field="col"
                         :data="allData"
                         :model-value="columnFilters[col.key]"
+                        :select-filter-placeholder="selectFilterPlaceholder"
+                        :select-filter-no-selection-text="selectFilterNoSelectionText"
+                        :select-filter-single-selection-text-fn="selectFilterSingleSelectionTextFn"
+                        :select-filter-multiple-selection-text-fn="selectFilterMultipleSelectionTextFn"
                         @filter-change="handleColumnFilter(col.key, $event)"
                     />
                 </div>
@@ -82,6 +86,23 @@ defineProps({
     columnFilters: {
         type: Object,
         default: () => ({})
+    },
+    // Column filter i18n props
+    selectFilterPlaceholder: {
+        type: String,
+        default: 'Search options...'
+    },
+    selectFilterNoSelectionText: {
+        type: String,
+        default: 'Select values...'
+    },
+    selectFilterSingleSelectionTextFn: {
+        type: Function,
+        default: (value) => value
+    },
+    selectFilterMultipleSelectionTextFn: {
+        type: Function,
+        default: (count) => `${count} selected`
     }
 })
 
@@ -93,5 +114,22 @@ const sortTable = (col) => {
 
 const handleColumnFilter = (fieldKey, filter) => {
     emit('column-filter', { field: fieldKey, filter })
+}
+
+// Extract column alignment classes for the header flex container
+const getHeaderFlexClasses = (col) => {
+    const baseClasses = ['flex', 'items-center']
+    const thClasses = col?.thClassList || ''
+    
+    // Check if the column has one of our table alignment shortcuts
+    if (thClasses.includes('table-col-left')) {
+        baseClasses.push('justify-start')
+    } else if (thClasses.includes('table-col-right')) {
+        baseClasses.push('justify-end')
+    } else if (thClasses.includes('table-col-center')) {
+        baseClasses.push('justify-center')
+    }
+    
+    return baseClasses
 }
 </script>

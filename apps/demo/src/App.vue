@@ -56,14 +56,14 @@ const columnFilterDemoFields = ref([
         key: 'id',
         label: 'ID',
         type: 'numeric',
-        thClassList: 'text-right px-2',
+        thClassList: 'table-col-right px-2',
         tdClassList: 'text-right px-2 font-mono'
     },
     {
         key: 'name',
         label: 'Employee Name',
         filterType: 'text',
-        thClassList: 'text-left px-2',
+        thClassList: 'table-col-left px-2',
         tdClassList: 'text-left px-2'
     },
     {
@@ -76,14 +76,14 @@ const columnFilterDemoFields = ref([
             { value: 'Sales', label: 'Sales' },
             { value: 'HR', label: 'Human Resources' }
         ],
-        thClassList: 'text-left px-2',
+        thClassList: 'table-col-left px-2',
         tdClassList: 'text-left px-2'
     },
     {
         key: 'salary',
         label: 'Salary',
         type: 'numeric',
-        thClassList: 'text-right px-2',
+        thClassList: 'table-col-right px-2',
         tdClassList: 'text-right px-2',
         formatter: (value) => value ? `$${value.toLocaleString()}` : '-'
     },
@@ -91,21 +91,21 @@ const columnFilterDemoFields = ref([
         key: 'hire_date',
         label: 'Hire Date',
         filterType: 'date',
-        thClassList: 'text-left px-2',
+        thClassList: 'table-col-left px-2',
         tdClassList: 'text-left px-2'
     },
     {
         key: 'status',
         label: 'Status',
         filterType: 'select',
-        thClassList: 'text-center px-2',
+        thClassList: 'table-col-center px-2',
         tdClassList: 'text-center px-2'
     }
 ])
 const fields = ref([
     {
         key: 'id',
-        thClassList: 'text-right px-1 w-18',
+        thClassList: 'table-col-right px-1 w-18',
         tdClassList: 'text-right px-1 font-mono',
         tdTopRowClassList: 'text-right px-1 italic',
         tdBottomRowClassList: 'text-right px-1 font-semibold'
@@ -113,28 +113,28 @@ const fields = ref([
     {
         key: 'first_name',
         label: 'the first name',
-        thClassList: 'text-left px-1',
+        thClassList: 'table-col-left px-1',
         tdClassList: 'text-left px-1',
         tdTopRowClassList: 'text-left px-1 italic',
         tdBottomRowClassList: 'text-right px-1 font-semibold'
     },
     {
         key: 'last_name',
-        thClassList: 'text-left px-1',
+        thClassList: 'table-col-left px-1',
         tdClassList: 'text-left px-1',
         tdTopRowClassList: 'text-left px-1 italic',
         tdBottomRowClassList: 'text-right px-1 font-semibold'
     },
     {
         key: 'email',
-        thClassList: 'text-left px-1',
+        thClassList: 'table-col-left px-1',
         tdClassList: 'text-left px-1 w-15',
         tdTopRowClassList: 'text-left px-1 italic',
         tdBottomRowClassList: 'text-right px-1 font-semibold'
     },
     {
         key: 'share',
-        thClassList: 'text-right px-1 w-15',
+        thClassList: 'table-col-right px-1 w-15',
         tdClassList: 'text-right px-1 font-mono w-15',
         tdTopRowClassList: 'text-right px-1 italic',
         tdBottomRowClassList: 'text-right px-1 font-semibold',
@@ -148,7 +148,7 @@ const fields = ref([
     },
     {
         key: 'ip_address',
-        thClassList: 'text-right px-1 w-45',
+        thClassList: 'table-col-right px-1 w-45',
         tdClassList: 'text-right px-1 font-mono',
         tdTopRowClassList: 'text-right px-1 italic',
         tdBottomRowClassList: 'text-right px-1 font-semibold'
@@ -652,15 +652,10 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 @column-filter-change="handleColumnFilterChange"
                 @after-column-filter="handleAfterColumnFilter"
             >
-                <template #table-top-controls>
-                    <div class="btn-transparent-default table-top-control ms-auto">
-                        Try the filter buttons in column headers! 🔍
-                    </div>
-                </template>
                 <template #cell(status)="{ value }">
                     <span 
                         :class="{
-                            'text-green-600 dark:text-green-400': value === 'Active',
+                            'text-green-500 dark:text-green-400': value === 'Active',
                             'text-red-600 dark:text-red-400': value === 'Inactive'
                         }"
                     >

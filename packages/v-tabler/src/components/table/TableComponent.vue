@@ -22,7 +22,12 @@
             :table-data="dataForPagination"
             :top-rows="topRows"
             :fields="fields"
+            :enable-column-filters="enableColumnFilters"
+            :has-active-filters="hasActiveFilters"
+            :show-clear-all-filters-button="showClearAllFiltersButton"
+            :clear-all-filters-button-text="clearAllFiltersButtonText"
             @filter-data="handleFilterInternal"
+            @clear-all-filters="clearAllColumnFilters"
         >
             <template #page-size-label="{ pageSize: currentPageSize }">
                 <slot name="page-size-label" v-bind="{ pageSize: currentPageSize }"></slot>
@@ -49,6 +54,10 @@
                     :enable-column-filters="enableColumnFilters"
                     :all-data="[...(props.items || []), ...topRows, ...bottomRows]"
                     :column-filters="columnFilters"
+                    :select-filter-placeholder="selectFilterPlaceholder"
+                    :select-filter-no-selection-text="selectFilterNoSelectionText"
+                    :select-filter-single-selection-text-fn="selectFilterSingleSelectionTextFn"
+                    :select-filter-multiple-selection-text-fn="selectFilterMultipleSelectionTextFn"
                     @sort-table="handleSortInternal"
                     @column-filter="handleColumnFilterInternal"
                 >
@@ -129,6 +138,7 @@
 <script setup>
 import '@unocss/reset/tailwind-compat.css'
 import 'virtual:uno.css'
+
 import { computed, useId, useSlots, watch, onMounted } from 'vue'
 import { joinLines } from '@/utils/string-join-lines.js'
 
@@ -240,6 +250,32 @@ const props = defineProps({
     enableColumnFilters: {
         type: Boolean,
         default: true
+    },
+    // Column filter i18n props
+    selectFilterPlaceholder: {
+        type: String,
+        default: 'Search options...'
+    },
+    selectFilterNoSelectionText: {
+        type: String,
+        default: 'Select values...'
+    },
+    selectFilterSingleSelectionTextFn: {
+        type: Function,
+        default: (value) => value
+    },
+    selectFilterMultipleSelectionTextFn: {
+        type: Function,
+        default: (count) => `${count} selected`
+    },
+    // Clear all filters button
+    showClearAllFiltersButton: {
+        type: Boolean,
+        default: true
+    },
+    clearAllFiltersButtonText: {
+        type: String,
+        default: 'Clear All Filters'
     }
 })
 

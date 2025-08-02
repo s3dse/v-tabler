@@ -6,7 +6,11 @@ import { presetScrollbar } from 'unocss-preset-scrollbar'
 export default defineConfig({
     content: {
         pipeline: {
-            include: [/\.(vue|html|js|ts)($|\?)/]
+            include: [
+                /\.(vue|html|js|ts)($|\?)/,
+                // Watch v-tabler source files for styling changes
+                '../../packages/v-tabler/src/**/*.{vue,js,ts}'
+            ]
         }
     },
     presets: [

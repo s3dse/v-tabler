@@ -31,7 +31,9 @@ const shortcuts = [
 
         'color-transition': 'transition-colors duration-150 ease-in-out',
         'table-top-control': `flex rounded-sm text-default text-sm px-2 h-[1.625rem]`,
-        formfield: `bg-inputfield border border-border disabled:bg-disabled focus:border-primary focus:ring focus:ring-primary/30 focus:outline-none transition-colors duration-150 ease-in-out`
+        'table-col-left': 'justify-start text-left',
+        'table-col-right': 'justify-end text-right',
+        'table-col-center': 'justify-center text-center'
     },
     [
         /^form-inputfield-(sm|md)$/,
@@ -56,7 +58,7 @@ const shortcuts = [
         'form-inputfield': 'form-inputfield-md'
     },
     [
-        /^btn-(base|primary|transparent)-(sm|md|lg|formfield|default)$/,
+        /^btn-(base|primary|transparent|ghost)-(sm|md|lg|formfield|default)$/,
         ([, colorOption, sizeOption]) => {
             const colors = {
                 base: `bg-surface text-default
@@ -67,18 +69,24 @@ const shortcuts = [
                 disabled:bg-disabled disabled:border-border disabled:text-subtle`,
                 transparent: `bg-transparent text-default
                 border border-solid border-border
+                disabled:bg-disabled disabled:text-subtle`,
+                ghost: `bg-primary/5 text-primary
+                border border-solid border-primary/20
                 disabled:bg-disabled disabled:text-subtle`
             }
             const hoverColors = {
                 primary: 'hover:bg-primary-hover',
+                ghost: 'hover:bg-primary/10 hover:text-primary',
                 default: 'hover:bg-surface-hover'
             }
             const activeColors = {
                 primary: 'active:bg-primary/80',
+                ghost: 'active:bg-primary/15',
                 default: 'active:bg-muted'
             }
             const disabledColors = {
                 primary: 'disabled:bg-disabled disabled:border-border disabled:text-subtle',
+                ghost: 'disabled:bg-disabled disabled:border-border disabled:text-subtle',
                 default: 'disabled:bg-disabled disabled:text-subtle'
             }
             const sizes = {

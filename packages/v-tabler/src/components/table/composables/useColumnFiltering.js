@@ -1,5 +1,21 @@
 import { ref, computed } from 'vue'
 
+// Define available operators for comparison filters (numeric and date)
+export const COMPARISON_OPERATORS = [
+    { value: '=', label: '=', symbol: '=' },
+    { value: '!=', label: '≠', symbol: '≠' },
+    { value: '>', label: '>', symbol: '>' },
+    { value: '>=', label: '≥', symbol: '≥' },
+    { value: '<', label: '<', symbol: '<' },
+    { value: '<=', label: '≤', symbol: '≤' }
+]
+
+// For backwards compatibility and clarity, export as FILTER_OPERATORS
+export const FILTER_OPERATORS = {
+    numeric: COMPARISON_OPERATORS,
+    date: COMPARISON_OPERATORS
+}
+
 export function useColumnFiltering() {
     const columnFilters = ref({})
 

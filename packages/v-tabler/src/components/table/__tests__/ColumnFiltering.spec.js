@@ -250,6 +250,45 @@ describe('Column Filtering', () => {
             const filtered = applyColumnFilters(testData)
             expect(filtered).toHaveLength(testData.length) // Should return all data
         })
+
+        it('should clear all column filters when clearAllColumnFilters is called', () => {
+            const { applyColumnFilters, setColumnFilter, clearAllColumnFilters, columnFilters, hasActiveFilters } = columnFiltering
+
+            // Apply multiple filters
+            setColumnFilter('name', {
+                type: 'text',
+                operator: 'contains',
+                value: 'John'
+            })
+
+            setColumnFilter('salary', {
+                type: 'numeric',
+                operator: '>',
+                value: 70000
+            })
+
+            setColumnFilter('department', {
+                type: 'select',
+                operator: 'in',
+                value: ['Engineering']
+            })
+
+            // Verify filters are active
+            expect(hasActiveFilters.value).toBe(true)
+            expect(Object.keys(columnFilters.value)).toHaveLength(3)
+
+            // Clear all filters
+            clearAllColumnFilters()
+
+            // Verify all filters are cleared
+            expect(hasActiveFilters.value).toBe(false)
+            expect(Object.keys(columnFilters.value)).toHaveLength(0)
+            expect(columnFilters.value).toEqual({})
+
+            // Verify no filtering is applied
+            const filtered = applyColumnFilters(testData)
+            expect(filtered).toHaveLength(testData.length)
+        })
     })
 
     describe('ColumnFilter component', () => {
@@ -301,6 +340,163 @@ describe('Column Filtering', () => {
                 }
             })
             expect(textWrapper.vm.filterType).toBe('text')
+        })
+
+        describe('Select Options Generation', () => {
+            it('should use explicit filterOptions when provided', () => {
+                const wrapper = mount(ColumnFilter, {
+                    props: {
+                        field: {
+                            key: 'department',
+                            filterType: 'select',
+                            filterOptions: [
+                                { value: 'Engineering', label: 'Engineering Dept' },
+                                { value: 'Marketing', label: 'Marketing Dept' }
+                            ]
+                        },
+                        data: testData,
+                        modelValue: {}
+                    }
+                })
+
+                const options = wrapper.vm.selectOptions
+                expect(options).toHaveLength(2)
+                expect(options[0]).toEqual({ value: 'Engineering', label: 'Engineering Dept' })
+                expect(options[1]).toEqual({ value: 'Marketing', label: 'Marketing Dept' })
+            })
+
+            it('should auto-generate options from data when no filterOptions provided', () => {
+                const wrapper = mount(ColumnFilter, {
+                    props: {
+                        field: {
+                            key: 'department',
+                            filterType: 'select'
+                            // No filterOptions provided
+                        },
+                        data: testData,
+                        modelValue: {}
+                    }
+                })
+
+                const options = wrapper.vm.selectOptions
+                expect(options).toHaveLength(4) // Engineering, HR, Marketing, Sales
+                expect(options.map(o => o.value)).toEqual(['Engineering', 'HR', 'Marketing', 'Sales'])
+                expect(options.map(o => o.label)).toEqual(['Engineering', 'HR', 'Marketing', 'Sales'])
+            })
+
+            it('should auto-detect select type for low cardinality data', () => {
+                const lowCardinalityData = [
+                    { status: 'Active' },
+                    { status: 'Active' },
+                    { status: 'Inactive' },
+                    { status: 'Active' },
+                    { status: 'Pending' },
+                    { status: 'Active' },
+                    { status: 'Inactive' },
+                    { status: 'Active' },
+                    { status: 'Pending' },
+                    { status: 'Active' }
+                ]
+
+                const wrapper = mount(ColumnFilter, {
+                    props: {
+                        field: { key: 'status' }, // No explicit filterType
+                        data: lowCardinalityData,
+                        modelValue: {}
+                    }
+                })
+
+                expect(wrapper.vm.filterType).toBe('select')
+                const options = wrapper.vm.selectOptions
+                expect(options).toHaveLength(3) // Active, Inactive, Pending
+                expect(options.map(o => o.value).sort()).toEqual(['Active', 'Inactive', 'Pending'])
+            })
+
+            it('should fallback to text type for high cardinality data', () => {
+                const highCardinalityData = [
+                    { id: 1, name: 'Person 1' },
+                    { id: 2, name: 'Person 2' },
+                    { id: 3, name: 'Person 3' },
+                    { id: 4, name: 'Person 4' },
+                    { id: 5, name: 'Person 5' },
+                    { id: 6, name: 'Person 6' },
+                    { id: 7, name: 'Person 7' },
+                    { id: 8, name: 'Person 8' },
+                    { id: 9, name: 'Person 9' },
+                    { id: 10, name: 'Person 10' }
+                ]
+
+                const wrapper = mount(ColumnFilter, {
+                    props: {
+                        field: { key: 'name' }, // No explicit filterType
+                        data: highCardinalityData,
+                        modelValue: {}
+                    }
+                })
+
+                expect(wrapper.vm.filterType).toBe('text') // Should fallback to text
+            })
+
+            it('should handle empty data gracefully', () => {
+                const wrapper = mount(ColumnFilter, {
+                    props: {
+                        field: { key: 'department' },
+                        data: [],
+                        modelValue: {}
+                    }
+                })
+
+                expect(wrapper.vm.filterType).toBe('text') // Default fallback
+                expect(wrapper.vm.selectOptions).toEqual([])
+            })
+
+            it('should handle data with null/undefined values', () => {
+                const dataWithNulls = [
+                    { status: 'Active' },
+                    { status: null },
+                    { status: 'Inactive' },
+                    { status: undefined },
+                    { status: '' },
+                    { status: 'Active' },
+                    { status: 'Pending' },
+                    { status: null },
+                    { status: 'Active' },
+                    { status: 'Inactive' }
+                ]
+
+                const wrapper = mount(ColumnFilter, {
+                    props: {
+                        field: { key: 'status', filterType: 'select' },
+                        data: dataWithNulls,
+                        modelValue: {}
+                    }
+                })
+
+                const options = wrapper.vm.selectOptions
+                expect(options).toHaveLength(3) // Should exclude null, undefined, empty string
+                expect(options.map(o => o.value).sort()).toEqual(['Active', 'Inactive', 'Pending'])
+            })
+
+            it('should limit auto-generated options to prevent performance issues', () => {
+                // This test will be added when we implement the safety limit
+                // For now, let's create data that would exceed reasonable limits
+                const largeUniqueData = Array.from({ length: 100 }, (_, i) => ({
+                    department: `Department ${i + 1}`
+                }))
+
+                const wrapper = mount(ColumnFilter, {
+                    props: {
+                        field: { key: 'department', filterType: 'select' },
+                        data: largeUniqueData,
+                        modelValue: {}
+                    }
+                })
+
+                const options = wrapper.vm.selectOptions
+                // Currently this will generate 100 options, but we'll limit this later
+                expect(options.length).toBeGreaterThan(0)
+                // TODO: Add safety limit and update this test
+            })
         })
     })
 
@@ -468,6 +664,123 @@ describe('Column Filtering', () => {
 
             // Should not throw error
             expect(wrapper.vm.dataForPagination).toEqual([])
+        })
+
+        it('should reset column filter visual state when clear all filters is clicked', async () => {
+            const wrapper = mount(TableComponent, {
+                props: {
+                    ...defaultProps,
+                    showClearAllFiltersButton: true
+                },
+                global: {
+                    stubs: {
+                        'table-title': true,
+                        'table-footer': true
+                    }
+                }
+            })
+
+            await flushPromises()
+
+            // Apply multiple filters to test different filter types
+            
+            // 1. Apply a text filter
+            wrapper.vm.setColumnFilter('name', {
+                type: 'text',
+                operator: 'contains',
+                value: 'Alice'
+            })
+
+            // 2. Apply a numeric filter  
+            wrapper.vm.setColumnFilter('salary', {
+                type: 'numeric',
+                operator: '=',
+                value: 75000
+            })
+
+            // 3. Apply a select filter
+            wrapper.vm.setColumnFilter('department', {
+                type: 'select',
+                operator: 'in',
+                value: ['Engineering']
+            })
+
+            await flushPromises()
+
+            // Verify filters are active and data is filtered
+            expect(wrapper.vm.hasActiveFilters).toBe(true)
+            expect(Object.keys(wrapper.vm.columnFilters).length).toBe(3)
+            
+            // The filtered data should only contain Alice Johnson
+            expect(wrapper.vm.dataForPagination).toHaveLength(1)
+            expect(wrapper.vm.dataForPagination[0].name).toBe('Alice Johnson')
+
+            // Check that column filters show active state
+            expect(wrapper.vm.columnFilters.name).toEqual({
+                type: 'text',
+                operator: 'contains',
+                value: 'Alice'
+            })
+            expect(wrapper.vm.columnFilters.salary).toEqual({
+                type: 'numeric',
+                operator: '=',
+                value: 75000
+            })
+            expect(wrapper.vm.columnFilters.department).toEqual({
+                type: 'select',
+                operator: 'in',
+                value: ['Engineering']
+            })
+
+            // Find and click the clear all filters button
+            const clearButton = wrapper.find('[data-testid="clear-all-filters-button"]')
+            if (!clearButton.exists()) {
+                // Fallback: try to find by button text or class
+                const buttons = wrapper.findAll('button')
+                const clearAllButton = buttons.find(btn => 
+                    btn.text().includes('Clear All Filters') || 
+                    btn.element.title?.includes('Clear All Filters')
+                )
+                expect(clearAllButton.exists()).toBe(true)
+                await clearAllButton.trigger('click')
+            } else {
+                await clearButton.trigger('click')
+            }
+
+            await flushPromises()
+
+            // Verify that all filters are cleared from the reactive state
+            expect(wrapper.vm.hasActiveFilters).toBe(false)
+            expect(Object.keys(wrapper.vm.columnFilters).length).toBe(0)
+            expect(wrapper.vm.columnFilters).toEqual({})
+
+            // Verify that data is back to showing all items
+            expect(wrapper.vm.dataForPagination).toHaveLength(testData.length)
+
+            // CRITICAL: Verify that each column filter component receives null/undefined modelValue
+            // This is the core of the bug - the ColumnFilter components should reset their internal state
+            
+            // Find all ColumnFilter components
+            const columnFilters = wrapper.findAllComponents(ColumnFilter)
+            expect(columnFilters.length).toBeGreaterThan(0)
+
+            // Each ColumnFilter should have a null/undefined modelValue after clearing
+            columnFilters.forEach(filterComponent => {
+                const modelValue = filterComponent.props('modelValue')
+                expect(modelValue).toBeUndefined()
+            })
+
+            // Additionally, we should verify that the ColumnFilter internal state is reset
+            columnFilters.forEach(filterComponent => {
+                // Check that hasActiveFilter computed is false (this controls the visual highlighting)
+                expect(filterComponent.vm.hasActiveFilter).toBe(false)
+                
+                // Check that internal filter values are reset
+                expect(filterComponent.vm.textFilter).toBe('')
+                expect(filterComponent.vm.numericValue).toBe('')
+                expect(filterComponent.vm.dateValue).toBe('')
+                expect(filterComponent.vm.selectedValues).toEqual([])
+            })
         })
     })
 })

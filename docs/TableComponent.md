@@ -134,13 +134,25 @@ Fields are defined as objects in the `fields` prop array. Each field object supp
 | `label` | `String` | Display label for the column header (defaults to key) |
 | `visible` | `Boolean` | Whether the column is visible (default: `true`) |
 | `formatter` | `Function` | Function to format cell values: `(value) => formattedValue` |
-| `thClassList` | `String` | CSS classes for the header cell |
+| `thClassList` | `String` | CSS classes for the header cell. Use `table-col-left`, `table-col-right`, or `table-col-center` for column alignment |
 | `tdClassList` | `String` | CSS classes for regular data cells |
 | `tdTopRowClassList` | `String` | CSS classes for top row cells |
 | `tdBottomRowClassList` | `String` | CSS classes for bottom row cells |
 | `type` | `String` | Data type for filtering and sorting (`'numeric'`, `'date'`, `'text'`) |
 | `filterType` | `String` | Override auto-detected filter type (`'numeric'`, `'date'`, `'text'`, `'select'`) |
 | `filterOptions` | `Array` | Options for select filter: `[{ value, label }]` |
+
+### Column Alignment Shortcuts
+
+The v-tabler theme provides dedicated UnoCSS shortcuts for consistent column alignment:
+
+| Shortcut | CSS Classes | Use Case |
+|----------|-------------|----------|
+| `table-col-left` | `justify-start text-left` | Left-align content (names, descriptions) |
+| `table-col-right` | `justify-end text-right` | Right-align content (numbers, currency, IDs) |
+| `table-col-center` | `justify-center text-center` | Center-align content (status, badges) |
+
+These shortcuts should be used in `thClassList` for header alignment and corresponding `text-*` classes in `tdClassList` for body cell alignment.
 
 ### Example Field Configuration
 
@@ -149,20 +161,20 @@ const fields = [
   {
     key: 'id',
     label: 'ID',
-    thClassList: 'text-right px-2',
-    tdClassList: 'text-right px-2 font-mono'
+    thClassList: 'table-col-right',
+    tdClassList: 'text-right font-mono'
   },
   {
     key: 'name',
     label: 'Full Name',
-    thClassList: 'text-left px-2',
-    tdClassList: 'text-left px-2'
+    thClassList: 'table-col-left',
+    tdClassList: 'text-left'
   },
   {
     key: 'share',
     label: 'Share %',
-    thClassList: 'text-right px-2',
-    tdClassList: 'text-right px-2',
+    thClassList: 'table-col-right',
+    tdClassList: 'text-right',
     formatter: (value) => {
       return value ? (parseFloat(value) * 100).toFixed(2) + '%' : '-'
     }
