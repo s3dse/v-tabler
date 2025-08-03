@@ -3,7 +3,7 @@
         <!-- Filter Toggle Button -->
         <DropdownMenuTrigger
             :class="[
-                'ml-1 p-1 rounded bg-surface transition-colors',
+                'ml-1 p-1 rounded bg-thead-background hover:bg-surface transition-colors',
                 { 'text-primary': hasActiveFilter }
             ]"
             :title="`Filter ${field.label || field.key}`"

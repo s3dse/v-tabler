@@ -13,6 +13,7 @@
         "build": "npm run build:packages",
         "build:packages": "npm run build --workspace=packages/v-tabler",
         "dev": "npm run demo:dev --workspace=packages/v-tabler",
+        "serve": "npm run demo:dev --workspace=packages/v-tabler",
         "demo:dev": "npm run demo:dev --workspace=packages/v-tabler",
         "test": "npm run test:unit --workspace=packages/v-tabler",
         "test:packages": "npm run test:unit --workspace=packages/v-tabler",
