@@ -115,26 +115,33 @@
                     </div>
 
                     <!-- Select Filter -->
-                    <div v-else-if="filterType === 'select'" @click.stop @mouseenter.stop @mouseleave.stop>
-                        <DropdownMenuLabel class="block text-xs font-medium text-muted mb-1">
+                                        <!-- Select Filter -->
+                    <div v-else-if="filterType === 'select'">
+                        <DropdownMenuLabel class="block text-xs font-medium text-muted mb-2">
                             Select values:
                         </DropdownMenuLabel>
-                        <ListSelect
-                            v-model="selectedValues"
-                            :options="selectOptions"
-                            :multiple="true"
-                            :portal="true"
-                            :dropDownWidth="'15rem'"
-                            :optionSize="32"
-                            :trackBy="'value'"
-                            :input-placeholder="selectPlaceholderText"
-                            :search-options-text-fn="() => props.selectFilterPlaceholder"
-                            class="w-full"
-                            @update:model-value="applyFilter"
-                            @click.stop
-                            @mouseenter.stop
-                            @mouseleave.stop
+                        
+                        <!-- Search input for filtering options -->
+                        <input
+                            v-model="selectSearchTerm"
+                            type="text"
+                            class="form-inputfield w-full text-default mb-2"
+                            :placeholder="props.selectFilterPlaceholder"
+                            @keydown.stop
                         />
+                        
+                        <!-- Options list with checkboxes -->
+                        <div class="max-h-32 overflow-y-auto space-y-1">
+                            <CheckboxComponent
+                                v-for="option in filteredSelectOptions" 
+                                :key="option.value"
+                                :value="option.value"
+                                :label="option.label"
+                                v-model="selectedValues"
+                                @change="applyFilter"
+                                class="text-default px-1 py-0.5 rounded text-xs"
+                            />
+                        </div>
                     </div>
 
                     <!-- Clear Filter Button -->
@@ -166,7 +173,7 @@ import {
     ToggleGroupRoot,
     ToggleGroupItem
 } from 'reka-ui'
-import ListSelect from '../../listselect/ListSelect.vue'
+import CheckboxComponent from '../../checkbox/CheckboxComponent.vue'
 import { FILTER_OPERATORS } from '../composables/useColumnFiltering.js'
 
 const props = defineProps({
@@ -220,6 +227,7 @@ const numericValue = ref('')
 const dateOperator = ref('=')
 const dateValue = ref('')
 const selectedValues = ref([])
+const selectSearchTerm = ref('')
 
 // Determine filter type based on field configuration or data analysis
 const filterType = computed(() => {
@@ -320,17 +328,15 @@ const selectOptions = computed(() => {
     return []
 })
 
-// Generate ListSelect placeholder text based on selection state
-const selectPlaceholderText = computed(() => {
-    const selectionCount = Array.isArray(selectedValues.value) ? selectedValues.value.length : 0
-    
-    if (selectionCount === 0) {
-        return props.selectFilterNoSelectionText
-    } else if (selectionCount === 1) {
-        return props.selectFilterSingleSelectionTextFn(selectedValues.value[0].label)
-    } else {
-        return props.selectFilterMultipleSelectionTextFn(selectionCount)
+// Filtered select options based on search term
+const filteredSelectOptions = computed(() => {
+    if (!selectSearchTerm.value) {
+        return selectOptions.value
     }
+    
+    return selectOptions.value.filter(option => 
+        option.label.toLowerCase().includes(selectSearchTerm.value.toLowerCase())
+    )
 })
 
 // Check if filter is active
@@ -365,8 +371,8 @@ const currentFilter = computed(() => {
         filter.value = dateValue.value
         filter.operator = dateOperator.value
     } else if (filterType.value === 'select') {
-        // Extract values from ListSelect option objects
-        filter.value = selectedValues.value.map(option => option.value)
+        // selectedValues is now an array of primitive values from checkboxes
+        filter.value = selectedValues.value
         filter.operator = 'in'
     }
     
@@ -424,11 +430,8 @@ watch(() => props.modelValue, (newFilter) => {
         dateValue.value = newFilter.value || ''
         dateOperator.value = newFilter.operator || '='
     } else if (newFilter.type === 'select') {
-        // Convert filter values back to ListSelect option objects
-        const filterValues = newFilter.value || []
-        selectedValues.value = selectOptions.value.filter(option => 
-            filterValues.includes(option.value)
-        )
+        // selectedValues is now an array of primitive values for checkboxes
+        selectedValues.value = newFilter.value || []
     }
 }, { immediate: true })
 </script>

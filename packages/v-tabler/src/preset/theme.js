@@ -121,6 +121,41 @@ const shortcuts = [
             return styles.join(' ')
         }
     ],
+    // Busy/loading indicator shortcuts
+    [
+        /^busy-text-(.*)$/,
+        ([, c]) => `relative 
+        select-none overflow-hidden border-rounded 
+        before:animate-spin 
+        before:border-opacity-90 
+        before:border-t-transparent  
+        before:border-r-${c} 
+        before:border-b-${c} 
+        before:border-l-${c} 
+        before:border-rounded-full 
+        before:border-solid 
+        before:border-3 
+        before:content-empty 
+        before:h-1.5rem 
+        before:w-1.5rem 
+        before:left-50% 
+        before:absolute 
+        before:top-50% 
+        before:m-t-[-0.75rem] 
+        before:m-r-0 
+        before:m-b-0 
+        before:m-l-[-0.75rem]
+        before:z-500 
+        after:border-rounded-[3px] 
+        after:content-empty 
+        after:h-full 
+        after:left-0 
+        after:absolute 
+        after:top-0 
+        after:w-full 
+        after:z-499`
+    ],
+    [/^busy-bg-(.*)$/, ([, c]) => `after:bg-${c}/70`],
     {
         'btn-base': 'btn-base-default'
     },

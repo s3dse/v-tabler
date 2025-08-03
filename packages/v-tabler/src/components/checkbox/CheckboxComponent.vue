@@ -6,7 +6,7 @@
             :value="$name"
             v-model="checked"
             v-bind="attrs"
-            class="relative shrink-0 appearance-none formfield rounded checked:bg-primary h-5 w-5 disabled:cursor-pointer-default peer"
+            class="relative shrink-0 appearance-none form-inputfield rounded checked:bg-primary h-5 w-5 disabled:cursor-pointer-default peer"
         />
         <label :for="$id" class="">{{ label }}</label>
         <div

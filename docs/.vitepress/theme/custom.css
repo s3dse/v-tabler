@@ -1,3 +1,52 @@
-/* Custom theme styles for VitePress documentation */
+/* Custom styles for V-Tabler documentation */
 
-/* Add any custom documentation styles here */
+:root {
+  --vp-c-brand: #646cff;
+  --vp-c-brand-light: #747bff;
+  --vp-c-brand-lighter: #9499ff;
+  --vp-c-brand-lightest: #bcc0ff;
+  --vp-c-brand-dark: #535bf2;
+  --vp-c-brand-darker: #454ce1;
+  --vp-c-brand-dimm: rgba(100, 108, 255, 0.08);
+}
+
+/* Demo sections */
+.demo-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 8px;
+  background: var(--vp-c-bg-soft);
+}
+
+.demo-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--vp-c-text-1);
+}
+
+/* Code examples */
+.example-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+@media (min-width: 768px) {
+  .example-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Component previews */
+.component-preview {
+  padding: 1rem;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 6px;
+  background: var(--vp-c-bg);
+}
+
+.component-preview + .component-preview {
+  margin-top: 1rem;
+}

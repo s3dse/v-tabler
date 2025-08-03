@@ -3,25 +3,6 @@ import data from './assets/MOCK_DATA-2.json'
 import TestOne from './components/TestOne.vue'
 import TestTwo from './components/TestTwo.vue'
 import { ref } from 'vue'
-import {
-    TableComponent,
-    CardComponent,
-    LoadingOverlay,
-    DropdownComponent,
-    ActionDropdownComponent,
-    DialogComponent,
-    TabCardComponent,
-    ListSelect,
-    SingleSelect,
-    MultiSelect,
-    ToggleComponent,
-    CollapsibleCard,
-    CheckboxComponent,
-    Heading,
-    PageTitle,
-    TableSkeleton,
-    Fade
-} from '../index.js'
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
