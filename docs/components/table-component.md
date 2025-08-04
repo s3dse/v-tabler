@@ -19,6 +19,27 @@ A comprehensive, feature-rich Vue 3 table component with built-in pagination, so
 import { TableComponent } from '@/components/table'
 ```
 
+## DEMO
+<script setup>
+  import { ref } from 'vue'
+import { TableComponent } from '@s3_dse/v-tabler'
+
+const tableData = ref([
+  { id: 1, name: 'John Doe', email: 'john@example.com' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+])
+
+const fieldDefinitions = ref([
+  { key: 'id', label: 'ID' },
+  { key: 'name', label: 'Full Name' },
+  { key: 'email', label: 'Email Address' }
+])
+</script>
+
+<iframe data-why width="100%">
+  <TableComponent :items="tableData" :fields="fieldDefinitions" />
+</iframe>
+
 ## Basic Usage
 
 ```vue
