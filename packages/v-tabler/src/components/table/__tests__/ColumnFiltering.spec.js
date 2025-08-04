@@ -3,14 +3,50 @@ import { flushPromises, mount } from '@vue/test-utils'
 import TableComponent from '@/components/table/TableComponent.vue'
 import ColumnFilter from '@/components/table/components/ColumnFilter.vue'
 import { useColumnFiltering } from '@/components/table/composables/useColumnFiltering.js'
+import { TABLE_FILTER_CONFIG_KEY } from '@/components/table/composables/useTableFilterConfig.js'
 
 // Test data similar to the demo
 const testData = [
-    { id: 1, name: 'Alice Johnson', department: 'Engineering', salary: 75000, hire_date: '2023-01-15', status: 'Active' },
-    { id: 2, name: 'Bob Smith', department: 'Marketing', salary: 65000, hire_date: '2022-03-20', status: 'Active' },
-    { id: 3, name: 'Carol Davis', department: 'Engineering', salary: 85000, hire_date: '2021-07-10', status: 'Active' },
-    { id: 4, name: 'David Wilson', department: 'Sales', salary: 55000, hire_date: '2023-05-01', status: 'Inactive' },
-    { id: 5, name: 'Eva Brown', department: 'HR', salary: 70000, hire_date: '2020-11-25', status: 'Active' }
+    {
+        id: 1,
+        name: 'Alice Johnson',
+        department: 'Engineering',
+        salary: 75000,
+        hire_date: '2023-01-15',
+        status: 'Active'
+    },
+    {
+        id: 2,
+        name: 'Bob Smith',
+        department: 'Marketing',
+        salary: 65000,
+        hire_date: '2022-03-20',
+        status: 'Active'
+    },
+    {
+        id: 3,
+        name: 'Carol Davis',
+        department: 'Engineering',
+        salary: 85000,
+        hire_date: '2021-07-10',
+        status: 'Active'
+    },
+    {
+        id: 4,
+        name: 'David Wilson',
+        department: 'Sales',
+        salary: 55000,
+        hire_date: '2023-05-01',
+        status: 'Inactive'
+    },
+    {
+        id: 5,
+        name: 'Eva Brown',
+        department: 'HR',
+        salary: 70000,
+        hire_date: '2020-11-25',
+        status: 'Active'
+    }
 ]
 
 const testFields = [
@@ -101,18 +137,18 @@ describe('Column Filtering', () => {
             // This was the original bug - when typing a number, all data would vanish
             // and the table header would disappear
             setColumnFilter('salary', {
-                type: 'numeric', 
+                type: 'numeric',
                 operator: '=',
                 value: 75000
             })
 
             const filtered = applyColumnFilters(testData)
-            
+
             // Should return exactly one match (Alice Johnson with salary 75000)
             expect(filtered).toHaveLength(1)
             expect(filtered[0].name).toBe('Alice Johnson')
             expect(filtered[0].salary).toBe(75000)
-            
+
             // Most importantly: should return a valid array, not undefined/null
             expect(Array.isArray(filtered)).toBe(true)
         })
@@ -204,7 +240,11 @@ describe('Column Filtering', () => {
 
             const filtered = applyColumnFilters(testData)
             expect(filtered).toHaveLength(3) // Alice, Bob, Carol
-            expect(filtered.map(item => item.department)).toEqual(['Engineering', 'Marketing', 'Engineering'])
+            expect(filtered.map(item => item.department)).toEqual([
+                'Engineering',
+                'Marketing',
+                'Engineering'
+            ])
         })
 
         it('should handle multiple filters combined', () => {
@@ -252,7 +292,13 @@ describe('Column Filtering', () => {
         })
 
         it('should clear all column filters when clearAllColumnFilters is called', () => {
-            const { applyColumnFilters, setColumnFilter, clearAllColumnFilters, columnFilters, hasActiveFilters } = columnFiltering
+            const {
+                applyColumnFilters,
+                setColumnFilter,
+                clearAllColumnFilters,
+                columnFilters,
+                hasActiveFilters
+            } = columnFiltering
 
             // Apply multiple filters
             setColumnFilter('name', {
@@ -380,8 +426,18 @@ describe('Column Filtering', () => {
 
                 const options = wrapper.vm.selectOptions
                 expect(options).toHaveLength(4) // Engineering, HR, Marketing, Sales
-                expect(options.map(o => o.value)).toEqual(['Engineering', 'HR', 'Marketing', 'Sales'])
-                expect(options.map(o => o.label)).toEqual(['Engineering', 'HR', 'Marketing', 'Sales'])
+                expect(options.map(o => o.value)).toEqual([
+                    'Engineering',
+                    'HR',
+                    'Marketing',
+                    'Sales'
+                ])
+                expect(options.map(o => o.label)).toEqual([
+                    'Engineering',
+                    'HR',
+                    'Marketing',
+                    'Sales'
+                ])
             })
 
             it('should auto-detect select type for low cardinality data', () => {
@@ -635,11 +691,11 @@ describe('Column Filtering', () => {
 
             // Should have zero data rows
             expect(wrapper.vm.dataForPagination).toHaveLength(0)
-            
+
             // But table header should still be present
             const tableHead = wrapper.find('thead')
             expect(tableHead.exists()).toBe(true)
-            
+
             // And should contain header cells for each field
             const headerCells = wrapper.findAll('th')
             expect(headerCells.length).toBeGreaterThan(0)
@@ -683,7 +739,7 @@ describe('Column Filtering', () => {
             await flushPromises()
 
             // Apply multiple filters to test different filter types
-            
+
             // 1. Apply a text filter
             wrapper.vm.setColumnFilter('name', {
                 type: 'text',
@@ -691,7 +747,7 @@ describe('Column Filtering', () => {
                 value: 'Alice'
             })
 
-            // 2. Apply a numeric filter  
+            // 2. Apply a numeric filter
             wrapper.vm.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '=',
@@ -710,7 +766,7 @@ describe('Column Filtering', () => {
             // Verify filters are active and data is filtered
             expect(wrapper.vm.hasActiveFilters).toBe(true)
             expect(Object.keys(wrapper.vm.columnFilters).length).toBe(3)
-            
+
             // The filtered data should only contain Alice Johnson
             expect(wrapper.vm.dataForPagination).toHaveLength(1)
             expect(wrapper.vm.dataForPagination[0].name).toBe('Alice Johnson')
@@ -737,9 +793,10 @@ describe('Column Filtering', () => {
             if (!clearButton.exists()) {
                 // Fallback: try to find by button text or class
                 const buttons = wrapper.findAll('button')
-                const clearAllButton = buttons.find(btn => 
-                    btn.text().includes('Clear All Filters') || 
-                    btn.element.title?.includes('Clear All Filters')
+                const clearAllButton = buttons.find(
+                    btn =>
+                        btn.text().includes('Clear All Filters') ||
+                        btn.element.title?.includes('Clear All Filters')
                 )
                 expect(clearAllButton.exists()).toBe(true)
                 await clearAllButton.trigger('click')
@@ -759,7 +816,7 @@ describe('Column Filtering', () => {
 
             // CRITICAL: Verify that each column filter component receives null/undefined modelValue
             // This is the core of the bug - the ColumnFilter components should reset their internal state
-            
+
             // Find all ColumnFilter components
             const columnFilters = wrapper.findAllComponents(ColumnFilter)
             expect(columnFilters.length).toBeGreaterThan(0)
@@ -774,7 +831,7 @@ describe('Column Filtering', () => {
             columnFilters.forEach(filterComponent => {
                 // Check that hasActiveFilter computed is false (this controls the visual highlighting)
                 expect(filterComponent.vm.hasActiveFilter).toBe(false)
-                
+
                 // Check that internal filter values are reset
                 expect(filterComponent.vm.textFilter).toBe('')
                 expect(filterComponent.vm.numericValue).toBe('')
@@ -797,8 +854,8 @@ describe('Column Filtering', () => {
                 i18n: {
                     placeholder: 'Search departments...',
                     noSelectionText: 'Choose departments...',
-                    singleSelectionTextFn: (value) => `Selected: ${value}`,
-                    multipleSelectionTextFn: (count) => `${count} dept(s) selected`
+                    singleSelectionTextFn: value => `Selected: ${value}`,
+                    multipleSelectionTextFn: count => `${count} dept(s) selected`
                 }
             }
 
@@ -811,11 +868,13 @@ describe('Column Filtering', () => {
             })
 
             expect(wrapper.exists()).toBe(true)
-            
+
             // Verify that the i18n settings are properly passed to the filter component
             expect(wrapper.vm.i18nSettings.placeholder).toBe('Search departments...')
             expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Choose departments...')
-            expect(wrapper.vm.i18nSettings.singleSelectionTextFn('Engineering')).toBe('Selected: Engineering')
+            expect(wrapper.vm.i18nSettings.singleSelectionTextFn('Engineering')).toBe(
+                'Selected: Engineering'
+            )
             expect(wrapper.vm.i18nSettings.multipleSelectionTextFn(2)).toBe('2 dept(s) selected')
         })
 
@@ -834,9 +893,22 @@ describe('Column Filtering', () => {
                 props: {
                     field: fieldWithoutI18n,
                     data: testData,
-                    modelValue: null,
-                    selectFilterPlaceholder: 'Fallback placeholder...',
-                    selectFilterNoSelectionText: 'Fallback no selection...'
+                    modelValue: null
+                },
+                global: {
+                    provide: {
+                        [TABLE_FILTER_CONFIG_KEY]: {
+                            value: {
+                                fallbackI18n: {
+                                    selectFilterPlaceholder: 'Fallback placeholder...',
+                                    selectFilterNoSelectionText: 'Fallback no selection...',
+                                    selectFilterSingleSelectionTextFn: value => value,
+                                    selectFilterMultipleSelectionTextFn: count =>
+                                        `${count} selected`
+                                }
+                            }
+                        }
+                    }
                 }
             })
 

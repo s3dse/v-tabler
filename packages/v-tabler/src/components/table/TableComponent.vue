@@ -54,10 +54,6 @@
                     :enable-column-filters="enableColumnFilters"
                     :all-data="[...(props.items || []), ...topRows, ...bottomRows]"
                     :column-filters="columnFilters"
-                    :select-filter-placeholder="selectFilterPlaceholder"
-                    :select-filter-no-selection-text="selectFilterNoSelectionText"
-                    :select-filter-single-selection-text-fn="selectFilterSingleSelectionTextFn"
-                    :select-filter-multiple-selection-text-fn="selectFilterMultipleSelectionTextFn"
                     @sort-table="handleSortInternal"
                     @column-filter="handleColumnFilterInternal"
                 >
@@ -151,6 +147,8 @@ import {
     useTableStyles,
     useColumnFiltering
 } from './composables/index.js'
+
+import { useTableFilterConfigProvider } from './composables/useTableFilterConfig.js'
 
 import {
     TableTitle,
@@ -303,6 +301,16 @@ const {
     getColumnLabel, 
     underscoresToSpaces 
 } = useTableData(props)
+
+// Provide filter configuration to child components
+const { filterConfig } = useTableFilterConfigProvider({
+    selectFilterPlaceholder: props.selectFilterPlaceholder,
+    selectFilterNoSelectionText: props.selectFilterNoSelectionText,
+    selectFilterSingleSelectionTextFn: props.selectFilterSingleSelectionTextFn,
+    selectFilterMultipleSelectionTextFn: props.selectFilterMultipleSelectionTextFn,
+    filterDebounce: props.filterDebounce,
+    filterMaxWait: props.filterMaxWait
+})
 
 // Column filtering (new feature)
 const { 

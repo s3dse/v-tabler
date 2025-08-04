@@ -9,7 +9,7 @@ describe('TableTitle', () => {
                 title: 'Test Title'
             }
         })
-        
+
         expect(wrapper.text()).toBe('Test Title')
         expect(wrapper.find('.vt-title').exists()).toBe(true)
     })
@@ -20,7 +20,7 @@ describe('TableTitle', () => {
                 title: '<h1>Custom Title</h1>'
             }
         })
-        
+
         expect(wrapper.html()).toContain('<h1>Custom Title</h1>')
         expect(wrapper.find('.vt-title').exists()).toBe(false) // Should not show default title style
     })
@@ -29,7 +29,7 @@ describe('TableTitle', () => {
         const wrapper = mount(TableTitle, {
             props: {}
         })
-        
+
         expect(wrapper.find('.vt-title-border').exists()).toBe(false)
     })
 
@@ -42,7 +42,7 @@ describe('TableTitle', () => {
                 title: '<h1>Slot Title</h1>'
             }
         })
-        
+
         expect(wrapper.html()).toContain('<h1>Slot Title</h1>')
         expect(wrapper.text()).not.toContain('Prop Title')
     })

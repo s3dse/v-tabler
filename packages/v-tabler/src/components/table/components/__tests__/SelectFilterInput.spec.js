@@ -50,8 +50,8 @@ describe('SelectFilterInput', () => {
     })
 
     it('should display single selection text using custom function', () => {
-        const singleSelectionTextFn = (value) => `Selected: ${value}`
-        
+        const singleSelectionTextFn = value => `Selected: ${value}`
+
         const wrapper = mount(SelectFilterInput, {
             props: {
                 modelValue: ['engineering'],
@@ -65,8 +65,8 @@ describe('SelectFilterInput', () => {
     })
 
     it('should display multiple selection text using custom function', () => {
-        const multipleSelectionTextFn = (count) => `${count} departments selected`
-        
+        const multipleSelectionTextFn = count => `${count} departments selected`
+
         const wrapper = mount(SelectFilterInput, {
             props: {
                 modelValue: ['engineering', 'marketing'],
@@ -133,7 +133,7 @@ describe('SelectFilterInput', () => {
         })
 
         await wrapper.setProps({ modelValue: ['engineering'] })
-        
+
         expect(wrapper.vm.selectedValues).toEqual(['engineering'])
     })
 })

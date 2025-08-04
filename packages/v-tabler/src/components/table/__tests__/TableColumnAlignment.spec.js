@@ -10,8 +10,8 @@ const testData = [
 describe('Table Column Alignment', () => {
     it('should apply table-col-left alignment to header', () => {
         const fields = [
-            { 
-                key: 'name', 
+            {
+                key: 'name',
                 label: 'Name',
                 thClassList: 'table-col-left'
             }
@@ -27,7 +27,7 @@ describe('Table Column Alignment', () => {
         // Find the header cell
         const headerCell = wrapper.find('th')
         expect(headerCell.classes()).toContain('table-col-left')
-        
+
         // Check that the inner flex container has justify-start
         const flexContainer = headerCell.find('div.flex')
         expect(flexContainer.classes()).toContain('justify-start')
@@ -35,8 +35,8 @@ describe('Table Column Alignment', () => {
 
     it('should apply table-col-right alignment to header', () => {
         const fields = [
-            { 
-                key: 'id', 
+            {
+                key: 'id',
                 label: 'ID',
                 thClassList: 'table-col-right'
             }
@@ -51,15 +51,15 @@ describe('Table Column Alignment', () => {
 
         const headerCell = wrapper.find('th')
         expect(headerCell.classes()).toContain('table-col-right')
-        
+
         const flexContainer = headerCell.find('div.flex')
         expect(flexContainer.classes()).toContain('justify-end')
     })
 
     it('should apply table-col-center alignment to header', () => {
         const fields = [
-            { 
-                key: 'amount', 
+            {
+                key: 'amount',
                 label: 'Amount',
                 thClassList: 'table-col-center'
             }
@@ -74,15 +74,15 @@ describe('Table Column Alignment', () => {
 
         const headerCell = wrapper.find('th')
         expect(headerCell.classes()).toContain('table-col-center')
-        
+
         const flexContainer = headerCell.find('div.flex')
         expect(flexContainer.classes()).toContain('justify-center')
     })
 
     it('should not add justify classes when no table-col-* classes are present', () => {
         const fields = [
-            { 
-                key: 'name', 
+            {
+                key: 'name',
                 label: 'Name',
                 thClassList: 'some-other-class'
             }
@@ -103,8 +103,8 @@ describe('Table Column Alignment', () => {
 
     it('should work with column filters and maintain alignment', () => {
         const fields = [
-            { 
-                key: 'name', 
+            {
+                key: 'name',
                 label: 'Name',
                 thClassList: 'table-col-right',
                 filterType: 'text'
@@ -121,7 +121,7 @@ describe('Table Column Alignment', () => {
 
         const flexContainer = wrapper.find('th div.flex')
         expect(flexContainer.classes()).toContain('justify-end')
-        
+
         // Verify that column filter is present
         const columnFilter = wrapper.findComponent({ name: 'ColumnFilter' })
         expect(columnFilter.exists()).toBe(true)

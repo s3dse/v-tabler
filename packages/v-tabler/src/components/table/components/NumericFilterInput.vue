@@ -1,57 +1,67 @@
 <template>
-  <div>
-    <DropdownMenuLabel class="block text-xs font-medium text-muted mb-2">
-      Number filter:
-    </DropdownMenuLabel>
-    <div class="space-y-3">
-      <div class="flex justify-center">
-        <ToggleGroupRoot
-          v-model="operatorValue"
-          type="single"
-          class="flex"
-          @update:model-value="onOperatorChange"
-        >
-          <ToggleGroupItem
-            v-for="operatorObj in operators"
-            :key="operatorObj.value"
-            :value="operatorObj.value"
-            class="btn-base-md data-[state=on]:bg-primary data-[state=on]:text-onprimary first:rounded-l last:rounded-r"
-            v-html="operatorObj.symbol"
-          />
-        </ToggleGroupRoot>
-      </div>
-      <input
-        :id="inputId"
-        :value="value"
-        type="number"
-        class="form-inputfield w-full text-default"
-        :placeholder="'Value...'"
-        @input="onInput"
-        @keydown.stop
-      />
+    <div>
+        <DropdownMenuLabel class="block text-xs font-medium text-muted mb-2">
+            Number filter:
+        </DropdownMenuLabel>
+        <div class="space-y-3">
+            <div class="flex justify-center">
+                <ToggleGroupRoot
+                    v-model="operatorValue"
+                    type="single"
+                    class="flex"
+                    @update:model-value="onOperatorChange"
+                >
+                    <ToggleGroupItem
+                        v-for="operatorObj in operators"
+                        :key="operatorObj.value"
+                        :value="operatorObj.value"
+                        class="btn-base-md data-[state=on]:bg-primary data-[state=on]:text-onprimary first:rounded-l last:rounded-r"
+                        v-html="operatorObj.symbol"
+                    />
+                </ToggleGroupRoot>
+            </div>
+            <input
+                :id="inputId"
+                :value="value"
+                type="number"
+                class="form-inputfield w-full text-default"
+                :placeholder="'Value...'"
+                @input="onInput"
+                @keydown.stop
+            />
+        </div>
     </div>
-  </div>
 </template>
 <script setup>
 import { ref, watch } from 'vue'
 import { DropdownMenuLabel, ToggleGroupRoot, ToggleGroupItem } from 'reka-ui'
 const props = defineProps({
-  modelValue: [String, Number],
-  operator: String,
-  operators: Array,
-  inputId: String
+    modelValue: [String, Number],
+    operator: String,
+    operators: Array,
+    inputId: String
 })
 const emit = defineEmits(['update:modelValue', 'update:operator'])
 const value = ref(props.modelValue || '')
 const operatorValue = ref(props.operator || '=')
-watch(() => props.modelValue, v => { value.value = v })
-watch(() => props.operator, v => { operatorValue.value = v })
+watch(
+    () => props.modelValue,
+    v => {
+        value.value = v
+    }
+)
+watch(
+    () => props.operator,
+    v => {
+        operatorValue.value = v
+    }
+)
 function onInput(e) {
-  value.value = e.target.value
-  emit('update:modelValue', value.value)
+    value.value = e.target.value
+    emit('update:modelValue', value.value)
 }
 function onOperatorChange(val) {
-  operatorValue.value = val
-  emit('update:operator', operatorValue.value)
+    operatorValue.value = val
+    emit('update:operator', operatorValue.value)
 }
 </script>

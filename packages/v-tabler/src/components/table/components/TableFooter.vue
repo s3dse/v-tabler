@@ -5,7 +5,7 @@
             :per-page="itemsPerPage || 0"
             :current-page="currentPage || 1"
             :total-pages="numberOfPages || 0"
-            :total-entries="remotePagination ? (totalItems || 0) : (tableDataLength || 0)"
+            :total-entries="remotePagination ? totalItems || 0 : tableDataLength || 0"
             :previous-label="paginationPreviousLabel"
             :next-label="paginationNextLabel"
             @page-changed="changePage"
@@ -80,7 +80,7 @@ defineProps({
 
 const emit = defineEmits(['page-changed'])
 
-const changePage = (page) => {
+const changePage = page => {
     emit('page-changed', page)
 }
 </script>

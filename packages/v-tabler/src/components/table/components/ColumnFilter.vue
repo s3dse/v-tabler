@@ -56,6 +56,7 @@ import {
     DropdownMenuItem,
 } from 'reka-ui'
 import { FILTER_OPERATORS } from '../composables/useColumnFiltering.js'
+import { useTableFilterConfig } from '../composables/useTableFilterConfig.js'
 import TextFilterInput from './TextFilterInput.vue'
 import NumericFilterInput from './NumericFilterInput.vue'
 import DateFilterInput from './DateFilterInput.vue'
@@ -73,27 +74,13 @@ const props = defineProps({
     modelValue: {
         type: Object,
         default: undefined
-    },
-    // Internationalization props for select filter labels (fallback - prefer field.i18n)
-    selectFilterPlaceholder: {
-        type: String,
-        default: 'Search options...'
-    },
-    selectFilterNoSelectionText: {
-        type: String,
-        default: 'Select values...'
-    },
-    selectFilterSingleSelectionTextFn: {
-        type: Function,
-        default: (value) => value
-    },
-    selectFilterMultipleSelectionTextFn: {
-        type: Function,
-        default: (count) => `${count} selected`
     }
 })
 
 const emit = defineEmits(['update:modelValue', 'filter-change'])
+
+// Use injected filter configuration
+const filterConfig = useTableFilterConfig()
 
 const textInputId = useId()
 const numericInputId = useId()
@@ -109,14 +96,15 @@ const dateValue = ref('')
 const selectedValues = ref([])
 const selectSearchTerm = ref('')
 
-// Get i18n settings from field level or fallback to props
+// Get i18n settings from field level or fallback to injected config
 const i18nSettings = computed(() => {
     const fieldI18n = props.field.i18n || {}
+    const fallbackI18n = filterConfig.fallbackI18n
     return {
-        placeholder: fieldI18n.placeholder || props.selectFilterPlaceholder,
-        noSelectionText: fieldI18n.noSelectionText || props.selectFilterNoSelectionText,
-        singleSelectionTextFn: fieldI18n.singleSelectionTextFn || props.selectFilterSingleSelectionTextFn,
-        multipleSelectionTextFn: fieldI18n.multipleSelectionTextFn || props.selectFilterMultipleSelectionTextFn
+        placeholder: fieldI18n.placeholder || fallbackI18n.selectFilterPlaceholder,
+        noSelectionText: fieldI18n.noSelectionText || fallbackI18n.selectFilterNoSelectionText,
+        singleSelectionTextFn: fieldI18n.singleSelectionTextFn || fallbackI18n.selectFilterSingleSelectionTextFn,
+        multipleSelectionTextFn: fieldI18n.multipleSelectionTextFn || fallbackI18n.selectFilterMultipleSelectionTextFn
     }
 })
 // Dynamic filter component mapping

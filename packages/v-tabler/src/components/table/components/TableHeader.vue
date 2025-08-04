@@ -22,7 +22,7 @@
                 <slot name="page-size-label" v-bind="{ pageSize: currentItem }"></slot>
             </template>
         </dropdown-component>
-        
+
         <!-- Clear All Filters Button -->
         <button
             v-if="enableColumnFilters && showClearAllFiltersButton && hasActiveFilters"
@@ -34,7 +34,7 @@
             <span class="i-tabler-filter-off"></span>
             {{ clearAllFiltersButtonText }}
         </button>
-        
+
         <slot
             name="table-top-controls"
             :data="tableData || []"
@@ -118,14 +118,19 @@ defineProps({
     }
 })
 
-const emit = defineEmits(['update:searchTerm', 'update:pageSize', 'filter-data', 'clear-all-filters'])
+const emit = defineEmits([
+    'update:searchTerm',
+    'update:pageSize',
+    'filter-data',
+    'clear-all-filters'
+])
 
-const handleInput = (event) => {
+const handleInput = event => {
     emit('update:searchTerm', event.target.value)
     emit('filter-data', event)
 }
 
-const updatePageSize = (value) => {
+const updatePageSize = value => {
     emit('update:pageSize', value)
 }
 

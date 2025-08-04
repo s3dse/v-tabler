@@ -1,36 +1,24 @@
 <template>
-    <thead
-        class="bg-thead-background font-semibold text-[0.625rem] text-thead-text"
-    >
+    <thead class="bg-thead-background font-semibold text-[0.625rem] text-thead-text">
         <th
-            v-for="(col, index) in (visibleFields || [])"
+            v-for="(col, index) in visibleFields || []"
             :key="index"
             :class="[col?.thClassList, leftPadFirstCol(index), rightPadLastCol(index)]"
             class="p-2 first:ps-6 last:pe-6 uppercase"
         >
             <slot :name="`th(${col?.key})`" :field="col">
                 <div :class="getHeaderFlexClasses(col)">
-                    <div 
-                        class="hover:cursor-pointer flex items-center"
-                        @click="sortTable(col)"
-                    >
+                    <div class="hover:cursor-pointer flex items-center" @click="sortTable(col)">
                         {{ underscoresToSpaces(getColumnLabel(col)) }}
-                        <div
-                            class="inline-block ml-1"
-                            :class="getSortIconClass(col?.key)"
-                        ></div>
+                        <div class="inline-block ml-1" :class="getSortIconClass(col?.key)"></div>
                     </div>
-                    
+
                     <!-- Column Filter -->
                     <column-filter
                         v-if="enableColumnFilters"
                         :field="col"
                         :data="allData"
                         :model-value="columnFilters[col.key]"
-                        :select-filter-placeholder="selectFilterPlaceholder"
-                        :select-filter-no-selection-text="selectFilterNoSelectionText"
-                        :select-filter-single-selection-text-fn="selectFilterSingleSelectionTextFn"
-                        :select-filter-multiple-selection-text-fn="selectFilterMultipleSelectionTextFn"
                         @filter-change="handleColumnFilter(col.key, $event)"
                     />
                 </div>
@@ -86,29 +74,12 @@ defineProps({
     columnFilters: {
         type: Object,
         default: () => ({})
-    },
-    // Column filter i18n props
-    selectFilterPlaceholder: {
-        type: String,
-        default: 'Search options...'
-    },
-    selectFilterNoSelectionText: {
-        type: String,
-        default: 'Select values...'
-    },
-    selectFilterSingleSelectionTextFn: {
-        type: Function,
-        default: (value) => value
-    },
-    selectFilterMultipleSelectionTextFn: {
-        type: Function,
-        default: (count) => `${count} selected`
     }
 })
 
 const emit = defineEmits(['sort-table', 'column-filter'])
 
-const sortTable = (col) => {
+const sortTable = col => {
     emit('sort-table', col)
 }
 
@@ -117,10 +88,10 @@ const handleColumnFilter = (fieldKey, filter) => {
 }
 
 // Extract column alignment classes for the header flex container
-const getHeaderFlexClasses = (col) => {
+const getHeaderFlexClasses = col => {
     const baseClasses = ['flex', 'items-center']
     const thClasses = col?.thClassList || ''
-    
+
     // Check if the column has one of our table alignment shortcuts
     if (thClasses.includes('table-col-left')) {
         baseClasses.push('justify-start')
@@ -129,7 +100,7 @@ const getHeaderFlexClasses = (col) => {
     } else if (thClasses.includes('table-col-center')) {
         baseClasses.push('justify-center')
     }
-    
+
     return baseClasses
 }
 </script>
