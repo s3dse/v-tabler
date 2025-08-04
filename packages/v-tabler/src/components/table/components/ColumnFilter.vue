@@ -74,7 +74,7 @@ const props = defineProps({
         type: Object,
         default: undefined
     },
-    // Internationalization props for select filter labels
+    // Internationalization props for select filter labels (fallback - prefer field.i18n)
     selectFilterPlaceholder: {
         type: String,
         default: 'Search options...'
@@ -95,17 +95,12 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'filter-change'])
 
-// Generate unique IDs for form elements
 const textInputId = useId()
 const numericInputId = useId()
-const numericSelectId = useId()
 const dateInputId = useId()
-const dateSelectId = useId()
 
-// Dropdown state
 const isDropdownOpen = ref(false)
 
-// Filter values
 const textFilter = ref('')
 const numericOperator = ref('=')
 const numericValue = ref('')
@@ -113,6 +108,17 @@ const dateOperator = ref('=')
 const dateValue = ref('')
 const selectedValues = ref([])
 const selectSearchTerm = ref('')
+
+// Get i18n settings from field level or fallback to props
+const i18nSettings = computed(() => {
+    const fieldI18n = props.field.i18n || {}
+    return {
+        placeholder: fieldI18n.placeholder || props.selectFilterPlaceholder,
+        noSelectionText: fieldI18n.noSelectionText || props.selectFilterNoSelectionText,
+        singleSelectionTextFn: fieldI18n.singleSelectionTextFn || props.selectFilterSingleSelectionTextFn,
+        multipleSelectionTextFn: fieldI18n.multipleSelectionTextFn || props.selectFilterMultipleSelectionTextFn
+    }
+})
 // Dynamic filter component mapping
 const filterComponent = computed(() => {
   switch (filterType.value) {
@@ -124,7 +130,6 @@ const filterComponent = computed(() => {
   }
 })
 
-// Props for each filter input
 const filterProps = computed(() => {
   if (filterType.value === 'text') {
     return {
@@ -153,13 +158,15 @@ const filterProps = computed(() => {
     return {
       modelValue: selectedValues.value,
       options: filteredSelectOptions.value,
-      placeholder: props.selectFilterPlaceholder
+      placeholder: i18nSettings.value.placeholder,
+      noSelectionText: i18nSettings.value.noSelectionText,
+      singleSelectionTextFn: i18nSettings.value.singleSelectionTextFn,
+      multipleSelectionTextFn: i18nSettings.value.multipleSelectionTextFn
     }
   }
   return {}
 })
 
-// Event handlers for filter input components
 function onFilterValueUpdate(val) {
   if (filterType.value === 'text') textFilter.value = val
   if (filterType.value === 'numeric') numericValue.value = val
@@ -173,7 +180,6 @@ function onOperatorUpdate(val) {
   onOperatorChange()
 }
 
-// Determine filter type based on field configuration or data analysis
 const filterType = computed(() => {
     if (props.field.filterType) {
         return props.field.filterType
@@ -246,6 +252,7 @@ const filterType = computed(() => {
 // Generate select options
 const selectOptions = computed(() => {
     if (props.field.filterOptions) {
+        // filterOptions is now just a direct array of options
         return props.field.filterOptions
     }
     

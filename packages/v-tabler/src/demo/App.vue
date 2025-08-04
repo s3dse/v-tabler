@@ -57,6 +57,12 @@ const columnFilterDemoFields = ref([
             { value: 'Sales', label: 'Sales' },
             { value: 'HR', label: 'Human Resources' }
         ],
+        i18n: {
+            placeholder: 'Search departments...',
+            noSelectionText: 'Choose departments...',
+            singleSelectionTextFn: (value) => `Selected: ${value}`,
+            multipleSelectionTextFn: (count) => `${count} department${count !== 1 ? 's' : ''} selected`
+        },
         thClassList: 'table-col-left px-2',
         tdClassList: 'text-left px-2'
     },
@@ -79,6 +85,16 @@ const columnFilterDemoFields = ref([
         key: 'status',
         label: 'Status',
         filterType: 'select',
+        filterOptions: [
+            { value: 'Active', label: 'Active' },
+            { value: 'Inactive', label: 'Inactive' }
+        ],
+        i18n: {
+            placeholder: 'Filter by status...',
+            noSelectionText: 'All statuses',
+            singleSelectionTextFn: (value) => value,
+            multipleSelectionTextFn: (count) => `${count} status${count !== 1 ? 'es' : ''}`
+        },
         thClassList: 'table-col-center px-2',
         tdClassList: 'text-center px-2'
     }

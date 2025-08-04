@@ -783,4 +783,65 @@ describe('Column Filtering', () => {
             })
         })
     })
+
+    describe('Field-level i18n configuration', () => {
+        it('should use field-level i18n settings for select filters', () => {
+            const fieldWithI18n = {
+                key: 'department',
+                label: 'Department',
+                filterType: 'select',
+                filterOptions: [
+                    { value: 'Engineering', label: 'Engineering' },
+                    { value: 'Marketing', label: 'Marketing' }
+                ],
+                i18n: {
+                    placeholder: 'Search departments...',
+                    noSelectionText: 'Choose departments...',
+                    singleSelectionTextFn: (value) => `Selected: ${value}`,
+                    multipleSelectionTextFn: (count) => `${count} dept(s) selected`
+                }
+            }
+
+            const wrapper = mount(ColumnFilter, {
+                props: {
+                    field: fieldWithI18n,
+                    data: testData,
+                    modelValue: null
+                }
+            })
+
+            expect(wrapper.exists()).toBe(true)
+            
+            // Verify that the i18n settings are properly passed to the filter component
+            expect(wrapper.vm.i18nSettings.placeholder).toBe('Search departments...')
+            expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Choose departments...')
+            expect(wrapper.vm.i18nSettings.singleSelectionTextFn('Engineering')).toBe('Selected: Engineering')
+            expect(wrapper.vm.i18nSettings.multipleSelectionTextFn(2)).toBe('2 dept(s) selected')
+        })
+
+        it('should fall back to component props when field i18n is not provided', () => {
+            const fieldWithoutI18n = {
+                key: 'department',
+                label: 'Department',
+                filterType: 'select',
+                filterOptions: [
+                    { value: 'Engineering', label: 'Engineering' },
+                    { value: 'Marketing', label: 'Marketing' }
+                ]
+            }
+
+            const wrapper = mount(ColumnFilter, {
+                props: {
+                    field: fieldWithoutI18n,
+                    data: testData,
+                    modelValue: null,
+                    selectFilterPlaceholder: 'Fallback placeholder...',
+                    selectFilterNoSelectionText: 'Fallback no selection...'
+                }
+            })
+
+            expect(wrapper.vm.i18nSettings.placeholder).toBe('Fallback placeholder...')
+            expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Fallback no selection...')
+        })
+    })
 })
