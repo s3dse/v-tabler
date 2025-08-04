@@ -24,127 +24,12 @@
                 @click.stop
             >
                 <div class="p-3">
-                    <!-- Text/String Filter -->
-                    <div v-if="filterType === 'text'">
-                        <DropdownMenuLabel class="block text-xs font-medium text-muted mb-1" :for="textInputId">
-                            Contains text:
-                        </DropdownMenuLabel>
-                        <input
-                            :id="textInputId"
-                            v-model="textFilter"
-                            type="text"
-                            class="form-inputfield w-full text-default"
-                            :placeholder="`Filter ${field.label || field.key}...`"
-                            @input="applyFilter"
-                            @keydown.stop
-                        />
-                    </div>
-
-                    <!-- Numeric Filter -->
-                    <div v-else-if="filterType === 'numeric'">
-                        <DropdownMenuLabel class="block text-xs font-medium text-muted mb-2">
-                            Number filter:
-                        </DropdownMenuLabel>
-                        <div class="space-y-3">
-                            <!-- Operator Toggle Group -->
-                            <div class="flex justify-center">
-                                <ToggleGroupRoot
-                                    v-model="numericOperator"
-                                    type="single"
-                                    class="flex"
-                                    @update:model-value="onOperatorChange"
-                                >
-                                    <ToggleGroupItem
-                                        v-for="operator in FILTER_OPERATORS.numeric"
-                                        :key="operator.value"
-                                        :value="operator.value"
-                                        class="btn-base-md data-[state=on]:bg-primary data-[state=on]:text-onprimary first:rounded-l last:rounded-r"
-                                        v-html="operator.symbol"
-                                    >
-                                    </ToggleGroupItem>
-                                </ToggleGroupRoot>
-                            </div>
-                            
-                            <!-- Numeric Value Input -->
-                            <input
-                                :id="numericInputId"
-                                v-model="numericValue"
-                                type="number"
-                                class="form-inputfield w-full text-default"
-                                :placeholder="'Value...'"
-                                @input="applyFilter"
-                                @keydown.stop
-                            />
-                        </div>
-                    </div>                    <!-- Date Filter -->
-                    <div v-else-if="filterType === 'date'">
-                        <DropdownMenuLabel class="block text-xs font-medium text-muted mb-2">
-                            Date filter:
-                        </DropdownMenuLabel>
-                        <div class="space-y-3">
-                            <!-- Operator Toggle Group -->
-                            <div class="flex justify-center">
-                                <ToggleGroupRoot
-                                    v-model="dateOperator"
-                                    type="single"
-                                    class="flex"
-                                    @update:model-value="onOperatorChange"
-                                >
-                                    <ToggleGroupItem
-                                        v-for="operator in FILTER_OPERATORS.date"
-                                        :key="operator.value"
-                                        :value="operator.value"
-                                        class="btn-base-md data-[state=on]:bg-primary data-[state=on]:text-onprimary first:rounded-l last:rounded-r"
-                                        v-html="operator.symbol"
-                                    >
-                                    </ToggleGroupItem>
-                                </ToggleGroupRoot>
-                            </div>
-                            
-                            <!-- Date Value Input -->
-                            <input
-                                :id="dateInputId"
-                                v-model="dateValue"
-                                type="date"
-                                class="form-inputfield w-full text-default"
-                                :placeholder="'Select date...'"
-                                @input="applyFilter"
-                                @keydown.stop
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Select Filter -->
-                                        <!-- Select Filter -->
-                    <div v-else-if="filterType === 'select'">
-                        <DropdownMenuLabel class="block text-xs font-medium text-muted mb-2">
-                            Select values:
-                        </DropdownMenuLabel>
-                        
-                        <!-- Search input for filtering options -->
-                        <input
-                            v-model="selectSearchTerm"
-                            type="text"
-                            class="form-inputfield w-full text-default mb-2"
-                            :placeholder="props.selectFilterPlaceholder"
-                            @keydown.stop
-                        />
-                        
-                        <!-- Options list with checkboxes -->
-                        <div class="max-h-32 overflow-y-auto space-y-1">
-                            <CheckboxComponent
-                                v-for="option in filteredSelectOptions" 
-                                :key="option.value"
-                                :value="option.value"
-                                :label="option.label"
-                                v-model="selectedValues"
-                                @change="applyFilter"
-                                class="text-default px-1 py-0.5 rounded text-xs"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Clear Filter Button -->
+                    <component
+                        :is="filterComponent"
+                        v-bind="filterProps"
+                        @update:modelValue="onFilterValueUpdate"
+                        @update:operator="onOperatorUpdate"
+                    />
                     <DropdownMenuSeparator class="my-2 h-px bg-border" />
                     <DropdownMenuItem
                         @click="clearFilter"
@@ -167,14 +52,14 @@ import {
     DropdownMenuTrigger,
     DropdownMenuPortal,
     DropdownMenuContent,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuItem,
-    ToggleGroupRoot,
-    ToggleGroupItem
 } from 'reka-ui'
-import CheckboxComponent from '../../checkbox/CheckboxComponent.vue'
 import { FILTER_OPERATORS } from '../composables/useColumnFiltering.js'
+import TextFilterInput from './TextFilterInput.vue'
+import NumericFilterInput from './NumericFilterInput.vue'
+import DateFilterInput from './DateFilterInput.vue'
+import SelectFilterInput from './SelectFilterInput.vue'
 
 const props = defineProps({
     field: {
@@ -228,6 +113,65 @@ const dateOperator = ref('=')
 const dateValue = ref('')
 const selectedValues = ref([])
 const selectSearchTerm = ref('')
+// Dynamic filter component mapping
+const filterComponent = computed(() => {
+  switch (filterType.value) {
+    case 'text': return TextFilterInput
+    case 'numeric': return NumericFilterInput
+    case 'date': return DateFilterInput
+    case 'select': return SelectFilterInput
+    default: return TextFilterInput
+  }
+})
+
+// Props for each filter input
+const filterProps = computed(() => {
+  if (filterType.value === 'text') {
+    return {
+      modelValue: textFilter.value,
+      inputId: textInputId,
+      placeholder: `Filter ${props.field.label || props.field.key}...`
+    }
+  }
+  if (filterType.value === 'numeric') {
+    return {
+      modelValue: numericValue.value,
+      operator: numericOperator.value,
+      operators: FILTER_OPERATORS.numeric,
+      inputId: numericInputId
+    }
+  }
+  if (filterType.value === 'date') {
+    return {
+      modelValue: dateValue.value,
+      operator: dateOperator.value,
+      operators: FILTER_OPERATORS.date,
+      inputId: dateInputId
+    }
+  }
+  if (filterType.value === 'select') {
+    return {
+      modelValue: selectedValues.value,
+      options: filteredSelectOptions.value,
+      placeholder: props.selectFilterPlaceholder
+    }
+  }
+  return {}
+})
+
+// Event handlers for filter input components
+function onFilterValueUpdate(val) {
+  if (filterType.value === 'text') textFilter.value = val
+  if (filterType.value === 'numeric') numericValue.value = val
+  if (filterType.value === 'date') dateValue.value = val
+  if (filterType.value === 'select') selectedValues.value = val
+  applyFilter()
+}
+function onOperatorUpdate(val) {
+  if (filterType.value === 'numeric') numericOperator.value = val
+  if (filterType.value === 'date') dateOperator.value = val
+  onOperatorChange()
+}
 
 // Determine filter type based on field configuration or data analysis
 const filterType = computed(() => {
@@ -420,7 +364,6 @@ watch(() => props.modelValue, (newFilter) => {
         selectedValues.value = []
         return
     }
-    
     if (newFilter.type === 'text') {
         textFilter.value = newFilter.value || ''
     } else if (newFilter.type === 'numeric') {
@@ -430,7 +373,6 @@ watch(() => props.modelValue, (newFilter) => {
         dateValue.value = newFilter.value || ''
         dateOperator.value = newFilter.operator || '='
     } else if (newFilter.type === 'select') {
-        // selectedValues is now an array of primitive values for checkboxes
         selectedValues.value = newFilter.value || []
     }
 }, { immediate: true })
