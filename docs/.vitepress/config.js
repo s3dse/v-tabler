@@ -1,12 +1,13 @@
 import { whyframe } from '@whyframe/core'
 import { whyframeVue } from '@whyframe/vue'
 import { defineConfig } from 'vitepress'
+import UnoCSS from 'unocss/vite' // Temporarily disabled
 // import UnoCSS from 'unocss/vite' // Temporarily disabled
 
 export default defineConfig({
   vite: {
     plugins: [
-      // UnoCSS(), // Temporarily disabled due to VitePress issues
+      UnoCSS(), // Temporarily disabled due to VitePress issues
       whyframe({
         defaultSrc: '/frames/default'
       }),

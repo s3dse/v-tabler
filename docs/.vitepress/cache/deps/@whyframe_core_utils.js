@@ -1,6 +1,4 @@
-import "./chunk-PZ5AY32C.js";
-
-// docs/node_modules/@whyframe/core/src/utils.js
+// node_modules/@whyframe/core/src/utils.js
 function createIframeRpc(iframe) {
   var _a;
   const nameToCallbacks = /* @__PURE__ */ new Map();

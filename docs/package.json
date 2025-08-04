@@ -9,12 +9,13 @@
         "preview": "vitepress preview"
     },
     "dependencies": {
-        "@s3_dse/v-tabler": "^1.0.0"
+        "@s3_dse/v-tabler": "file:../packages/v-tabler"
     },
     "devDependencies": {
         "@unocss/transformer-variant-group": "^66.4.1",
         "@whyframe/core": "^0.1.13",
         "@whyframe/vue": "^0.1.8",
+        "unocss-preset-scrollbar": "^3.2.0",
         "unocss": "^66.4.1",
         "vitepress": "^1.6.3"
     }

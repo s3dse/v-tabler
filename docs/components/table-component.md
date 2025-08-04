@@ -36,7 +36,7 @@ const fieldDefinitions = ref([
 ])
 </script>
 
-<iframe data-why width="100%">
+<iframe data-why width="100%" height="250">
   <TableComponent :items="tableData" :fields="fieldDefinitions" />
 </iframe>
 

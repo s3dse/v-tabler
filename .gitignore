@@ -28,3 +28,4 @@ coverage
 *.sw?
 *v-tail-vue3-*.tgz
 *v-tabler-*.tgz
+cache

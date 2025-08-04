@@ -2,8 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { createApp } from 'whyframe:app'
 import { TableComponent } from '@s3_dse/v-tabler'
+import '@unocss/reset/tailwind-compat.css'
 import '@s3_dse/v-tabler/v-tabler.css'
-// import 'virtual:uno.css' // Temporarily disabled due to VitePress issues
+import 'virtual:uno.css' // Temporarily disabled due to VitePress issues
 const el = ref()
 
 onMounted(() => {
