@@ -1,13 +1,13 @@
 <template>
     <tbody :class="bodyClass">
         <tr
-            v-for="(item, rowIndex) in (rows || [])"
+            v-for="(item, rowIndex) in rows || []"
             :key="getRowKey(rowIndex)"
             :class="rowClass"
             :data-top-row="rowType === 'top' ? rowIndex : undefined"
         >
             <td
-                v-for="(column, fieldIndex) in (visibleFields || [])"
+                v-for="(column, fieldIndex) in visibleFields || []"
                 :key="getCellKey(fieldIndex)"
                 class="p-2 first:ps-6 last:pe-6"
                 :class="[getCellClassList(column)]"
@@ -63,19 +63,19 @@ const props = defineProps({
     }
 })
 
-const getRowKey = (rowIndex) => {
-    return props.rowType === 'top' 
-        ? `top_row_${rowIndex}` 
-        : props.rowType === 'bottom' 
-            ? `bottom_row_${rowIndex}` 
-            : `row_${rowIndex}`
+const getRowKey = rowIndex => {
+    return props.rowType === 'top'
+        ? `top_row_${rowIndex}`
+        : props.rowType === 'bottom'
+          ? `bottom_row_${rowIndex}`
+          : `row_${rowIndex}`
 }
 
-const getCellKey = (fieldIndex) => {
-    return props.rowType === 'top' 
-        ? `top_row_column_${fieldIndex}` 
-        : props.rowType === 'bottom' 
-            ? `bottom_row_column_${fieldIndex}` 
-            : `column_${fieldIndex}`
+const getCellKey = fieldIndex => {
+    return props.rowType === 'top'
+        ? `top_row_column_${fieldIndex}`
+        : props.rowType === 'bottom'
+          ? `bottom_row_column_${fieldIndex}`
+          : `column_${fieldIndex}`
 }
 </script>
