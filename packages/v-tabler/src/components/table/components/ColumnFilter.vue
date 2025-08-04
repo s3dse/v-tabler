@@ -17,7 +17,7 @@
         <!-- Filter Dropdown -->
         <DropdownMenuPortal>
             <DropdownMenuContent
-                class="bg-surface border border-border rounded-sm shadow-lg min-w-[200px] z-50"
+                class="bg-surface border border-solid border-border rounded-sm shadow-lg min-w-[200px] z-50"
                 :side="'bottom'"
                 :align="'end'"
                 :side-offset="4"
