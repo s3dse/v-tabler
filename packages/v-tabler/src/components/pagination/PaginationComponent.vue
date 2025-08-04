@@ -89,7 +89,7 @@ export default {
         activeClasses: {
             type: String,
             default:
-                'bg-primary text-onprimary hover:text-default hover:bg-inherit! border border-primary border-2 rounded-sm px-2 color-transition'
+                'bg-primary text-onprimary hover:text-default hover:bg-inherit! border border-solid border-primary border-2 rounded-sm px-2 color-transition'
         },
         inactiveClasses: {
             type: String,
