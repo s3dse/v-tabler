@@ -22,7 +22,7 @@ import { TableComponent } from '@/components/table'
 ## DEMO
 <script setup>
   import { ref } from 'vue'
-import { TableComponent } from '@s3_dse/v-tabler'
+import { TableComponent, CardComponent } from '@s3_dse/v-tabler'
 
 const tableData = ref([
   { id: 1, name: 'John Doe', email: 'john@example.com' },
@@ -37,7 +37,9 @@ const fieldDefinitions = ref([
 </script>
 
 <iframe data-why width="100%" height="250">
+<CardComponent>
   <TableComponent :items="tableData" :fields="fieldDefinitions" />
+  </CardComponent>
 </iframe>
 
 ## Basic Usage

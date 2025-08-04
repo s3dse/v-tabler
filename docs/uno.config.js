@@ -16,7 +16,7 @@
 
 import { defineConfig, presetWind3, transformerDirectives } from 'unocss'
 import transformerVariantGroup from '@unocss/transformer-variant-group'
-import { presetVTabler } from '../../packages/v-tabler/src/preset/index.mjs'
+import { presetVTabler, safelist } from '../../packages/v-tabler/src/preset/index.mjs'
 import { presetScrollbar } from 'unocss-preset-scrollbar'
 
 export default defineConfig({
@@ -30,5 +30,6 @@ export default defineConfig({
         presetScrollbar(),
         presetVTabler({ enableSemanticSpacing: false })
     ],
-    transformers: [transformerVariantGroup(), transformerDirectives()]
+    transformers: [transformerVariantGroup(), transformerDirectives()],
+    safelist: [...safelist, 'form-inputfield', 'border-border'],
 })
