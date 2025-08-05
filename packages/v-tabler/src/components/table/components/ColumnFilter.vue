@@ -56,7 +56,7 @@ import {
     DropdownMenuItem
 } from 'reka-ui'
 import { FILTER_OPERATORS } from '../composables/useColumnFiltering.js'
-import { useTableFilterConfig } from '../composables/useTableFilterConfig.js'
+import { FILTER_I18N_DEFAULTS } from '../composables/useTableFilterConfig.js'
 import { detectFilterType, generateSelectOptions } from '../utils/filterTypeDetection.js'
 import TextFilterInput from './TextFilterInput.vue'
 import NumericFilterInput from './NumericFilterInput.vue'
@@ -81,8 +81,6 @@ const modelValue = defineModel({
 
 const emit = defineEmits(['filter-change'])
 
-const filterConfig = useTableFilterConfig()
-
 const isDropdownOpen = ref(false)
 
 const filterState = ref({
@@ -103,16 +101,16 @@ function getInitialValueForFilterType(type) {
     }
 }
 
+// Get i18n settings from field level or fallback to defaults
 const i18nSettings = computed(() => {
     const fieldI18n = props.field.i18n || {}
-    const fallbackI18n = filterConfig.fallbackI18n
     return {
-        placeholder: fieldI18n.placeholder || fallbackI18n.selectFilterPlaceholder,
-        noSelectionText: fieldI18n.noSelectionText || fallbackI18n.selectFilterNoSelectionText,
+        placeholder: fieldI18n.placeholder || FILTER_I18N_DEFAULTS.selectFilterPlaceholder,
+        noSelectionText: fieldI18n.noSelectionText || FILTER_I18N_DEFAULTS.selectFilterNoSelectionText,
         singleSelectionTextFn:
-            fieldI18n.singleSelectionTextFn || fallbackI18n.selectFilterSingleSelectionTextFn,
+            fieldI18n.singleSelectionTextFn || FILTER_I18N_DEFAULTS.selectFilterSingleSelectionTextFn,
         multipleSelectionTextFn:
-            fieldI18n.multipleSelectionTextFn || fallbackI18n.selectFilterMultipleSelectionTextFn
+            fieldI18n.multipleSelectionTextFn || FILTER_I18N_DEFAULTS.selectFilterMultipleSelectionTextFn
     }
 })
 

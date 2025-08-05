@@ -3,7 +3,6 @@ import { flushPromises, mount } from '@vue/test-utils'
 import TableComponent from '@/components/table/TableComponent.vue'
 import ColumnFilter from '@/components/table/components/ColumnFilter.vue'
 import { useColumnFiltering } from '@/components/table/composables/useColumnFiltering.js'
-import { TABLE_FILTER_CONFIG_KEY } from '@/components/table/composables/useTableFilterConfig.js'
 
 // Test data similar to the demo
 const testData = [
@@ -882,7 +881,7 @@ describe('Column Filtering', () => {
             expect(wrapper.vm.i18nSettings.multipleSelectionTextFn(2)).toBe('2 dept(s) selected')
         })
 
-        it('should fall back to component props when field i18n is not provided', () => {
+        it('should fall back to default constants when field i18n is not provided', () => {
             const fieldWithoutI18n = {
                 key: 'department',
                 label: 'Department',
@@ -898,26 +897,11 @@ describe('Column Filtering', () => {
                     field: fieldWithoutI18n,
                     data: testData,
                     modelValue: null
-                },
-                global: {
-                    provide: {
-                        [TABLE_FILTER_CONFIG_KEY]: {
-                            value: {
-                                fallbackI18n: {
-                                    selectFilterPlaceholder: 'Fallback placeholder...',
-                                    selectFilterNoSelectionText: 'Fallback no selection...',
-                                    selectFilterSingleSelectionTextFn: value => value,
-                                    selectFilterMultipleSelectionTextFn: count =>
-                                        `${count} selected`
-                                }
-                            }
-                        }
-                    }
                 }
             })
 
-            expect(wrapper.vm.i18nSettings.placeholder).toBe('Fallback placeholder...')
-            expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Fallback no selection...')
+            expect(wrapper.vm.i18nSettings.placeholder).toBe('Search options...')
+            expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Select values...')
         })
     })
 })
