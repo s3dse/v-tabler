@@ -121,24 +121,28 @@ const i18nSettings = computed(() => {
 const filterComponent = computed(() => {
     const componentMap = {
         text: TextFilterInput,
-        numeric: NumericFilterInput,
+        numeric: NumericFilterInput, 
         date: DateFilterInput,
         select: SelectFilterInput
     }
     return componentMap[filterType.value] || TextFilterInput
 })
 
+const resetIfNecessary = (filterType, filterValue) => {
+    if (filterType === 'select' && !Array.isArray(filterValue.value)) {
+        filterValue.value = []
+    } else if (
+        ['text', 'date', 'numeric'].includes(filterType) &&
+        (filterValue.value === null || filterValue.value === undefined)
+    ) {
+        filterValue.value = ''
+    }
+}
+
 const filterProps = computed(() => {
     const modelValue = filterState.value
 
-    if (filterType.value === 'select' && !Array.isArray(modelValue.value)) {
-        modelValue.value = []
-    } else if (
-        ['text', 'numeric', 'date'].includes(filterType.value) &&
-        (modelValue.value === null || modelValue.value === undefined)
-    ) {
-        modelValue.value = ''
-    }
+    resetIfNecessary(filterType.value, modelValue)
 
     const baseProps = {
         modelValue: modelValue.value
@@ -274,13 +278,7 @@ watch(
     filterType,
     newType => {
         // Only reset if the current value is incompatible with the new type
-        const currentValue = filterState.value.value
-
-        if (newType === 'select' && !Array.isArray(currentValue)) {
-            filterState.value.value = []
-        } else if (['text', 'numeric', 'date'].includes(newType) && Array.isArray(currentValue)) {
-            filterState.value.value = ''
-        }
+        resetIfNecessary(newType, filterState.value)
     },
     { immediate: true }
 )
