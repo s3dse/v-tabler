@@ -833,10 +833,14 @@ describe('Column Filtering', () => {
                 expect(filterComponent.vm.hasActiveFilter).toBe(false)
 
                 // Check that internal filter values are reset
-                expect(filterComponent.vm.textFilter).toBe('')
-                expect(filterComponent.vm.numericValue).toBe('')
-                expect(filterComponent.vm.dateValue).toBe('')
-                expect(filterComponent.vm.selectedValues).toEqual([])
+                if (['date', 'numeric'].includes(filterComponent.vm.filterType)) {
+                    expect(filterComponent.vm.filterState.value).toBe('')
+                    expect(filterComponent.vm.filterState.operator).toBe('=')
+                } else if (filterComponent.vm.filterType === 'text') {
+                    expect(filterComponent.vm.filterState.value).toBe('')
+                } else if (filterComponent.vm.filterType === 'select') {
+                    expect(filterComponent.vm.filterState.value).toEqual([])
+                }
             })
         })
     })

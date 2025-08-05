@@ -8,7 +8,7 @@
             ]"
             :title="`Filter ${field.label || field.key}`"
         >
-            <div 
+            <div
                 class="w-4 h-4"
                 :class="hasActiveFilter ? 'i-tabler-filter text-primary' : 'i-tabler-filter'"
             ></div>
@@ -46,17 +46,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, useId } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
     DropdownMenuRoot,
     DropdownMenuTrigger,
     DropdownMenuPortal,
     DropdownMenuContent,
     DropdownMenuSeparator,
-    DropdownMenuItem,
+    DropdownMenuItem
 } from 'reka-ui'
 import { FILTER_OPERATORS } from '../composables/useColumnFiltering.js'
 import { useTableFilterConfig } from '../composables/useTableFilterConfig.js'
+import { detectFilterType, generateSelectOptions } from '../utils/filterTypeDetection.js'
 import TextFilterInput from './TextFilterInput.vue'
 import NumericFilterInput from './NumericFilterInput.vue'
 import DateFilterInput from './DateFilterInput.vue'
@@ -70,31 +71,38 @@ const props = defineProps({
     data: {
         type: Array,
         required: true
-    },
-    modelValue: {
-        type: Object,
-        default: undefined
     }
 })
 
-const emit = defineEmits(['update:modelValue', 'filter-change'])
+const modelValue = defineModel({
+    type: Object,
+    default: undefined
+})
 
-// Use injected filter configuration
+const emit = defineEmits(['filter-change'])
+
 const filterConfig = useTableFilterConfig()
-
-const textInputId = useId()
-const numericInputId = useId()
-const dateInputId = useId()
 
 const isDropdownOpen = ref(false)
 
-const textFilter = ref('')
-const numericOperator = ref('=')
-const numericValue = ref('')
-const dateOperator = ref('=')
-const dateValue = ref('')
-const selectedValues = ref([])
-const selectSearchTerm = ref('')
+const filterState = ref({
+    value: null,
+    operator: '='
+})
+
+// Get the appropriate initial value based on filter type
+function getInitialValue(type) {
+    switch (type) {
+        case 'select':
+            return []
+        case 'text':
+        case 'numeric':
+        case 'date':
+            return ''
+        default:
+            return null
+    }
+}
 
 // Get i18n settings from field level or fallback to injected config
 const i18nSettings = computed(() => {
@@ -103,272 +111,177 @@ const i18nSettings = computed(() => {
     return {
         placeholder: fieldI18n.placeholder || fallbackI18n.selectFilterPlaceholder,
         noSelectionText: fieldI18n.noSelectionText || fallbackI18n.selectFilterNoSelectionText,
-        singleSelectionTextFn: fieldI18n.singleSelectionTextFn || fallbackI18n.selectFilterSingleSelectionTextFn,
-        multipleSelectionTextFn: fieldI18n.multipleSelectionTextFn || fallbackI18n.selectFilterMultipleSelectionTextFn
+        singleSelectionTextFn:
+            fieldI18n.singleSelectionTextFn || fallbackI18n.selectFilterSingleSelectionTextFn,
+        multipleSelectionTextFn:
+            fieldI18n.multipleSelectionTextFn || fallbackI18n.selectFilterMultipleSelectionTextFn
     }
 })
 // Dynamic filter component mapping
 const filterComponent = computed(() => {
-  switch (filterType.value) {
-    case 'text': return TextFilterInput
-    case 'numeric': return NumericFilterInput
-    case 'date': return DateFilterInput
-    case 'select': return SelectFilterInput
-    default: return TextFilterInput
-  }
+    const componentMap = {
+        text: TextFilterInput,
+        numeric: NumericFilterInput,
+        date: DateFilterInput,
+        select: SelectFilterInput
+    }
+    return componentMap[filterType.value] || TextFilterInput
 })
 
 const filterProps = computed(() => {
-  if (filterType.value === 'text') {
-    return {
-      modelValue: textFilter.value,
-      inputId: textInputId,
-      placeholder: `Filter ${props.field.label || props.field.key}...`
-    }
-  }
-  if (filterType.value === 'numeric') {
-    return {
-      modelValue: numericValue.value,
-      operator: numericOperator.value,
-      operators: FILTER_OPERATORS.numeric,
-      inputId: numericInputId
-    }
-  }
-  if (filterType.value === 'date') {
-    return {
-      modelValue: dateValue.value,
-      operator: dateOperator.value,
-      operators: FILTER_OPERATORS.date,
-      inputId: dateInputId
-    }
-  }
-  if (filterType.value === 'select') {
-    return {
-      modelValue: selectedValues.value,
-      options: filteredSelectOptions.value,
-      placeholder: i18nSettings.value.placeholder,
-      noSelectionText: i18nSettings.value.noSelectionText,
-      singleSelectionTextFn: i18nSettings.value.singleSelectionTextFn,
-      multipleSelectionTextFn: i18nSettings.value.multipleSelectionTextFn
-    }
-  }
-  return {}
-})
+    const modelValue = filterState.value
 
-function onFilterValueUpdate(val) {
-  if (filterType.value === 'text') textFilter.value = val
-  if (filterType.value === 'numeric') numericValue.value = val
-  if (filterType.value === 'date') dateValue.value = val
-  if (filterType.value === 'select') selectedValues.value = val
-  applyFilter()
-}
-function onOperatorUpdate(val) {
-  if (filterType.value === 'numeric') numericOperator.value = val
-  if (filterType.value === 'date') dateOperator.value = val
-  onOperatorChange()
-}
+    if (filterType.value === 'select' && !Array.isArray(modelValue.value)) {
+        modelValue.value = []
+    } else if (
+        ['text', 'numeric', 'date'].includes(filterType.value) &&
+        (modelValue.value === null || modelValue.value === undefined)
+    ) {
+        modelValue.value = ''
+    }
 
-const filterType = computed(() => {
-    if (props.field.filterType) {
-        return props.field.filterType
+    const baseProps = {
+        modelValue: modelValue.value
     }
-    
-    if (props.field.filterOptions) {
-        return 'select'
-    }
-    
-    if (props.field.type === 'numeric') {
-        return 'numeric'
-    }
-    
-    // Auto-detect from data
-    const sampleValues = props.data
-        .map(item => item[props.field.key])
-        .filter(val => val != null && val !== '')
-        .slice(0, 10)
-    
-    if (sampleValues.length === 0) return 'text'
-    
-    // Check if all values are numbers
-    const allNumbers = sampleValues.every(val => !isNaN(Number(val)))
-    if (allNumbers) return 'numeric'
-    
-    // Check if limited unique values (for select filter) - do this BEFORE date check
-    const uniqueValues = [...new Set(sampleValues)]
-    if (uniqueValues.length <= 10 && uniqueValues.length < sampleValues.length * 0.5) {
-        // Double-check against full dataset for high cardinality
-        const allUniqueValues = [...new Set(
-            props.data
-                .map(item => item[props.field.key])
-                .filter(val => val != null && val !== '')
-        )]
-        
-        // Fallback to text if too many unique values
-        if (allUniqueValues.length > 50) {
-            return 'text'
+
+    if (filterType.value === 'text') {
+        return {
+            ...baseProps,
+            placeholder: `Filter ${props.field.label || props.field.key}...`
         }
-        
-        return 'select'
     }
-    
-    // Check if all values are dates (after select check)
-    const allDates = sampleValues.every(val => {
-        // More strict date validation - should look like actual dates
-        const dateValue = Date.parse(val)
-        return !isNaN(dateValue) && 
-               // Exclude obviously non-date strings like "Person 1"
-               /^\d{4}-\d{2}-\d{2}|^\d{1,2}\/\d{1,2}\/\d{4}|^\d{1,2}-\d{1,2}-\d{4}/.test(val)
-    })
-    if (allDates) {
-        // Even for dates, check cardinality - if too many unique dates, use text filter
-        const allUniqueValues = [...new Set(
-            props.data
-                .map(item => item[props.field.key])
-                .filter(val => val != null && val !== '')
-        )]
-        
-        if (allUniqueValues.length > 50) {
-            return 'text'
-        }
-        
-        return 'date'
-    }
-    
-    return 'text'
-})
 
-// Generate select options
-const selectOptions = computed(() => {
-    if (props.field.filterOptions) {
-        // filterOptions is now just a direct array of options
-        return props.field.filterOptions
+    if (filterType.value === 'numeric' || filterType.value === 'date') {
+        return {
+            ...baseProps,
+            operator: filterState.value.operator,
+            operators: FILTER_OPERATORS[filterType.value]
+        }
     }
-    
+
     if (filterType.value === 'select') {
-        const allValues = props.data
-            .map(item => item[props.field.key])
-            .filter(val => val != null && val !== '')
-        
-        const uniqueValues = [...new Set(allValues)]
-        
-        // Safety check - only apply to auto-detected select filters, not explicit ones
-        if (!props.field.filterType && uniqueValues.length > 50) {
-            console.warn(`Column "${props.field.key}" has ${uniqueValues.length} unique values. Consider providing explicit filterOptions for better performance.`)
-            // Fallback to text filter for high cardinality data (auto-detected only)
-            return []
+        return {
+            ...baseProps,
+            options: filteredSelectOptions.value,
+            ...i18nSettings.value
         }
-        
-        return uniqueValues.sort().map(value => ({
-            value: value,
-            label: String(value)
-        }))
     }
-    
-    return []
+
+    return baseProps
 })
 
-// Filtered select options based on search term
+// Simplified event handlers
+function onFilterValueUpdate(value) {
+    filterState.value.value = value
+    applyFilter()
+}
+
+function onOperatorUpdate(operator) {
+    filterState.value.operator = operator
+    applyFilter()
+}
+
+// Use the extracted auto-detection logic
+const filterType = computed(() => {
+    return detectFilterType(props.field, props.data)
+})
+
+// Use the extracted select options generation
+const selectOptions = computed(() => {
+    return generateSelectOptions(props.field, props.data, filterType.value)
+})
+
+// Filtered select options (no search term needed - that's handled by SelectFilterInput)
 const filteredSelectOptions = computed(() => {
-    if (!selectSearchTerm.value) {
-        return selectOptions.value
-    }
-    
-    return selectOptions.value.filter(option => 
-        option.label.toLowerCase().includes(selectSearchTerm.value.toLowerCase())
-    )
+    return selectOptions.value
 })
 
-// Check if filter is active
+// Simplified active filter check
 const hasActiveFilter = computed(() => {
-    if (filterType.value === 'text') return textFilter.value.trim() !== ''
-    if (filterType.value === 'numeric') {
-        const numValue = String(numericValue.value || '').trim()
-        return numValue !== '' && !isNaN(Number(numValue))
+    const value = filterState.value.value
+
+    if (filterType.value === 'text') {
+        return typeof value === 'string' && value.trim() !== ''
     }
-    if (filterType.value === 'date') return dateValue.value !== ''
-    if (filterType.value === 'select') return Array.isArray(selectedValues.value) && selectedValues.value.length > 0
+    if (filterType.value === 'numeric') {
+        return value != null && value !== '' && !isNaN(Number(value))
+    }
+    if (filterType.value === 'date') {
+        return value != null && value !== ''
+    }
+    if (filterType.value === 'select') {
+        return Array.isArray(value) && value.length > 0
+    }
     return false
 })
 
-// Build current filter object
+// Simplified filter object generation
 const currentFilter = computed(() => {
     if (!hasActiveFilter.value) return null
-    
-    const filter = {
+
+    const value = filterState.value.value
+    const operator = filterState.value.operator
+
+    const operatorMap = {
+        text: 'contains',
+        numeric: operator,
+        date: operator,
+        select: 'in'
+    }
+
+    return {
         field: props.field.key,
-        type: filterType.value
+        type: filterType.value,
+        value: filterType.value === 'numeric' ? Number(value) : value,
+        operator: operatorMap[filterType.value]
     }
-    
-    if (filterType.value === 'text') {
-        filter.value = textFilter.value.trim()
-        filter.operator = 'contains'
-    } else if (filterType.value === 'numeric') {
-        const numValue = String(numericValue.value || '').trim()
-        filter.value = numValue === '' ? null : Number(numValue)
-        filter.operator = numericOperator.value
-    } else if (filterType.value === 'date') {
-        filter.value = dateValue.value
-        filter.operator = dateOperator.value
-    } else if (filterType.value === 'select') {
-        // selectedValues is now an array of primitive values from checkboxes
-        filter.value = selectedValues.value
-        filter.operator = 'in'
-    }
-    
-    return filter
 })
 
-// Handle operator change for comparison filters (numeric and date)
-const onOperatorChange = () => {
-    // Only apply if we have a value and an existing filter
-    if (filterType.value === 'numeric') {
-        const numValue = String(numericValue.value || '').trim()
-        if (numValue !== '' && !isNaN(Number(numValue))) {
-            applyFilter()
-        }
-    } else if (filterType.value === 'date') {
-        if (dateValue.value !== '') {
-            applyFilter()
-        }
-    }
-}
-
-// Apply filter
+// Apply filter - simplified with defineModel
 const applyFilter = () => {
-    emit('update:modelValue', currentFilter.value)
-    emit('filter-change', currentFilter.value)
+    const filter = currentFilter.value
+    modelValue.value = filter
+    emit('filter-change', filter)
 }
 
-// Clear filter
+// Clear filter - simplified with defineModel
 const clearFilter = () => {
-    textFilter.value = ''
-    numericValue.value = ''
-    dateValue.value = ''
-    selectedValues.value = []
+    filterState.value = { value: getInitialValue(filterType.value), operator: '=' }
     isDropdownOpen.value = false
-    emit('update:modelValue', null)
+    modelValue.value = undefined
     emit('filter-change', null)
 }
 
-// Initialize from modelValue
-watch(() => props.modelValue, (newFilter) => {
-    if (!newFilter) {
-        textFilter.value = ''
-        numericValue.value = ''
-        dateValue.value = ''
-        selectedValues.value = []
-        return
-    }
-    if (newFilter.type === 'text') {
-        textFilter.value = newFilter.value || ''
-    } else if (newFilter.type === 'numeric') {
-        numericValue.value = String(newFilter.value || '')
-        numericOperator.value = newFilter.operator || '='
-    } else if (newFilter.type === 'date') {
-        dateValue.value = newFilter.value || ''
-        dateOperator.value = newFilter.operator || '='
-    } else if (newFilter.type === 'select') {
-        selectedValues.value = newFilter.value || []
-    }
-}, { immediate: true })
+// Initialize from modelValue - simplified with defineModel
+watch(
+    modelValue,
+    newFilter => {
+        if (!newFilter) {
+            filterState.value = { value: getInitialValue(filterType.value), operator: '=' }
+            return
+        }
+
+        filterState.value = {
+            value: newFilter.value,
+            operator: newFilter.operator || '='
+        }
+    },
+    { immediate: true }
+)
+
+// Watch for filter type changes and reset value if needed
+watch(
+    filterType,
+    newType => {
+        // Only reset if the current value is incompatible with the new type
+        const currentValue = filterState.value.value
+
+        if (newType === 'select' && !Array.isArray(currentValue)) {
+            filterState.value.value = []
+        } else if (['text', 'numeric', 'date'].includes(newType) && Array.isArray(currentValue)) {
+            filterState.value.value = ''
+        }
+    },
+    { immediate: true }
+)
 </script>
