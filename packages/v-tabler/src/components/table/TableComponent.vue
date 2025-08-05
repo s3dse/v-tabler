@@ -249,23 +249,6 @@ const props = defineProps({
         type: Boolean,
         default: true
     },
-    // Column filter i18n props
-    selectFilterPlaceholder: {
-        type: String,
-        default: 'Search options...'
-    },
-    selectFilterNoSelectionText: {
-        type: String,
-        default: 'Select values...'
-    },
-    selectFilterSingleSelectionTextFn: {
-        type: Function,
-        default: (value) => value
-    },
-    selectFilterMultipleSelectionTextFn: {
-        type: Function,
-        default: (count) => `${count} selected`
-    },
     // Clear all filters button
     showClearAllFiltersButton: {
         type: Boolean,
@@ -304,10 +287,6 @@ const {
 
 // Provide filter configuration to child components
 const { filterConfig } = useTableFilterConfigProvider({
-    selectFilterPlaceholder: props.selectFilterPlaceholder,
-    selectFilterNoSelectionText: props.selectFilterNoSelectionText,
-    selectFilterSingleSelectionTextFn: props.selectFilterSingleSelectionTextFn,
-    selectFilterMultipleSelectionTextFn: props.selectFilterMultipleSelectionTextFn,
     filterDebounce: props.filterDebounce,
     filterMaxWait: props.filterMaxWait
 })

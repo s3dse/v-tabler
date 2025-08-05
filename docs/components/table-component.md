@@ -10,6 +10,11 @@ A comprehensive, feature-rich Vue 3 table component with built-in pagination, so
 - [Events](#events)
 - [Slots](#slots)
 - [Field Configuration](#field-configuration)
+  - [Required Field Properties](#required-field-properties)
+  - [Optional Field Properties](#optional-field-properties)
+  - [Column Alignment Shortcuts](#column-alignment-shortcuts)
+  - [Field i18n Configuration](#field-i18n-configuration)
+  - [Filter Type Auto-Detection](#filter-type-auto-detection)
 - [Examples](#examples)
 - [Advanced Features](#advanced-features)
 
@@ -164,6 +169,7 @@ Fields are defined as objects in the `fields` prop array. Each field object supp
 | `type` | `String` | Data type for filtering and sorting (`'numeric'`, `'date'`, `'text'`) |
 | `filterType` | `String` | Override auto-detected filter type (`'numeric'`, `'date'`, `'text'`, `'select'`) |
 | `filterOptions` | `Array` | Options for select filter: `[{ value, label }]` |
+| `i18n` | `Object` | Internationalization settings for column filters (see [Field i18n Configuration](#field-i18n-configuration)) |
 
 ### Column Alignment Shortcuts
 
@@ -176,6 +182,85 @@ The v-tabler theme provides dedicated UnoCSS shortcuts for consistent column ali
 | `table-col-center` | `justify-center text-center` | Center-align content (status, badges) |
 
 These shortcuts should be used in `thClassList` for header alignment and corresponding `text-*` classes in `tdClassList` for body cell alignment.
+
+### Field i18n Configuration
+
+The `i18n` field property allows you to customize internationalization settings for column filters on a per-field basis. This is particularly useful for select filters where you want to customize the placeholder text, selection display text, and other filter-specific labels.
+
+#### i18n Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `placeholder` | `String` | `'Search options...'` | Placeholder text for the filter input field |
+| `noSelectionText` | `String` | `'Select values...'` | Text displayed when no items are selected |
+| `singleSelectionTextFn` | `Function` | `(value) => value` | Function to format the display text for single selections |
+| `multipleSelectionTextFn` | `Function` | `(count) => \`${count} selected\`` | Function to format the display text for multiple selections |
+
+#### Example i18n Configuration
+
+```javascript
+const fields = [
+  {
+    key: 'department',
+    label: 'Department',
+    filterType: 'select',
+    filterOptions: [
+      { value: 'eng', label: 'Engineering' },
+      { value: 'sales', label: 'Sales' },
+      { value: 'marketing', label: 'Marketing' }
+    ],
+    i18n: {
+      placeholder: 'Search departments...',
+      noSelectionText: 'Choose departments...',
+      singleSelectionTextFn: (value) => `Selected: ${value}`,
+      multipleSelectionTextFn: (count) => `${count} departments selected`
+    }
+  },
+  {
+    key: 'status',
+    label: 'Status',
+    filterType: 'select',
+    filterOptions: [
+      { value: 'active', label: 'Active' },
+      { value: 'inactive', label: 'Inactive' }
+    ],
+    i18n: {
+      placeholder: 'Filter by status...',
+      noSelectionText: 'All statuses',
+      singleSelectionTextFn: (value) => `Status: ${value}`,
+      multipleSelectionTextFn: (count) => `${count} statuses`
+    }
+  }
+]
+```
+
+#### Global i18n Fallbacks
+
+If field-level `i18n` settings are not provided, the component will fall back to built-in default values:
+
+- **placeholder**: `'Search options...'`
+- **noSelectionText**: `'Select values...'`
+- **singleSelectionTextFn**: `(value) => value`
+- **multipleSelectionTextFn**: `(count) => \`${count} selected\``
+
+This provides consistent behavior across all select filters while still allowing field-specific customization when needed.
+
+### Filter Type Auto-Detection
+
+The TableComponent includes an auto-detection for column filter types. When `filterType` is not explicitly specified, the component analyzes the data to determine the most appropriate filter type.
+
+#### Detection Rules
+
+1. **Numeric**: All sampled values are valid numbers
+2. **Select**: Limited unique values (≤10 unique in sample, <50% cardinality)
+3. **Date**: All values match date patterns and are valid dates
+4. **Text**: Default fallback for all other cases
+
+#### Performance Considerations
+
+- Auto-detection only samples the first 10 rows by default
+- High cardinality data (>50 unique values) falls back to text filters
+- Explicit `filterType` configuration bypasses auto-detection and improves performance
 
 ### Example Field Configuration
 
@@ -290,6 +375,99 @@ const handleFilter = async (searchTerm) => {
   tableData.value = response.data
   totalCount.value = response.total
 }
+</script>
+```
+
+### Table with Custom Filter i18n
+
+```vue
+<template>
+  <TableComponent
+    :items="employeeData"
+    :fields="employeeFields"
+    title="Employee Directory"
+    enable-column-filters
+  />
+</template>
+
+<script setup>
+const employeeData = ref([
+  { 
+    id: 1, 
+    name: 'John Doe', 
+    department: 'Engineering', 
+    status: 'active',
+    salary: 75000 
+  },
+  { 
+    id: 2, 
+    name: 'Jane Smith', 
+    department: 'Marketing', 
+    status: 'active',
+    salary: 65000 
+  },
+  { 
+    id: 3, 
+    name: 'Mike Johnson', 
+    department: 'Sales', 
+    status: 'inactive',
+    salary: 55000 
+  }
+])
+
+const employeeFields = [
+  { 
+    key: 'id', 
+    label: 'ID',
+    thClassList: 'table-col-right',
+    tdClassList: 'text-right font-mono'
+  },
+  { 
+    key: 'name', 
+    label: 'Employee Name',
+    thClassList: 'table-col-left',
+    tdClassList: 'text-left'
+  },
+  {
+    key: 'department',
+    label: 'Department',
+    filterType: 'select',
+    filterOptions: [
+      { value: 'Engineering', label: 'Engineering' },
+      { value: 'Marketing', label: 'Marketing' },
+      { value: 'Sales', label: 'Sales' }
+    ],
+    i18n: {
+      placeholder: 'Search departments...',
+      noSelectionText: 'All departments',
+      singleSelectionTextFn: (value) => `Dept: ${value}`,
+      multipleSelectionTextFn: (count) => `${count} departments`
+    }
+  },
+  {
+    key: 'status',
+    label: 'Status',
+    filterType: 'select',
+    filterOptions: [
+      { value: 'active', label: 'Active' },
+      { value: 'inactive', label: 'Inactive' }
+    ],
+    i18n: {
+      placeholder: 'Filter status...',
+      noSelectionText: 'Any status',
+      singleSelectionTextFn: (value) => `Status: ${value.toUpperCase()}`,
+      multipleSelectionTextFn: (count) => `${count} selected`
+    }
+  },
+  {
+    key: 'salary',
+    label: 'Salary',
+    type: 'numeric',
+    thClassList: 'table-col-right',
+    tdClassList: 'text-right',
+    formatter: (value) => `$${value.toLocaleString()}`
+  }
+]
 </script>
 ```
 

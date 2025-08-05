@@ -90,8 +90,7 @@ const filterState = ref({
     operator: '='
 })
 
-// Get the appropriate initial value based on filter type
-function getInitialValue(type) {
+function getInitialValueForFilterType(type) {
     switch (type) {
         case 'select':
             return []
@@ -104,7 +103,6 @@ function getInitialValue(type) {
     }
 }
 
-// Get i18n settings from field level or fallback to injected config
 const i18nSettings = computed(() => {
     const fieldI18n = props.field.i18n || {}
     const fallbackI18n = filterConfig.fallbackI18n
@@ -117,7 +115,7 @@ const i18nSettings = computed(() => {
             fieldI18n.multipleSelectionTextFn || fallbackI18n.selectFilterMultipleSelectionTextFn
     }
 })
-// Dynamic filter component mapping
+
 const filterComponent = computed(() => {
     const componentMap = {
         text: TextFilterInput,
@@ -195,12 +193,10 @@ const selectOptions = computed(() => {
     return generateSelectOptions(props.field, props.data, filterType.value)
 })
 
-// Filtered select options (no search term needed - that's handled by SelectFilterInput)
 const filteredSelectOptions = computed(() => {
     return selectOptions.value
 })
 
-// Simplified active filter check
 const hasActiveFilter = computed(() => {
     const value = filterState.value.value
 
@@ -250,7 +246,7 @@ const applyFilter = () => {
 
 // Clear filter - simplified with defineModel
 const clearFilter = () => {
-    filterState.value = { value: getInitialValue(filterType.value), operator: '=' }
+    filterState.value = { value: getInitialValueForFilterType(filterType.value), operator: '=' }
     isDropdownOpen.value = false
     modelValue.value = undefined
     emit('filter-change', null)
@@ -261,7 +257,7 @@ watch(
     modelValue,
     newFilter => {
         if (!newFilter) {
-            filterState.value = { value: getInitialValue(filterType.value), operator: '=' }
+            filterState.value = { value: getInitialValueForFilterType(filterType.value), operator: '=' }
             return
         }
 
