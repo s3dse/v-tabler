@@ -148,8 +148,6 @@ import {
     useColumnFiltering
 } from './composables/index.js'
 
-import { useTableFilterConfigProvider } from './composables/useTableFilterConfig.js'
-
 import {
     TableTitle,
     TableHeader,
@@ -249,7 +247,6 @@ const props = defineProps({
         type: Boolean,
         default: true
     },
-    // Clear all filters button
     showClearAllFiltersButton: {
         type: Boolean,
         default: true
@@ -285,13 +282,6 @@ const {
     underscoresToSpaces 
 } = useTableData(props)
 
-// Provide filter configuration to child components
-const { filterConfig } = useTableFilterConfigProvider({
-    filterDebounce: props.filterDebounce,
-    filterMaxWait: props.filterMaxWait
-})
-
-// Column filtering (new feature)
 const { 
     columnFilters,
     setColumnFilter,
@@ -300,7 +290,6 @@ const {
     applyColumnFilters
 } = useColumnFiltering()
 
-// Use filtered data for pagination - apply column filters to search-filtered data
 const dataForPagination = computed(() => {
     return hasActiveFilters.value ? applyColumnFilters(tableData.value) : tableData.value
 })
@@ -400,9 +389,8 @@ const handleFilterInternal = (event) => {
 
 const handleColumnFilterInternal = ({ field, filter }) => {
     setColumnFilter(field, filter)
-    
-    // Reset to first page when filtering
     const pageResult = changePageInternal(1)
+    
     if (pageResult?.shouldEmitPageChange) {
         emit('page-change', pageResult.eventData.page)
     }
@@ -413,7 +401,6 @@ const handleColumnFilterInternal = ({ field, filter }) => {
         })
     }
     
-    // Emit column filter events
     emit('column-filter-change', { field, filter })
     emit('after-column-filter', { field, filter, activeFilters: columnFilters.value })
 }
