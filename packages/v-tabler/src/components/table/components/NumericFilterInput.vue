@@ -5,12 +5,7 @@
         </DropdownMenuLabel>
         <div class="space-y-3">
             <div class="flex justify-center">
-                <ToggleGroupRoot
-                    v-model="operatorValue"
-                    type="single"
-                    class="flex"
-                    @update:model-value="onOperatorChange"
-                >
+                <ToggleGroupRoot v-model="operatorValue" type="single" class="flex">
                     <ToggleGroupItem
                         v-for="operatorObj in operators"
                         :key="operatorObj.value"
@@ -22,46 +17,22 @@
             </div>
             <input
                 :id="inputId"
-                :value="value"
                 type="number"
                 class="form-inputfield w-full text-default"
                 :placeholder="'Value...'"
-                @input="onInput"
+                v-model="modelValue"
                 @keydown.stop
             />
         </div>
     </div>
 </template>
 <script setup>
-import { ref, watch } from 'vue'
 import { DropdownMenuLabel, ToggleGroupRoot, ToggleGroupItem } from 'reka-ui'
 const props = defineProps({
-    modelValue: [String, Number],
-    operator: String,
-    operators: Array,
-    inputId: String
+    inputId: String,
+    operators: Array
 })
-const emit = defineEmits(['update:modelValue', 'update:operator'])
-const value = ref(props.modelValue || '')
-const operatorValue = ref(props.operator || '=')
-watch(
-    () => props.modelValue,
-    v => {
-        value.value = v
-    }
-)
-watch(
-    () => props.operator,
-    v => {
-        operatorValue.value = v
-    }
-)
-function onInput(e) {
-    value.value = e.target.value
-    emit('update:modelValue', value.value)
-}
-function onOperatorChange(val) {
-    operatorValue.value = val
-    emit('update:operator', operatorValue.value)
-}
+
+const modelValue = defineModel({ type: [String, Number] })
+const operatorValue = defineModel('operator', { type: String, default: '=' })
 </script>

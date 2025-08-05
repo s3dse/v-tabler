@@ -118,7 +118,8 @@ describe('SelectFilterInput', () => {
         })
 
         const firstCheckbox = wrapper.findAllComponents(CheckboxComponent)[0]
-        await firstCheckbox.vm.$emit('change')
+        const checkboxInput = firstCheckbox.find('input[type="checkbox"]')
+        await checkboxInput.setChecked(true)
 
         expect(wrapper.emitted('update:modelValue')).toBeTruthy()
     })
