@@ -37,7 +37,6 @@ const props = defineProps({
 const selectedValues = defineModel('modelValue', { type: Array, default: () => []})
 const searchTerm = ref('')
 
-// Computed selection text based on current selection
 const selectionText = computed(() => {
     if (!selectedValues.value || selectedValues.value.length === 0) {
         return props.noSelectionText || 'Select values:'
