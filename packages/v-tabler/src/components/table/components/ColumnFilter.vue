@@ -169,7 +169,6 @@ const filterProps = computed(() => {
     return baseProps
 })
 
-// Simplified event handlers
 function onFilterValueUpdate(value) {
     filterState.value.value = value
     applyFilter()
@@ -180,12 +179,10 @@ function onOperatorUpdate(operator) {
     applyFilter()
 }
 
-// Use the extracted auto-detection logic
 const filterType = computed(() => {
     return detectFilterType(props.field, props.data)
 })
 
-// Use the extracted select options generation
 const selectOptions = computed(() => {
     return generateSelectOptions(props.field, props.data, filterType.value)
 })
@@ -212,7 +209,6 @@ const hasActiveFilter = computed(() => {
     return false
 })
 
-// Simplified filter object generation
 const currentFilter = computed(() => {
     if (!hasActiveFilter.value) return null
 
@@ -234,14 +230,12 @@ const currentFilter = computed(() => {
     }
 })
 
-// Apply filter - simplified with defineModel
 const applyFilter = () => {
     const filter = currentFilter.value
     modelValue.value = filter
     emit('filter-change', filter)
 }
 
-// Clear filter - simplified with defineModel
 const clearFilter = () => {
     filterState.value = { value: getInitialValueForFilterType(filterType.value), operator: '=' }
     isDropdownOpen.value = false
@@ -249,7 +243,6 @@ const clearFilter = () => {
     emit('filter-change', null)
 }
 
-// Initialize from modelValue - simplified with defineModel
 watch(
     modelValue,
     newFilter => {
@@ -266,7 +259,6 @@ watch(
     { immediate: true }
 )
 
-// Watch for filter type changes and reset value if needed
 watch(
     filterType,
     newType => {

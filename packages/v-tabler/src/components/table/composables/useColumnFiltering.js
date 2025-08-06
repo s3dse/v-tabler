@@ -42,7 +42,8 @@ export function useColumnFiltering() {
                 return applyFilter(value, filter)
             })
         })
-    } // Apply a single filter to a value
+    }
+
     const applyFilter = (value, filter) => {
         if (!filter) return true
 

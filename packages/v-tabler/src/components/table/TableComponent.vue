@@ -1,8 +1,6 @@
 <template>
     <div>
-        <table-title 
-            :title="title"
-        >
+        <table-title :title="title">
             <template v-if="slots.title" #title>
                 <slot name="title" />
             </template>
@@ -50,14 +48,18 @@
                     :get-column-label="getColumnLabel"
                     :get-sort-icon-class="getSortIconClass"
                     :left-pad-first-col="leftPadFirstCol"
-                    :right-pad-last-col="(index) => rightPadLastCol(index, visibleFields.length)"
+                    :right-pad-last-col="index => rightPadLastCol(index, visibleFields.length)"
                     :enable-column-filters="enableColumnFilters"
                     :all-data="[...(props.items || []), ...topRows, ...bottomRows]"
                     :column-filters="columnFilters"
                     @sort-table="handleSortInternal"
                     @column-filter="handleColumnFilterInternal"
                 >
-                    <template v-for="field in visibleFields" :key="field.key" #[`th(${field.key})`]="slotProps">
+                    <template
+                        v-for="field in visibleFields"
+                        :key="field.key"
+                        #[`th(${field.key})`]="slotProps"
+                    >
                         <slot :name="`th(${field.key})`" v-bind="slotProps"></slot>
                     </template>
                 </table-head>
@@ -71,7 +73,11 @@
                     :get-unformatted-value="getUnformattedValue"
                     :get-cell-class-list="getTopRowClassList"
                 >
-                    <template v-for="field in visibleFields" :key="field.key" #[`cell(${field.key})`]="slotProps">
+                    <template
+                        v-for="field in visibleFields"
+                        :key="field.key"
+                        #[`cell(${field.key})`]="slotProps"
+                    >
                         <slot :name="`cell(${field.key})`" v-bind="slotProps"></slot>
                     </template>
                 </table-body>
@@ -85,7 +91,11 @@
                     :get-unformatted-value="getUnformattedValue"
                     :get-cell-class-list="getClassList"
                 >
-                    <template v-for="field in visibleFields" :key="field.key" #[`cell(${field.key})`]="slotProps">
+                    <template
+                        v-for="field in visibleFields"
+                        :key="field.key"
+                        #[`cell(${field.key})`]="slotProps"
+                    >
                         <slot :name="`cell(${field.key})`" v-bind="slotProps"></slot>
                     </template>
                 </table-body>
@@ -100,7 +110,11 @@
                     :get-unformatted-value="getUnformattedValue"
                     :get-cell-class-list="getBottomRowClassList"
                 >
-                    <template v-for="field in visibleFields" :key="field.key" #[`cell(${field.key})`]="slotProps">
+                    <template
+                        v-for="field in visibleFields"
+                        :key="field.key"
+                        #[`cell(${field.key})`]="slotProps"
+                    >
                         <slot :name="`cell(${field.key})`" v-bind="slotProps"></slot>
                     </template>
                 </table-body>
@@ -123,10 +137,13 @@
             @page-changed="changePage"
         >
             <template #pagination-label="{ data }">
-                <slot name="pagination-label" v-bind="data || { perPage: 0, currentPage: 1, totalEntries: 0 }"></slot>
+                <slot
+                    name="pagination-label"
+                    v-bind="data || { perPage: 0, currentPage: 1, totalEntries: 0 }"
+                ></slot>
             </template>
             <template #table-bottom-controls="slotProps">
-                <slot name="table-bottom-controls" v-bind="slotProps || {}"></slot>
+                <slot name="table-bottom-controls" v-bind="slotProps"></slot>
             </template>
         </table-footer>
     </div>
@@ -148,13 +165,7 @@ import {
     useColumnFiltering
 } from './composables/index.js'
 
-import {
-    TableTitle,
-    TableHeader,
-    TableHead,
-    TableBody,
-    TableFooter
-} from './components/index.js'
+import { TableTitle, TableHeader, TableHead, TableBody, TableFooter } from './components/index.js'
 
 const props = defineProps({
     title: {
@@ -273,16 +284,16 @@ const emit = defineEmits([
 const id = useId()
 const slots = useSlots()
 
-const { 
-    tableData, 
-    visibleFields, 
-    getValue, 
-    getUnformattedValue, 
-    getColumnLabel, 
-    underscoresToSpaces 
+const {
+    tableData,
+    visibleFields,
+    getValue,
+    getUnformattedValue,
+    getColumnLabel,
+    underscoresToSpaces
 } = useTableData(props)
 
-const { 
+const {
     columnFilters,
     setColumnFilter,
     clearAllColumnFilters,
@@ -299,76 +310,78 @@ const itemsPerPage = computed(() => {
     const safeTopRowsLength = props.topRows?.length || 0
     return Math.max(1, safePageSize - safeTopRowsLength)
 })
-const { 
-    currentPage, 
-    pageSize, 
-    numberOfPages, 
-    changePage: changePageInternal, 
-    getRows 
+const {
+    currentPage,
+    pageSize,
+    numberOfPages,
+    changePage: changePageInternal,
+    getRows
 } = useTablePagination(props, itemsPerPage, dataForPagination)
 
-const { 
-    handleSort, 
-    getSortIconClass 
-} = useTableSorting(dataForPagination, props.remotePagination, props.sortNullsFirst)
+const { handleSort, getSortIconClass } = useTableSorting(
+    dataForPagination,
+    props.remotePagination,
+    props.sortNullsFirst
+)
 
-const { 
-    searchTerm, 
-    filterData,
-    setupDebouncedEmission
-} = useTableFiltering(props, props.items, tableData, (page) => {
-    const result = changePageInternal(page)
-    if (result?.shouldEmitPageChange) {
-        emit('page-change', result.eventData.page)
+const { searchTerm, filterData, setupDebouncedEmission } = useTableFiltering(
+    props,
+    props.items,
+    tableData,
+    page => {
+        const result = changePageInternal(page)
+        if (result?.shouldEmitPageChange) {
+            emit('page-change', result.eventData.page)
+        }
+        if (result?.shouldEmitAfterPageChange) {
+            emit('after-page-change', {
+                oldPage: result.eventData.oldPage,
+                newPage: result.eventData.newPage
+            })
+        }
     }
-    if (result?.shouldEmitAfterPageChange) {
-        emit('after-page-change', { 
-            oldPage: result.eventData.oldPage, 
-            newPage: result.eventData.newPage 
-        })
-    }
-})
+)
 
 const { validateProps } = useTableValidation()
 
-const { 
-    getClassList, 
-    getTopRowClassList, 
-    getBottomRowClassList, 
-    leftPadFirstCol, 
-    rightPadLastCol 
+const {
+    getClassList,
+    getTopRowClassList,
+    getBottomRowClassList,
+    leftPadFirstCol,
+    rightPadLastCol
 } = useTableStyles()
 
 const filterInputId = computed(() => `filter_input_${id}`)
 
-const changePage = (page) => {
+const changePage = page => {
     const result = changePageInternal(page)
     if (result?.shouldEmitPageChange) {
         emit('page-change', result.eventData.page)
     }
     if (result?.shouldEmitAfterPageChange) {
-        emit('after-page-change', { 
-            oldPage: result.eventData.oldPage, 
-            newPage: result.eventData.newPage 
+        emit('after-page-change', {
+            oldPage: result.eventData.oldPage,
+            newPage: result.eventData.newPage
         })
     }
     return result
 }
 
-const handleSortInternal = (column) => {
-    const result = handleSort(column, (page) => {
+const handleSortInternal = column => {
+    const result = handleSort(column, page => {
         const pageResult = changePageInternal(page)
         if (pageResult?.shouldEmitPageChange) {
             emit('page-change', pageResult.eventData.page)
         }
         if (pageResult?.shouldEmitAfterPageChange) {
-            emit('after-page-change', { 
-                oldPage: pageResult.eventData.oldPage, 
-                newPage: pageResult.eventData.newPage 
+            emit('after-page-change', {
+                oldPage: pageResult.eventData.oldPage,
+                newPage: pageResult.eventData.newPage
             })
         }
     })
-    
+
     if (result?.shouldEmitSortChange) {
         emit('sort-change', result.eventData)
     }
@@ -377,7 +390,7 @@ const handleSortInternal = (column) => {
     }
 }
 
-const handleFilterInternal = (event) => {
+const handleFilterInternal = event => {
     const result = filterData(event)
     if (result?.shouldEmitFilterChange) {
         emit('filter-change', result.eventData.searchValue)
@@ -390,45 +403,46 @@ const handleFilterInternal = (event) => {
 const handleColumnFilterInternal = ({ field, filter }) => {
     setColumnFilter(field, filter)
     const pageResult = changePageInternal(1)
-    
+
     if (pageResult?.shouldEmitPageChange) {
         emit('page-change', pageResult.eventData.page)
     }
     if (pageResult?.shouldEmitAfterPageChange) {
-        emit('after-page-change', { 
-            oldPage: pageResult.eventData.oldPage, 
-            newPage: pageResult.eventData.newPage 
+        emit('after-page-change', {
+            oldPage: pageResult.eventData.oldPage,
+            newPage: pageResult.eventData.newPage
         })
     }
-    
+
     emit('column-filter-change', { field, filter })
     emit('after-column-filter', { field, filter, activeFilters: columnFilters.value })
 }
 
-setupDebouncedEmission((result) => {
+setupDebouncedEmission(result => {
     if (result?.shouldEmitFilterChangeDebounced) {
         emit('filter-change-debounced', result.eventData.searchTerm)
     }
 })
 
-watch(() => itemsPerPage.value, (newItemsPerPage) => {
-    emit('per-page-change', newItemsPerPage)
-})
-
-watch(() => props.perPage, (newPerPage) => {
-    if (newPerPage > props.topRows.length) {
-        pageSize.value = newPerPage
-    } else {
-        pageSize.value = props.pageSizes.find(e => e > props.topRows.length)
+watch(
+    () => itemsPerPage.value,
+    newItemsPerPage => {
+        emit('per-page-change', newItemsPerPage)
     }
-})
+)
+
+watch(
+    () => props.perPage,
+    newPerPage => {
+        if (newPerPage > props.topRows.length) {
+            pageSize.value = newPerPage
+        } else {
+            pageSize.value = props.pageSizes.find(e => e > props.topRows.length)
+        }
+    }
+)
 
 onMounted(() => {
-    validateProps(
-        pageSize.value, 
-        props.topRows.length, 
-        props.remotePagination, 
-        props.totalItems
-    )
+    validateProps(pageSize.value, props.topRows.length, props.remotePagination, props.totalItems)
 })
 </script>
