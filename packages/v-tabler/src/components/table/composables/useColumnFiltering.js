@@ -1,5 +1,12 @@
 import { ref, computed } from 'vue'
 
+export const FILTER_I18N_DEFAULTS = {
+    selectFilterPlaceholder: 'Search options...',
+    selectFilterNoSelectionText: 'Select values...',
+    selectFilterSingleSelectionTextFn: value => value,
+    selectFilterMultipleSelectionTextFn: count => `${count} selected`
+}
+
 // Define available operators for comparison filters (numeric and date)
 export const COMPARISON_OPERATORS = [
     { value: '=', label: '=', symbol: '=' },
