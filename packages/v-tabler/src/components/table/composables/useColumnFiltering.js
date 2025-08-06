@@ -133,29 +133,22 @@ export function useColumnFiltering() {
         return true
     }
 
-    // Set a column filter
     const setColumnFilter = (fieldKey, filter) => {
         if (filter) {
             columnFilters.value[fieldKey] = filter
         } else {
             delete columnFilters.value[fieldKey]
         }
-
-        // Trigger reactivity
-        columnFilters.value = { ...columnFilters.value }
     }
 
-    // Clear all column filters
     const clearAllColumnFilters = () => {
         columnFilters.value = {}
     }
 
-    // Get active filters count
     const activeFiltersCount = computed(() => {
         return Object.keys(columnFilters.value).filter(key => columnFilters.value[key]).length
     })
 
-    // Check if any filters are active
     const hasActiveFilters = computed(() => {
         return activeFiltersCount.value > 0
     })
