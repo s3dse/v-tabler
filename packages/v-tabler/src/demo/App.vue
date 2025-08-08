@@ -38,7 +38,8 @@ const columnFilterDemoFields = ref([
         label: 'ID',
         type: 'numeric',
         thClassList: 'table-col-right px-2',
-        tdClassList: 'text-right px-2 font-mono'
+        tdClassList: 'text-right px-2 font-mono',
+        filterable: false
     },
     {
         key: 'name',

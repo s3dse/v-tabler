@@ -24,13 +24,13 @@ export const FILTER_OPERATORS = {
 }
 
 export function useColumnFiltering() {
-    const columnFilters = ref({})
+    const columnFilters = ref(new Map())
 
     // Apply all column filters to the data
     const applyColumnFilters = data => {
         if (!data || !Array.isArray(data)) return []
 
-        const activeFilters = Object.entries(columnFilters.value).filter(([_, filter]) => filter)
+        const activeFilters = [...columnFilters.value.entries()]//.filter(([_, filter]) => filter)
 
         if (activeFilters.length === 0) {
             return [...data]
@@ -136,18 +136,18 @@ export function useColumnFiltering() {
 
     const setColumnFilter = (fieldKey, filter) => {
         if (filter) {
-            columnFilters.value[fieldKey] = filter
+            columnFilters.value.set(fieldKey, filter)
         } else {
-            delete columnFilters.value[fieldKey]
+            columnFilters.value.delete(fieldKey)
         }
     }
 
     const clearAllColumnFilters = () => {
-        columnFilters.value = {}
+        columnFilters.value.clear()
     }
 
     const activeFiltersCount = computed(() => {
-        return Object.keys(columnFilters.value).filter(key => columnFilters.value[key]).length
+        return columnFilters.value.size
     })
 
     const hasActiveFilters = computed(() => {

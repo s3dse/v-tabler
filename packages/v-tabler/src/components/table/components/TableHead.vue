@@ -15,10 +15,10 @@
 
                     <!-- Column Filter -->
                     <column-filter
-                        v-if="enableColumnFilters"
+                        v-if="enableColumnFilters && col?.filterable !== false"
                         :field="col"
                         :data="allData"
-                        :model-value="columnFilters[col.key]"
+                        :model-value="columnFilters.get(col.key)"
                         @filter-change="handleColumnFilter(col.key, $event)"
                     />
                 </div>

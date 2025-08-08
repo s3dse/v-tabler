@@ -96,7 +96,7 @@ describe('Column Filtering', () => {
         })
 
         it('should initialize with empty filters', () => {
-            expect(columnFiltering.columnFilters.value).toEqual({})
+            expect(columnFiltering.columnFilters.value).toEqual(new Map())
             expect(columnFiltering.hasActiveFilters.value).toBe(false)
             expect(columnFiltering.activeFiltersCount.value).toBe(0)
         })
@@ -284,7 +284,7 @@ describe('Column Filtering', () => {
             clearAllColumnFilters()
 
             expect(columnFiltering.hasActiveFilters.value).toBe(false)
-            expect(columnFiltering.columnFilters.value).toEqual({})
+            expect(columnFiltering.columnFilters.value).toEqual(new Map())
 
             const filtered = applyColumnFilters(testData)
             expect(filtered).toHaveLength(testData.length) // Should return all data
@@ -320,15 +320,15 @@ describe('Column Filtering', () => {
 
             // Verify filters are active
             expect(hasActiveFilters.value).toBe(true)
-            expect(Object.keys(columnFilters.value)).toHaveLength(3)
+            expect(columnFilters.value.size).toBe(3)
 
             // Clear all filters
             clearAllColumnFilters()
 
             // Verify all filters are cleared
             expect(hasActiveFilters.value).toBe(false)
-            expect(Object.keys(columnFilters.value)).toHaveLength(0)
-            expect(columnFilters.value).toEqual({})
+            expect(columnFilters.value.size).toBe(0)
+            expect(columnFilters.value).toEqual(new Map())
 
             // Verify no filtering is applied
             const filtered = applyColumnFilters(testData)
@@ -764,24 +764,24 @@ describe('Column Filtering', () => {
 
             // Verify filters are active and data is filtered
             expect(wrapper.vm.hasActiveFilters).toBe(true)
-            expect(Object.keys(wrapper.vm.columnFilters).length).toBe(3)
+            expect(wrapper.vm.columnFilters.size).toBe(3)
 
             // The filtered data should only contain Alice Johnson
             expect(wrapper.vm.dataForPagination).toHaveLength(1)
             expect(wrapper.vm.dataForPagination[0].name).toBe('Alice Johnson')
 
             // Check that column filters show active state
-            expect(wrapper.vm.columnFilters.name).toEqual({
+            expect(wrapper.vm.columnFilters.get('name')).toEqual({
                 type: 'text',
                 operator: 'contains',
                 value: 'Alice'
             })
-            expect(wrapper.vm.columnFilters.salary).toEqual({
+            expect(wrapper.vm.columnFilters.get('salary')).toEqual({
                 type: 'numeric',
                 operator: '=',
                 value: 75000
             })
-            expect(wrapper.vm.columnFilters.department).toEqual({
+            expect(wrapper.vm.columnFilters.get('department')).toEqual({
                 type: 'select',
                 operator: 'in',
                 value: ['Engineering']
@@ -807,8 +807,8 @@ describe('Column Filtering', () => {
 
             // Verify that all filters are cleared from the reactive state
             expect(wrapper.vm.hasActiveFilters).toBe(false)
-            expect(Object.keys(wrapper.vm.columnFilters).length).toBe(0)
-            expect(wrapper.vm.columnFilters).toEqual({})
+            expect(wrapper.vm.columnFilters.size).toBe(0)
+            expect(wrapper.vm.columnFilters).toEqual(new Map())
 
             // Verify that data is back to showing all items
             expect(wrapper.vm.dataForPagination).toHaveLength(testData.length)
