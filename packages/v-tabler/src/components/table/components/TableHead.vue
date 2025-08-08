@@ -13,7 +13,6 @@
                         <div class="inline-block ml-1" :class="getSortIconClass(col?.key)"></div>
                     </div>
 
-                    <!-- Column Filter -->
                     <column-filter
                         v-if="enableColumnFilters && col?.filterable !== false"
                         :field="col"

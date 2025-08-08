@@ -7,7 +7,6 @@ export const FILTER_I18N_DEFAULTS = {
     selectFilterMultipleSelectionTextFn: count => `${count} selected`
 }
 
-// Define available operators for comparison filters (numeric and date)
 export const COMPARISON_OPERATORS = [
     { value: '=', label: '=', symbol: '=' },
     { value: '!=', label: '≠', symbol: '≠' },
@@ -17,7 +16,6 @@ export const COMPARISON_OPERATORS = [
     { value: '<=', label: '≤', symbol: '≤' }
 ]
 
-// For backwards compatibility and clarity, export as FILTER_OPERATORS
 export const FILTER_OPERATORS = {
     numeric: COMPARISON_OPERATORS,
     date: COMPARISON_OPERATORS
@@ -26,15 +24,11 @@ export const FILTER_OPERATORS = {
 export function useColumnFiltering() {
     const columnFilters = ref(new Map())
 
-    // Apply all column filters to the data
     const applyColumnFilters = data => {
         if (!data || !Array.isArray(data)) return []
+        if (columnFilters.value.size === 0) return [...data]
 
-        const activeFilters = [...columnFilters.value.entries()]//.filter(([_, filter]) => filter)
-
-        if (activeFilters.length === 0) {
-            return [...data]
-        }
+        const activeFilters = [...columnFilters.value.entries()]
 
         return data.filter(item => {
             return activeFilters.every(([fieldKey, filter]) => {
@@ -49,27 +43,25 @@ export function useColumnFiltering() {
 
         const filterValue = filter.value
 
-        switch (filter.type) {
-            case 'text':
+        const typeHandlers = {
+            'text': filter => {
                 if (filter.operator === 'contains') {
                     const searchValue = String(filterValue).toLowerCase()
                     const cellValue = String(value || '').toLowerCase()
-                    return cellValue.indexOf(searchValue) !== -1
+                    return cellValue.includes(searchValue)
                 }
-                break
-
-            case 'numeric':
+                return true
+            },
+            'numeric': filter => {
                 const numValue = Number(value)
                 const numFilter = Number(filterValue)
 
-                // If either value is NaN, or if filterValue is empty/null, return false
                 if (
                     isNaN(numValue) ||
                     isNaN(numFilter) ||
                     filterValue === '' ||
                     filterValue == null
-                )
-                    return false
+                ) return false
 
                 switch (filter.operator) {
                     case '=':
@@ -87,14 +79,13 @@ export function useColumnFiltering() {
                     default:
                         return true
                 }
-
-            case 'date':
+            },
+            'date': filter => {
                 const dateValue = new Date(value)
                 const dateFilter = new Date(filterValue)
 
                 if (isNaN(dateValue.getTime()) || isNaN(dateFilter.getTime())) return false
 
-                // Compare only dates, not times
                 const valueDateOnly = new Date(
                     dateValue.getFullYear(),
                     dateValue.getMonth(),
@@ -120,18 +111,18 @@ export function useColumnFiltering() {
                     default:
                         return true
                 }
-
-            case 'select':
+            },
+            'select': filter => {
                 if (filter.operator === 'in') {
                     return Array.isArray(filterValue) && filterValue.includes(value)
                 }
-                break
-
-            default:
                 return true
+            },
+            'default': () => true
         }
-
-        return true
+        const filterType = filter.type || 'default'
+        const handler = typeHandlers[filterType] || typeHandlers['default']
+        return handler(filter)
     }
 
     const setColumnFilter = (fieldKey, filter) => {
