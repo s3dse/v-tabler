@@ -1,44 +1,27 @@
 <template>
     <DropdownMenuRoot v-model:open="isDropdownOpen" :modal="false">
         <!-- Filter Toggle Button -->
-        <DropdownMenuTrigger
-            :class="[
-                'ml-1 p-1 rounded bg-thead-background hover:bg-surface transition-colors',
-                { 'text-primary': hasActiveFilter }
-            ]"
-            :title="`Filter ${field.label || field.key}`"
-        >
-            <div
-                class="w-4 h-4"
-                :class="hasActiveFilter ? 'i-tabler-filter text-primary' : 'i-tabler-filter'"
-            ></div>
+        <DropdownMenuTrigger :class="[
+            'ml-1 p-1 rounded bg-thead-background hover:bg-surface transition-colors',
+            { 'text-primary': hasActiveFilter }
+        ]" :title="`Filter ${field.label || field.key}`">
+            <div class="w-4 h-4" :class="hasActiveFilter ? 'i-tabler-filter text-primary' : 'i-tabler-filter'"></div>
         </DropdownMenuTrigger>
 
         <!-- Filter Dropdown -->
         <DropdownMenuPortal>
             <DropdownMenuContent
                 class="bg-surface border border-solid border-border rounded-sm shadow-lg min-w-[200px] z-50"
-                :side="'bottom'"
-                :align="'end'"
-                :side-offset="4"
-                @click.stop
-            >
+                :side="'bottom'" :align="'end'" :side-offset="4" @click.stop>
                 <div class="p-3">
-                    <component
-                        :is="filterComponent"
-                        v-bind="filterProps"
-                        @update:modelValue="onFilterValueUpdate"
-                        @update:operator="onOperatorUpdate"
-                    />
+                    <component :is="filterComponent" v-bind="filterProps" @update:modelValue="onFilterValueUpdate"
+                        @update:operator="onOperatorUpdate" />
                     <DropdownMenuSeparator class="my-2 h-px bg-border" />
-                    <DropdownMenuItem
-                        @click="clearFilter"
-                        @mouseenter.stop
-                        @mouseleave.stop
-                        class="w-full text-xs text-subtle hover:text-default hover:bg-surface-hover px-2 py-1 rounded cursor-pointer"
-                    >
+                    <button
+                        class="w-full btn-transparent-default text-xs text-default hover:text-primary hover:bg-surface-hover px-2 py-1 rounded cursor-pointer"
+                        @click="clearFilter">
                         Clear Filter
-                    </DropdownMenuItem>
+                    </button>
                 </div>
             </DropdownMenuContent>
         </DropdownMenuPortal>
@@ -53,7 +36,6 @@ import {
     DropdownMenuPortal,
     DropdownMenuContent,
     DropdownMenuSeparator,
-    DropdownMenuItem
 } from 'reka-ui'
 import { FILTER_OPERATORS, FILTER_I18N_DEFAULTS } from '../composables/useColumnFiltering.js'
 import { detectFilterType, generateSelectOptions } from '../utils/filterTypeDetection.js'
@@ -116,7 +98,7 @@ const i18nSettings = computed(() => {
 const filterComponent = computed(() => {
     const componentMap = {
         text: TextFilterInput,
-        numeric: NumericFilterInput, 
+        numeric: NumericFilterInput,
         date: DateFilterInput,
         select: SelectFilterInput
     }
@@ -245,15 +227,16 @@ const clearFilter = () => {
 
 watch(
     modelValue,
-    newFilter => {
-        if (!newFilter) {
+    (newFilter, oldFilter) => {
+        // Only reset if externally cleared (oldFilter was not null/undefined, newFilter is null/undefined)
+        if (oldFilter && !newFilter) {
             filterState.value = { value: getInitialValueForFilterType(filterType.value), operator: '=' }
             return
-        }
-
-        filterState.value = {
-            value: newFilter.value,
-            operator: newFilter.operator || '='
+        } else if (newFilter !== undefined && newFilter !== null) {
+            filterState.value = {
+                value: newFilter.value,
+                operator: newFilter.operator || '='
+            }
         }
     },
     { immediate: true }
