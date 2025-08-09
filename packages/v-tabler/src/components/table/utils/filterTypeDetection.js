@@ -1,15 +1,45 @@
 /**
- * Auto-detection utilities for column filter types
- * Library maintainers can easily enable/disable auto-detection by modifying this file
+ * Auto-detection utilities for column filter types.
+ * 
+ * Typed filters allow for data type-specific filtering logic to improve performance and user experience.
+ * This module provides functions to detect the appropriate filter type based on the data in a column,
+ * as well as to generate select options for columns that use a select filter.
+ * As a fallback, it provides default text filtering logic.
  */
 
-// Configuration - easily toggle auto-detection features
 export const FILTER_DETECTION_CONFIG = {
     enabled: true,
-    sampleSize: 10,
-    maxSelectOptions: 50,
+    minSampleSize: 10, // Minimum sample size to consider auto-detection
+    relativeSampleSize: 0.1, // Relative sample size (10% of total data)
+    maxSelectOptions: 50, // Maximum unique options for select filter
     selectCardinality: 0.5, // If unique values are less than 50% of sample, consider select filter
-    maxSelectUniqueValues: 10
+    maxSelectUniqueValues: 10 // Maximum unique values in a sample to consider select filter
+}
+
+const isTypeDetectionNecessary = field => {
+    // filterType preceeds field.type preceeds filterOptions preceeds FILTER_DETECTION_CONFIG
+    if (field.filterType) {
+        return { typeDetectionNecessary: false, type: field.filterType }
+    } else if (field.type === 'numeric') {
+        return { typeDetectionNecessary: false, type: 'numeric' }
+    } else if (field.filterOptions) {
+        return { typeDetectionNecessary: false, type: 'select' }
+    } else if (!FILTER_DETECTION_CONFIG.enabled) {
+        return { typeDetectionNecessary: false, type: 'text' }
+    }
+    return { typeDetectionNecessary: true }
+}
+
+const sampleData = (field, data) => {
+    const sampleSize = Math.max(
+        FILTER_DETECTION_CONFIG.minSampleSize,
+        Math.ceil(FILTER_DETECTION_CONFIG.relativeSampleSize * data.length)
+    )
+
+    return data
+        .map(item => item[field.key])
+        .filter(val => val != null && val !== '')
+        .slice(0, sampleSize)
 }
 
 /**
@@ -19,54 +49,35 @@ export const FILTER_DETECTION_CONFIG = {
  * @returns {string} - The detected filter type ('text', 'numeric', 'date', 'select')
  */
 export function detectFilterType(field, data) {
-    // If auto-detection is disabled, default to text
-    if (!FILTER_DETECTION_CONFIG.enabled) {
+    const { typeDetectionNecessary, type } = isTypeDetectionNecessary(field)
+    if (!typeDetectionNecessary) return type
+
+    const sampleValues = sampleData(field, data)
+    if (sampleValues.length === 0) return 'text'
+
+    // Check if all values are numbers
+    if (allNumeric(sampleValues)) {
+        return 'numeric'
+    }
+
+    // Check if limited unique values (for select filter) - do this BEFORE date check
+    else if (isSelectColumn(sampleValues, data, field)) {
+        return 'select'
+    }
+
+    // Check if all values are dates (after select check)
+    else if (isDateColumn(sampleValues, data, field)) {
+        return 'date'
+    } else {
         return 'text'
     }
 
-    // Explicit field configuration takes precedence
-    if (field.filterType) {
-        return field.filterType
-    }
-    
-    if (field.filterOptions) {
-        return 'select'
-    }
-    
-    if (field.type === 'numeric') {
-        return 'numeric'
-    }
-    
-    // Auto-detect from data
-    const sampleValues = data
-        .map(item => item[field.key])
-        .filter(val => val != null && val !== '')
-        .slice(0, FILTER_DETECTION_CONFIG.sampleSize)
-    
-    if (sampleValues.length === 0) return 'text'
-    
-    // Check if all values are numbers
-    if (isNumericColumn(sampleValues)) {
-        return 'numeric'
-    }
-    
-    // Check if limited unique values (for select filter) - do this BEFORE date check
-    if (isSelectColumn(sampleValues, data, field)) {
-        return 'select'
-    }
-    
-    // Check if all values are dates (after select check)
-    if (isDateColumn(sampleValues, data, field)) {
-        return 'date'
-    }
-    
-    return 'text'
 }
 
 /**
  * Check if column contains numeric values
  */
-function isNumericColumn(sampleValues) {
+function allNumeric(sampleValues) {
     return sampleValues.every(val => !isNaN(Number(val)))
 }
 
@@ -75,25 +86,25 @@ function isNumericColumn(sampleValues) {
  */
 function isSelectColumn(sampleValues, data, field) {
     const uniqueValues = [...new Set(sampleValues)]
-    
-    if (uniqueValues.length <= FILTER_DETECTION_CONFIG.maxSelectUniqueValues && 
+
+    if (uniqueValues.length <= FILTER_DETECTION_CONFIG.maxSelectUniqueValues &&
         uniqueValues.length < sampleValues.length * FILTER_DETECTION_CONFIG.selectCardinality) {
-        
+
         // Double-check against full dataset for high cardinality
         const allUniqueValues = [...new Set(
             data
                 .map(item => item[field.key])
                 .filter(val => val != null && val !== '')
         )]
-        
+
         // Fallback to text if too many unique values
         if (allUniqueValues.length > FILTER_DETECTION_CONFIG.maxSelectOptions) {
             return false
         }
-        
+
         return true
     }
-    
+
     return false
 }
 
@@ -104,11 +115,11 @@ function isDateColumn(sampleValues, data, field) {
     const allDates = sampleValues.every(val => {
         // More strict date validation - should look like actual dates
         const dateValue = Date.parse(val)
-        return !isNaN(dateValue) && 
-               // Exclude obviously non-date strings like "Person 1"
-               /^\d{4}-\d{2}-\d{2}|^\d{1,2}\/\d{1,2}\/\d{4}|^\d{1,2}-\d{1,2}-\d{4}/.test(val)
+        return !isNaN(dateValue) &&
+            // Exclude obviously non-date strings like "Person 1"
+            /^\d{4}-\d{2}-\d{2}|^\d{1,2}\/\d{1,2}\/\d{4}|^\d{1,2}-\d{1,2}-\d{4}/.test(val)
     })
-    
+
     if (allDates) {
         // Even for dates, check cardinality - if too many unique dates, use text filter
         const allUniqueValues = [...new Set(
@@ -116,14 +127,14 @@ function isDateColumn(sampleValues, data, field) {
                 .map(item => item[field.key])
                 .filter(val => val != null && val !== '')
         )]
-        
+
         if (allUniqueValues.length > FILTER_DETECTION_CONFIG.maxSelectOptions) {
             return false
         }
-        
+
         return true
     }
-    
+
     return false
 }
 
@@ -139,26 +150,26 @@ export function generateSelectOptions(field, data, filterType) {
         // filterOptions is now just a direct array of options
         return field.filterOptions
     }
-    
+
     if (filterType === 'select') {
         const allValues = data
             .map(item => item[field.key])
             .filter(val => val != null && val !== '')
-        
+
         const uniqueValues = [...new Set(allValues)]
-        
+
         // Safety check - only apply to auto-detected select filters, not explicit ones
         if (!field.filterType && uniqueValues.length > FILTER_DETECTION_CONFIG.maxSelectOptions) {
             console.warn(`Column "${field.key}" has ${uniqueValues.length} unique values. Consider providing explicit filterOptions for better performance.`)
             // Fallback to text filter for high cardinality data (auto-detected only)
             return []
         }
-        
+
         return uniqueValues.sort().map(value => ({
             value: value,
             label: String(value)
         }))
     }
-    
+
     return []
 }
