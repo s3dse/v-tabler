@@ -2,9 +2,10 @@ import { ref, computed } from 'vue'
 
 export const FILTER_I18N_DEFAULTS = {
     selectFilterPlaceholder: 'Search options...',
-    selectFilterNoSelectionText: 'Select values...',
+    selectFilterNoSelectionText: 'Select values:',
     selectFilterSingleSelectionTextFn: value => value,
-    selectFilterMultipleSelectionTextFn: count => `${count} selected`
+    selectFilterMultipleSelectionTextFn: count => `${count} selected`,
+    clearFilterLabel: 'Clear Filter'
 }
 
 export const COMPARISON_OPERATORS = [

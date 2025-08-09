@@ -19,7 +19,7 @@
                 :id="inputId"
                 type="number"
                 class="form-inputfield w-full text-default"
-                :placeholder="'Value...'"
+                :placeholder="placeholder"
                 v-model="modelValue"
                 @keydown.stop
             />
@@ -30,7 +30,8 @@
 import { DropdownMenuLabel, ToggleGroupRoot, ToggleGroupItem } from 'reka-ui'
 const props = defineProps({
     inputId: String,
-    operators: Array
+    operators: Array,
+    placeholder: { type: String, default: 'Value...' }
 })
 
 const modelValue = defineModel({ type: [String, Number] })

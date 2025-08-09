@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SelectFilterInput from '../SelectFilterInput.vue'
 import CheckboxComponent from '../../../checkbox/CheckboxComponent.vue'
+import { FILTER_I18N_DEFAULTS } from '../../composables/useColumnFiltering.js'
 
 const mockOptions = [
     { value: 'engineering', label: 'Engineering' },
@@ -29,7 +30,8 @@ describe('SelectFilterInput', () => {
             props: {
                 modelValue: [],
                 options: mockOptions,
-                placeholder: 'Search...'
+                placeholder: 'Search...',
+                noSelectionText: FILTER_I18N_DEFAULTS.selectFilterNoSelectionText
             }
         })
 

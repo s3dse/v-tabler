@@ -20,7 +20,7 @@
                     <button
                         class="w-full btn-transparent-default text-xs text-default hover:text-primary hover:bg-surface-hover px-2 py-1 rounded cursor-pointer"
                         @click="clearFilter">
-                        Clear Filter
+                        {{ i18nSettings.clearFilterLabel }}
                     </button>
                 </div>
             </DropdownMenuContent>
@@ -86,6 +86,7 @@ function getInitialValueForFilterType(type) {
 const i18nSettings = computed(() => {
     const fieldI18n = props.field.i18n || {}
     return {
+        clearFilterLabel: fieldI18n.clearFilterLabel || FILTER_I18N_DEFAULTS.clearFilterLabel,
         placeholder: fieldI18n.placeholder || FILTER_I18N_DEFAULTS.selectFilterPlaceholder,
         noSelectionText: fieldI18n.noSelectionText || FILTER_I18N_DEFAULTS.selectFilterNoSelectionText,
         singleSelectionTextFn:
@@ -128,7 +129,7 @@ const filterProps = computed(() => {
     if (filterType.value === 'text') {
         return {
             ...baseProps,
-            placeholder: `Filter ${props.field.label || props.field.key}...`
+            placeholder: props.field.i18n?.placeholder || `Filter ${props.field.label || props.field.key}...`
         }
     }
 
@@ -136,7 +137,8 @@ const filterProps = computed(() => {
         return {
             ...baseProps,
             operator: filterState.value.operator,
-            operators: FILTER_OPERATORS[filterType.value]
+            operators: FILTER_OPERATORS[filterType.value],
+            placeholder: props.field.i18n?.placeholder
         }
     }
 

@@ -3,22 +3,11 @@
         <DropdownMenuLabel class="block text-xs font-medium text-muted mb-2">
             {{ selectionText }}
         </DropdownMenuLabel>
-        <input
-            v-model="searchTerm"
-            type="text"
-            class="form-inputfield w-full text-default mb-2"
-            :placeholder="placeholder"
-            @keydown.stop
-        />
+        <input v-model="searchTerm" type="text" class="form-inputfield w-full text-default mb-2"
+            :placeholder="placeholder" @keydown.stop />
         <div class="max-h-32 overflow-y-auto space-y-1">
-            <CheckboxComponent
-                v-for="option in filteredOptions"
-                :key="option.value"
-                :name="option.value"
-                :label="option.label"
-                v-model="selectedValues"
-                class="text-default px-1 py-0.5 rounded text-xs"
-            />
+            <CheckboxComponent v-for="option in filteredOptions" :key="option.value" :name="option.value"
+                :label="option.label" v-model="selectedValues" class="text-default px-1 py-0.5 rounded text-xs" />
         </div>
     </div>
 </template>
@@ -30,29 +19,25 @@ const props = defineProps({
     options: Array,
     placeholder: String,
     noSelectionText: String,
-    singleSelectionTextFn: Function,
-    multipleSelectionTextFn: Function
+    singleSelectionTextFn: { type: Function, default: x => x },
+    multipleSelectionTextFn: { type: Function, default: x => `${x} selected` }
 })
 
-const selectedValues = defineModel('modelValue', { type: Array, default: () => []})
+const selectedValues = defineModel('modelValue', { type: Array, default: () => [] })
 const searchTerm = ref('')
 
 const selectionText = computed(() => {
     if (!selectedValues.value || selectedValues.value.length === 0) {
-        return props.noSelectionText || 'Select values:'
+        return props.noSelectionText
     }
 
     if (selectedValues.value.length === 1) {
         const selectedOption = props.options.find(opt => opt.value === selectedValues.value[0])
         const displayValue = selectedOption ? selectedOption.label : selectedValues.value[0]
-        return props.singleSelectionTextFn
-            ? props.singleSelectionTextFn(displayValue)
-            : displayValue
+        return props.singleSelectionTextFn(displayValue)
     }
 
-    return props.multipleSelectionTextFn
-        ? props.multipleSelectionTextFn(selectedValues.value.length)
-        : `${selectedValues.value.length} selected`
+    return props.multipleSelectionTextFn(selectedValues.value.length)
 })
 
 const filteredOptions = computed(() => {

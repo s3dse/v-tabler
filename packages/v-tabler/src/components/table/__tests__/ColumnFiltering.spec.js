@@ -901,7 +901,7 @@ describe('Column Filtering', () => {
             })
 
             expect(wrapper.vm.i18nSettings.placeholder).toBe('Search options...')
-            expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Select values...')
+            expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Select values:')
         })
     })
 })
