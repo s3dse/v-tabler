@@ -1,25 +1,40 @@
 <template>
     <DropdownMenuRoot v-model:open="isDropdownOpen" :modal="false">
         <!-- Filter Toggle Button -->
-        <DropdownMenuTrigger :class="[
-            'ml-1 p-1 rounded bg-thead-background hover:bg-surface transition-colors',
-            { 'text-primary': hasActiveFilter }
-        ]" :title="`Filter ${field.label || field.key}`">
-            <div class="w-4 h-4" :class="hasActiveFilter ? 'i-tabler-filter text-primary' : 'i-tabler-filter'"></div>
+        <DropdownMenuTrigger
+            :class="[
+                'ml-1 p-1 rounded bg-thead-background hover:bg-surface transition-colors',
+                { 'text-primary': hasActiveFilter }
+            ]"
+            :title="`Filter ${field.label || field.key}`"
+        >
+            <div
+                class="w-4 h-4"
+                :class="hasActiveFilter ? 'i-tabler-filter text-primary' : 'i-tabler-filter'"
+            ></div>
         </DropdownMenuTrigger>
 
         <!-- Filter Dropdown -->
         <DropdownMenuPortal>
             <DropdownMenuContent
                 class="bg-surface border border-solid border-border rounded-sm shadow-lg min-w-[200px] z-50"
-                :side="'bottom'" :align="'end'" :side-offset="4" @click.stop>
+                :side="'bottom'"
+                :align="'end'"
+                :side-offset="4"
+                @click.stop
+            >
                 <div class="p-3">
-                    <component :is="filterComponent" v-bind="filterProps" @update:modelValue="onFilterValueUpdate"
-                        @update:operator="onOperatorUpdate" />
+                    <component
+                        :is="filterComponent"
+                        v-bind="filterProps"
+                        @update:modelValue="onFilterValueUpdate"
+                        @update:operator="onOperatorUpdate"
+                    />
                     <DropdownMenuSeparator class="my-2 h-px bg-border" />
                     <button
                         class="w-full btn-transparent-default text-xs text-default hover:text-primary hover:bg-surface-hover px-2 py-1 rounded cursor-pointer"
-                        @click="clearFilter">
+                        @click="clearFilter"
+                    >
                         {{ i18nSettings.clearFilterLabel }}
                     </button>
                 </div>
@@ -35,7 +50,7 @@ import {
     DropdownMenuTrigger,
     DropdownMenuPortal,
     DropdownMenuContent,
-    DropdownMenuSeparator,
+    DropdownMenuSeparator
 } from 'reka-ui'
 import { FILTER_OPERATORS, FILTER_I18N_DEFAULTS } from '../composables/useColumnFiltering.js'
 import { detectFilterType, generateSelectOptions } from '../utils/filterTypeDetection.js'
@@ -88,11 +103,14 @@ const i18nSettings = computed(() => {
     return {
         clearFilterLabel: fieldI18n.clearFilterLabel || FILTER_I18N_DEFAULTS.clearFilterLabel,
         placeholder: fieldI18n.placeholder || FILTER_I18N_DEFAULTS.selectFilterPlaceholder,
-        noSelectionText: fieldI18n.noSelectionText || FILTER_I18N_DEFAULTS.selectFilterNoSelectionText,
+        noSelectionText:
+            fieldI18n.noSelectionText || FILTER_I18N_DEFAULTS.selectFilterNoSelectionText,
         singleSelectionTextFn:
-            fieldI18n.singleSelectionTextFn || FILTER_I18N_DEFAULTS.selectFilterSingleSelectionTextFn,
+            fieldI18n.singleSelectionTextFn ||
+            FILTER_I18N_DEFAULTS.selectFilterSingleSelectionTextFn,
         multipleSelectionTextFn:
-            fieldI18n.multipleSelectionTextFn || FILTER_I18N_DEFAULTS.selectFilterMultipleSelectionTextFn
+            fieldI18n.multipleSelectionTextFn ||
+            FILTER_I18N_DEFAULTS.selectFilterMultipleSelectionTextFn
     }
 })
 
@@ -129,7 +147,8 @@ const filterProps = computed(() => {
     if (filterType.value === 'text') {
         return {
             ...baseProps,
-            placeholder: props.field.i18n?.placeholder || `Filter ${props.field.label || props.field.key}...`
+            placeholder:
+                props.field.i18n?.placeholder || `Filter ${props.field.label || props.field.key}...`
         }
     }
 
@@ -232,7 +251,10 @@ watch(
     (newFilter, oldFilter) => {
         // Only reset if externally cleared (oldFilter was not null/undefined, newFilter is null/undefined)
         if (oldFilter && !newFilter) {
-            filterState.value = { value: getInitialValueForFilterType(filterType.value), operator: '=' }
+            filterState.value = {
+                value: getInitialValueForFilterType(filterType.value),
+                operator: '='
+            }
             return
         } else if (newFilter !== undefined && newFilter !== null) {
             filterState.value = {
