@@ -22,7 +22,7 @@ export const FILTER_OPERATORS = {
     date: COMPARISON_OPERATORS
 }
 
-export function useColumnFiltering() {
+export function useColumnFiltering({ remotePagination = false } = {}) {
     const columnFilters = ref(new Map())
 
     const applyColumnFilters = data => {
@@ -31,6 +31,7 @@ export function useColumnFiltering() {
 
         const activeFilters = [...columnFilters.value.entries()]
 
+        if (remotePagination) return data
         return data.filter(item => {
             return activeFilters.every(([fieldKey, filter]) => {
                 const value = item[fieldKey]
@@ -45,7 +46,7 @@ export function useColumnFiltering() {
         const filterValue = filter.value
 
         const typeHandlers = {
-            'text': filter => {
+            text: filter => {
                 if (filter.operator === 'contains') {
                     const searchValue = String(filterValue).toLowerCase()
                     const cellValue = String(value || '').toLowerCase()
@@ -53,7 +54,7 @@ export function useColumnFiltering() {
                 }
                 return true
             },
-            'numeric': filter => {
+            numeric: filter => {
                 const numValue = Number(value)
                 const numFilter = Number(filterValue)
 
@@ -62,7 +63,8 @@ export function useColumnFiltering() {
                     isNaN(numFilter) ||
                     filterValue === '' ||
                     filterValue == null
-                ) return false
+                )
+                    return false
 
                 switch (filter.operator) {
                     case '=':
@@ -81,7 +83,7 @@ export function useColumnFiltering() {
                         return true
                 }
             },
-            'date': filter => {
+            date: filter => {
                 const dateValue = new Date(value)
                 const dateFilter = new Date(filterValue)
 
@@ -113,13 +115,13 @@ export function useColumnFiltering() {
                         return true
                 }
             },
-            'select': filter => {
+            select: filter => {
                 if (filter.operator === 'in') {
                     return Array.isArray(filterValue) && filterValue.includes(value)
                 }
                 return true
             },
-            'default': () => true
+            default: () => true
         }
         const filterType = filter.type || 'default'
         const handler = typeHandlers[filterType] || typeHandlers['default']

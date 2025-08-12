@@ -25,7 +25,7 @@
             :show-clear-all-filters-button="showClearAllFiltersButton"
             :clear-all-filters-button-text="clearAllFiltersButtonText"
             @filter-data="handleFilterInternal"
-            @clear-all-filters="clearAllColumnFilters"
+            @clear-all-filters="clearAllColumnFiltersInternal"
         >
             <template #page-size-label="{ pageSize: currentPageSize }">
                 <slot name="page-size-label" v-bind="{ pageSize: currentPageSize }"></slot>
@@ -299,7 +299,7 @@ const {
     clearAllColumnFilters,
     hasActiveFilters,
     applyColumnFilters
-} = useColumnFiltering()
+} = useColumnFiltering({ remotePagination: props.remotePagination })
 
 const dataForPagination = computed(() => {
     return hasActiveFilters.value ? applyColumnFilters(tableData.value) : tableData.value
@@ -318,7 +318,7 @@ const {
     getRows
 } = useTablePagination(props, itemsPerPage, dataForPagination)
 
-const { handleSort, getSortIconClass } = useTableSorting(
+const { ascending, sortColumnKey, sortState, handleSort, getSortIconClass } = useTableSorting(
     dataForPagination,
     props.remotePagination,
     props.sortNullsFirst
@@ -342,6 +342,46 @@ const { searchTerm, filterData, setupDebouncedEmission } = useTableFiltering(
     }
 )
 
+const useTableEvents = ({
+    searchTerm,
+    columnFilters,
+    currentPage,
+    perPage,
+    numberOfPages,
+    ascending,
+    sortColumnKey
+}) => {
+    const createEventPayload = eventName => {
+        // table-state
+        return {
+            eventName,
+            searchTerm: searchTerm.value,
+            columnFilters: columnFilters.value,
+            page: currentPage.value,
+            perPage: perPage.value,
+            numberOfPages: numberOfPages.value,
+            sort: {
+                dir: ascending.value ? 'asc' : 'desc',
+                key: sortColumnKey.value
+            }
+        }
+    }
+    return {
+        createEventPayload
+    }
+}
+
+const { createEventPayload } = useTableEvents({
+    searchTerm,
+    columnFilters,
+    currentPage,
+    perPage: itemsPerPage,
+    numberOfPages,
+    ascending,
+    sortColumnKey,
+    sortState
+})
+
 const { validateProps } = useTableValidation()
 
 const {
@@ -357,7 +397,8 @@ const filterInputId = computed(() => `filter_input_${id}`)
 const changePage = page => {
     const result = changePageInternal(page)
     if (result?.shouldEmitPageChange) {
-        emit('page-change', result.eventData.page)
+        // emit('page-change', result.eventData.page)
+        emit('page-change', createEventPayload('page-change'))
     }
     if (result?.shouldEmitAfterPageChange) {
         emit('after-page-change', {
@@ -372,7 +413,7 @@ const handleSortInternal = column => {
     const result = handleSort(column, page => {
         const pageResult = changePageInternal(page)
         if (pageResult?.shouldEmitPageChange) {
-            emit('page-change', pageResult.eventData.page)
+            emit('page-change', createEventPayload('page-change'))
         }
         if (pageResult?.shouldEmitAfterPageChange) {
             emit('after-page-change', {
@@ -383,7 +424,7 @@ const handleSortInternal = column => {
     })
 
     if (result?.shouldEmitSortChange) {
-        emit('sort-change', result.eventData)
+        emit('sort-change', createEventPayload('sort-change'))
     }
     if (result?.shouldEmitAfterSort) {
         emit('after-sort', result.eventData)
@@ -393,7 +434,8 @@ const handleSortInternal = column => {
 const handleFilterInternal = event => {
     const result = filterData(event)
     if (result?.shouldEmitFilterChange) {
-        emit('filter-change', result.eventData.searchValue)
+        // emit('filter-change', result.eventData.searchValue)
+        emit('filter-change', createEventPayload('filter-change'))
     }
     if (result?.shouldEmitAfterFilter) {
         emit('after-filter', { searchTerm: result.eventData.searchTerm })
@@ -405,7 +447,7 @@ const handleColumnFilterInternal = ({ field, filter }) => {
     const pageResult = changePageInternal(1)
 
     if (pageResult?.shouldEmitPageChange) {
-        emit('page-change', pageResult.eventData.page)
+        emit('page-change', createEventPayload('page-change'))
     }
     if (pageResult?.shouldEmitAfterPageChange) {
         emit('after-page-change', {
@@ -414,20 +456,27 @@ const handleColumnFilterInternal = ({ field, filter }) => {
         })
     }
 
-    emit('column-filter-change', { field, filter })
+    // emit('column-filter-change', { field, filter })
+    emit('column-filter-change', createEventPayload('column-filter-change'))
     emit('after-column-filter', { field, filter, activeFilters: columnFilters.value })
+}
+
+const clearAllColumnFiltersInternal = () => {
+    clearAllColumnFilters()
+    emit('column-filter-change', createEventPayload('column-filter-change'))
 }
 
 setupDebouncedEmission(result => {
     if (result?.shouldEmitFilterChangeDebounced) {
-        emit('filter-change-debounced', result.eventData.searchTerm)
+        emit('filter-change-debounced', createEventPayload('filter-change-debounced'))
     }
 })
 
 watch(
     () => itemsPerPage.value,
     newItemsPerPage => {
-        emit('per-page-change', newItemsPerPage)
+        // emit('per-page-change', newItemsPerPage)
+        emit('per-page-change', createEventPayload('per-page-change'))
     }
 )
 

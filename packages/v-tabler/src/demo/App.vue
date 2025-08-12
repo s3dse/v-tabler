@@ -3,6 +3,7 @@ import data from './assets/MOCK_DATA-2.json'
 import TestOne from './components/TestOne.vue'
 import TestTwo from './components/TestTwo.vue'
 import { ref } from 'vue'
+import RemoteTableDemo from './components/RemoteTableDemo.vue'
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -20,16 +21,86 @@ const topRows = ref([...data].slice(0, 1))
 
 // Sample data for column filtering demo
 const columnFilterDemoData = ref([
-    { id: 1, name: 'Alice Johnson', department: 'Engineering', salary: 75000, hire_date: '2023-01-15', status: 'Active' },
-    { id: 2, name: 'Bob Smith', department: 'Marketing', salary: 65000, hire_date: '2022-03-20', status: 'Active' },
-    { id: 3, name: 'Carol Davis', department: 'Engineering', salary: 85000, hire_date: '2021-07-10', status: 'Active' },
-    { id: 4, name: 'David Wilson', department: 'Sales', salary: 55000, hire_date: '2023-05-01', status: 'Inactive' },
-    { id: 5, name: 'Eva Brown', department: 'HR', salary: 70000, hire_date: '2020-11-25', status: 'Active' },
-    { id: 6, name: 'Frank Miller', department: 'Engineering', salary: 95000, hire_date: '2019-02-14', status: 'Active' },
-    { id: 7, name: 'Grace Lee', department: 'Marketing', salary: 60000, hire_date: '2023-08-30', status: 'Active' },
-    { id: 8, name: 'Henry Taylor', department: 'Sales', salary: 52000, hire_date: '2022-12-05', status: 'Inactive' },
-    { id: 9, name: 'Ivy Chen', department: 'Engineering', salary: 80000, hire_date: '2021-04-18', status: 'Active' },
-    { id: 10, name: 'Jack Robinson', department: 'HR', salary: 65000, hire_date: '2020-09-12', status: 'Active' }
+    {
+        id: 1,
+        name: 'Alice Johnson',
+        department: 'Engineering',
+        salary: 75000,
+        hire_date: '2023-01-15',
+        status: 'Active'
+    },
+    {
+        id: 2,
+        name: 'Bob Smith',
+        department: 'Marketing',
+        salary: 65000,
+        hire_date: '2022-03-20',
+        status: 'Active'
+    },
+    {
+        id: 3,
+        name: 'Carol Davis',
+        department: 'Engineering',
+        salary: 85000,
+        hire_date: '2021-07-10',
+        status: 'Active'
+    },
+    {
+        id: 4,
+        name: 'David Wilson',
+        department: 'Sales',
+        salary: 55000,
+        hire_date: '2023-05-01',
+        status: 'Inactive'
+    },
+    {
+        id: 5,
+        name: 'Eva Brown',
+        department: 'HR',
+        salary: 70000,
+        hire_date: '2020-11-25',
+        status: 'Active'
+    },
+    {
+        id: 6,
+        name: 'Frank Miller',
+        department: 'Engineering',
+        salary: 95000,
+        hire_date: '2019-02-14',
+        status: 'Active'
+    },
+    {
+        id: 7,
+        name: 'Grace Lee',
+        department: 'Marketing',
+        salary: 60000,
+        hire_date: '2023-08-30',
+        status: 'Active'
+    },
+    {
+        id: 8,
+        name: 'Henry Taylor',
+        department: 'Sales',
+        salary: 52000,
+        hire_date: '2022-12-05',
+        status: 'Inactive'
+    },
+    {
+        id: 9,
+        name: 'Ivy Chen',
+        department: 'Engineering',
+        salary: 80000,
+        hire_date: '2021-04-18',
+        status: 'Active'
+    },
+    {
+        id: 10,
+        name: 'Jack Robinson',
+        department: 'HR',
+        salary: 65000,
+        hire_date: '2020-09-12',
+        status: 'Active'
+    }
 ])
 
 const columnFilterDemoFields = ref([
@@ -61,8 +132,9 @@ const columnFilterDemoFields = ref([
         i18n: {
             placeholder: 'Search departments...',
             noSelectionText: 'Choose departments...',
-            singleSelectionTextFn: (value) => `Selected: ${value}`,
-            multipleSelectionTextFn: (count) => `${count} department${count !== 1 ? 's' : ''} selected`
+            singleSelectionTextFn: value => `Selected: ${value}`,
+            multipleSelectionTextFn: count =>
+                `${count} department${count !== 1 ? 's' : ''} selected`
         },
         thClassList: 'table-col-left px-2',
         tdClassList: 'text-left px-2'
@@ -73,7 +145,7 @@ const columnFilterDemoFields = ref([
         type: 'numeric',
         thClassList: 'table-col-right px-2',
         tdClassList: 'text-right px-2',
-        formatter: (value) => value ? `$${value.toLocaleString()}` : '-'
+        formatter: value => (value ? `$${value.toLocaleString()}` : '-')
     },
     {
         key: 'hire_date',
@@ -93,8 +165,8 @@ const columnFilterDemoFields = ref([
         i18n: {
             placeholder: 'Filter by status...',
             noSelectionText: 'All statuses',
-            singleSelectionTextFn: (value) => value,
-            multipleSelectionTextFn: (count) => `${count} status${count !== 1 ? 'es' : ''}`
+            singleSelectionTextFn: value => value,
+            multipleSelectionTextFn: count => `${count} status${count !== 1 ? 'es' : ''}`
         },
         thClassList: 'table-col-center px-2',
         tdClassList: 'text-center px-2'
@@ -159,11 +231,11 @@ const logItem = item => {
 }
 
 // Column filter event handlers
-const handleColumnFilterChange = (event) => {
+const handleColumnFilterChange = event => {
     console.log('Column filter changed:', event)
 }
 
-const handleAfterColumnFilter = (event) => {
+const handleAfterColumnFilter = event => {
     console.log('Active column filters:', event.activeFilters)
     console.log('Total active filters:', Object.keys(event.activeFilters).length)
 }
@@ -244,6 +316,7 @@ const showTableSkeleton = ref(true)
 
 <template>
     <PageTitle tag="h1">Theme & Components</PageTitle>
+    <RemoteTableDemo />
     <CollapsibleCard class="my-4" heading="Buttons">
         <div class="p-4 flex flex-col gap-2">
             <h1 class="header-2 text-default">Basic Buttons</h1>
@@ -651,7 +724,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 @after-column-filter="handleAfterColumnFilter"
             >
                 <template #cell(status)="{ value }">
-                    <span 
+                    <span
                         :class="{
                             'text-green-500 dark:text-green-400': value === 'Active',
                             'text-red-600 dark:text-red-400': value === 'Inactive'
