@@ -2,7 +2,7 @@ import { computed } from 'vue'
 
 /**
  * Utility composable for table data extraction and field management.
- * These are pure utility functions that don't manage state.
+ * No state management here.
  */
 export function useTableDataUtils(props) {
     const fieldsVisibleInTable = computed(() => {
