@@ -5,26 +5,26 @@ import UnoCSS from 'unocss/vite' // Temporarily disabled
 // import UnoCSS from 'unocss/vite' // Temporarily disabled
 
 export default defineConfig({
-  vite: {
-    plugins: [
-      UnoCSS(), // Temporarily disabled due to VitePress issues
-      whyframe({
-        defaultSrc: '/frames/default'
-      }),
-      whyframeVue({
-        include: /\.(?:vue|md)$/
-      })
-    ]
-  },
-  vue: {
-    template: {
-      compilerOptions: {
-        isCustomElement: tag => tag === 'whyframe'
-      }
-    }
-  },
-  title: 'V-Tabler',
-  description: 'A comprehensive Vue 3 component library with advanced table functionality',
+    vite: {
+        plugins: [
+            UnoCSS(), // Temporarily disabled due to VitePress issues
+            whyframe({
+                defaultSrc: '/frames/default'
+            }),
+            whyframeVue({
+                include: /\.(?:vue|md)$/
+            })
+        ]
+    },
+    vue: {
+        template: {
+            compilerOptions: {
+                isCustomElement: tag => tag === 'whyframe'
+            }
+        }
+    },
+    title: 'V-Tabler',
+    description: 'A comprehensive Vue 3 component library with advanced table functionality',
 
     themeConfig: {
         nav: [
@@ -64,6 +64,10 @@ export default defineConfig({
                         {
                             text: 'Table Column Alignment',
                             link: '/guide/table-column-alignment-migration'
+                        },
+                        {
+                            text: 'Table Events',
+                            link: '/guide/table-events-migration'
                         }
                     ]
                 }

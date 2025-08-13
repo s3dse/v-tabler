@@ -34,27 +34,23 @@ app.mount('#app')
 
 ```vue
 <template>
-  <div>
-    <TableComponent 
-      :items="data" 
-      :fields="fields"
-      title="My First Table"
-    />
-  </div>
+    <div>
+        <TableComponent :items="data" :fields="fields" title="My First Table" />
+    </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 
 const data = ref([
-  { id: 1, name: 'John', email: 'john@example.com' },
-  { id: 2, name: 'Jane', email: 'jane@example.com' }
+    { id: 1, name: 'John', email: 'john@example.com' },
+    { id: 2, name: 'Jane', email: 'jane@example.com' }
 ])
 
 const fields = ref([
-  { key: 'id', label: 'ID' },
-  { key: 'name', label: 'Name' },
-  { key: 'email', label: 'Email' }
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: 'Name' },
+    { key: 'email', label: 'Email' }
 ])
 </script>
 ```
@@ -67,10 +63,10 @@ If you prefer to import components individually:
 import { TableComponent, CardComponent } from '@s3-dse/v-tabler'
 
 export default {
-  components: {
-    TableComponent,
-    CardComponent
-  }
+    components: {
+        TableComponent,
+        CardComponent
+    }
 }
 ```
 
@@ -88,14 +84,12 @@ Create `uno.config.js`:
 import { defineConfig, presetUno } from 'unocss'
 
 export default defineConfig({
-  presets: [
-    presetUno()
-  ],
-  theme: {
-    colors: {
-      primary: '#646cff'
+    presets: [presetUno()],
+    theme: {
+        colors: {
+            primary: '#646cff'
+        }
     }
-  }
 })
 ```
 

@@ -46,10 +46,10 @@ You can also import components individually:
 import { TableComponent, CardComponent } from '@s3_dse/v-tabler'
 
 export default {
-  components: {
-    TableComponent,
-    CardComponent
-  }
+    components: {
+        TableComponent,
+        CardComponent
+    }
 }
 ```
 
@@ -62,9 +62,7 @@ import { defineConfig } from 'unocss'
 import { presetVTabler } from '@s3_dse/v-tabler/preset'
 
 export default defineConfig({
-  presets: [
-    presetVTabler()
-  ]
+    presets: [presetVTabler()]
 })
 ```
 

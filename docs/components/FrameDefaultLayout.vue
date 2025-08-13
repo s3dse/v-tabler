@@ -6,17 +6,17 @@ import '@s3_dse/v-tabler/v-tabler.css'
 const el = ref()
 
 onMounted(() => {
-  console.log('FrameDefaultLayout mounted')
-  
-  // Create the whyframe app and provide the components it needs
-  createApp(el.value, {
-    TableComponent
-  })
+    console.log('FrameDefaultLayout mounted')
+
+    // Create the whyframe app and provide the components it needs
+    createApp(el.value, {
+        TableComponent
+    })
 })
 </script>
 
 <template>
-  <div ref="el" class="whyframe-frame-default-layout">
-    <!-- Content will be mounted here by whyframe -->
-  </div>
+    <div ref="el" class="whyframe-frame-default-layout">
+        <!-- Content will be mounted here by whyframe -->
+    </div>
 </template>

@@ -5,9 +5,11 @@ V-Tabler provides a comprehensive set of Vue 3 components designed for modern we
 ## Core Components
 
 ### [TableComponent](/components/table-component)
+
 Advanced data table with sorting, filtering, pagination, and column-level controls.
 
 **Key Features:**
+
 - Column-level filtering with type detection
 - Advanced search and pagination
 - Customizable sorting and formatting
@@ -15,18 +17,22 @@ Advanced data table with sorting, filtering, pagination, and column-level contro
 - Extensive slot system for customization
 
 ### [CardComponent](/components/card-component)
+
 Flexible container component with header, content, and action areas.
 
 **Key Features:**
+
 - Title and subtitle support
 - Action slot for buttons and controls
 - Elevation and border variants
 - Collapsible functionality
 
 ### [DialogComponent](/components/dialog-component)
+
 Modal dialog component with customizable content and actions.
 
 **Key Features:**
+
 - Backdrop click to close
 - ESC key handling
 - Focus management
@@ -35,17 +41,21 @@ Modal dialog component with customizable content and actions.
 ## Form Components
 
 ### [Select Components](/components/select-components)
+
 Multiple select component variants for different use cases.
 
 **Variants:**
+
 - `SingleSelect` - Single value selection
 - `MultiSelect` - Multiple value selection
 - `ListSelect` - List-based selection interface
 
 ### [ToggleComponent](/components/toggle-component)
+
 Switch/toggle component for boolean values.
 
 **Features:**
+
 - Customizable labels
 - Size variants
 - Disabled state support
@@ -53,37 +63,46 @@ Switch/toggle component for boolean values.
 ## UI Components
 
 ### [DropdownComponent](/components/dropdown-component)
+
 Flexible dropdown menu component.
 
 **Features:**
+
 - Multiple trigger types
 - Positioning options
 - Nested menu support
 
 ### [Typography](/components/typography)
+
 Text and heading components with consistent styling.
 
 **Components:**
+
 - `Heading` - Styled headings with size variants
 - `PageTitle` - Page-level title component
 
 ## Layout Components
 
 ### LoadingOverlay
+
 Full-screen or container-specific loading indicator.
 
 ### Pagination
+
 Standalone pagination component used by TableComponent.
 
 ### Skeleton
+
 Loading skeleton components for better perceived performance.
 
 ## Transition Components
 
 ### Fade
+
 Smooth fade in/out transitions.
 
 ### Collapse
+
 Expand/collapse animations for content areas.
 
 ## Getting Started
@@ -100,33 +119,26 @@ Each component is designed to work independently or as part of a larger system. 
 
 ```vue
 <template>
-  <div class="space-y-6">
-    <!-- Data Table -->
-    <CardComponent title="User Management">
-      <TableComponent
-        :items="users"
-        :fields="userFields"
-        enable-search
-        enable-column-filters
-      />
-    </CardComponent>
-    
-    <!-- Form Controls -->
-    <CardComponent title="Settings">
-      <div class="space-y-4">
-        <SingleSelect
-          v-model="selectedRole"
-          :options="roleOptions"
-          label="Default Role"
-        />
-        
-        <ToggleComponent
-          v-model="notificationsEnabled"
-          label="Enable Notifications"
-        />
-      </div>
-    </CardComponent>
-  </div>
+    <div class="space-y-6">
+        <!-- Data Table -->
+        <CardComponent title="User Management">
+            <TableComponent
+                :items="users"
+                :fields="userFields"
+                enable-search
+                enable-column-filters
+            />
+        </CardComponent>
+
+        <!-- Form Controls -->
+        <CardComponent title="Settings">
+            <div class="space-y-4">
+                <SingleSelect v-model="selectedRole" :options="roleOptions" label="Default Role" />
+
+                <ToggleComponent v-model="notificationsEnabled" label="Enable Notifications" />
+            </div>
+        </CardComponent>
+    </div>
 </template>
 ```
 

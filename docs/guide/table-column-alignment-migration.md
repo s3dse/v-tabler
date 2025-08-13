@@ -7,10 +7,12 @@ In the latest version, we've improved the table header layout to better group co
 ### What Changed
 
 **Before:**
+
 - Column headers used `justify-between` layout that spread controls to opposite ends
 - Text alignment classes like `text-left`, `text-right` applied to `thClassList` would align header content
 
 **After:**
+
 - Column headers now group all controls together (name + sort + filter)
 - New UnoCSS shortcuts provide both header and body alignment
 - Old text alignment classes in `thClassList` no longer affect header layout
@@ -20,26 +22,28 @@ In the latest version, we've improved the table header layout to better group co
 If you were using text alignment classes in your field definitions, you need to migrate to the new table column shortcuts:
 
 #### Before (no longer works):
+
 ```javascript
 const fields = [
-  {
-    key: 'price',
-    label: 'Price',
-    thClassList: 'text-right',           // ❌ No longer affects header
-    tdClassList: 'text-right'            // ✅ Still works for body cells
-  }
+    {
+        key: 'price',
+        label: 'Price',
+        thClassList: 'text-right', // ❌ No longer affects header
+        tdClassList: 'text-right' // ✅ Still works for body cells
+    }
 ]
 ```
 
 #### After (new approach):
+
 ```javascript
 const fields = [
-  {
-    key: 'price',
-    label: 'Price', 
-    thClassList: 'table-col-right',      // ✅ New shortcut for header alignment
-    tdClassList: 'text-right'            // ✅ Still works for body cells
-  }
+    {
+        key: 'price',
+        label: 'Price',
+        thClassList: 'table-col-right', // ✅ New shortcut for header alignment
+        tdClassList: 'text-right' // ✅ Still works for body cells
+    }
 ]
 ```
 
@@ -47,24 +51,26 @@ const fields = [
 
 We've added three new shortcuts to the v-tabler theme:
 
-| Shortcut | Effect | Use Case |
-|----------|--------|----------|
-| `table-col-left` | `justify-start text-left` | Left-align header and body content |
-| `table-col-right` | `justify-end text-right` | Right-align header and body content (numbers, currency) |
-| `table-col-center` | `justify-center text-center` | Center-align header and body content |
+| Shortcut           | Effect                       | Use Case                                                |
+| ------------------ | ---------------------------- | ------------------------------------------------------- |
+| `table-col-left`   | `justify-start text-left`    | Left-align header and body content                      |
+| `table-col-right`  | `justify-end text-right`     | Right-align header and body content (numbers, currency) |
+| `table-col-center` | `justify-center text-center` | Center-align header and body content                    |
 
 ### Migration Examples
 
 #### Numeric columns (IDs, prices, quantities):
+
 ```javascript
 // Before
 { key: 'id', thClassList: 'text-right', tdClassList: 'text-right' }
 
-// After  
+// After
 { key: 'id', thClassList: 'table-col-right', tdClassList: 'text-right' }
 ```
 
 #### Text columns (names, descriptions):
+
 ```javascript
 // Before
 { key: 'name', thClassList: 'text-left', tdClassList: 'text-left' }
@@ -74,6 +80,7 @@ We've added three new shortcuts to the v-tabler theme:
 ```
 
 #### Centered columns (status, badges):
+
 ```javascript
 // Before
 { key: 'status', thClassList: 'text-center', tdClassList: 'text-center' }
@@ -94,7 +101,7 @@ We've added three new shortcuts to the v-tabler theme:
 The migration is straightforward - just replace text alignment classes in `thClassList`:
 
 - `text-left` → `table-col-left`
-- `text-right` → `table-col-right`  
+- `text-right` → `table-col-right`
 - `text-center` → `table-col-center`
 
 Keep all other classes and `tdClassList` unchanged.

@@ -8,10 +8,10 @@ const route = useRoute()
 </script>
 
 <template>
-  <!--
+    <!--
     replace with the layout entirely for `/frames/default`
     so we don't inherit from `Theme.Layout`
   -->
-  <FrameDefaultLayout v-if="route.path.startsWith('/frames/default')" />
-  <Theme.Layout v-else />
+    <FrameDefaultLayout v-if="route.path.startsWith('/frames/default')" />
+    <Theme.Layout v-else />
 </template>

@@ -2,24 +2,24 @@
 layout: home
 
 hero:
-  name: "V-Tabler"
-  text: "Vue 3 Component Library"
-  tagline: "Comprehensive table functionality and beautiful UI components"
-  actions:
-    - theme: brand
-      text: Get Started
-      link: /guide/quick-start
-    - theme: alt
-      text: View Components
-      link: /components/
+    name: 'V-Tabler'
+    text: 'Vue 3 Component Library'
+    tagline: 'Comprehensive table functionality and beautiful UI components'
+    actions:
+        - theme: brand
+          text: Get Started
+          link: /guide/quick-start
+        - theme: alt
+          text: View Components
+          link: /components/
 
 features:
-  - title: Advanced Tables
-    details: Feature-rich table component with filtering, sorting, pagination, and custom styling
-  - title: Modern UI
-    details: Beautiful, responsive components built with Vue 3 and modern CSS
-  - title: Developer Friendly
-    details: Simple API, comprehensive documentation, and TypeScript support
+    - title: Advanced Tables
+      details: Feature-rich table component with filtering, sorting, pagination, and custom styling
+    - title: Modern UI
+      details: Beautiful, responsive components built with Vue 3 and modern CSS
+    - title: Developer Friendly
+      details: Simple API, comprehensive documentation, and TypeScript support
 ---
 
 Get started with V-Tabler in minutes:
@@ -50,20 +50,24 @@ app.use(VTabler)
 ## 📋 Components
 
 ### Data Display
+
 - [TableComponent](/components/table-component) - Feature-rich data tables
 - [CardComponent](/components/card) - Flexible content containers
 - [PaginationComponent](/components/pagination) - Navigate large datasets
 
 ### Forms & Input
+
 - [CheckboxComponent](/components/checkbox) - Styled checkboxes
 - [SelectComponents](/components/select) - Single and multi-select dropdowns
 - [ToggleComponent](/components/toggle) - Switch controls
 
 ### Feedback & Overlay
+
 - [DialogComponent](/components/dialog) - Modal dialogs and confirmations
 - [LoadingOverlay](/components/loading-overlay) - Loading states and spinners
 
 ### Navigation
+
 - [TabsComponent](/components/tabs) - Tabbed interfaces
 - [DropdownComponent](/components/dropdown) - Context menus and actions
 
@@ -74,12 +78,12 @@ V-Tabler uses UnoCSS for styling, providing atomic CSS utilities and easy custom
 ```javascript
 // uno.config.js
 export default {
-  theme: {
-    colors: {
-      primary: '#646cff',
-      // ... your custom colors
+    theme: {
+        colors: {
+            primary: '#646cff'
+            // ... your custom colors
+        }
     }
-  }
 }
 ```
 
