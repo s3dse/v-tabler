@@ -52,19 +52,21 @@ function applyColumnFilter(item, filter, key) {
                 dateFilter.getMonth(),
                 dateFilter.getDate()
             )
+            const valueTime = valueDateOnly.getTime()
+            const filterTime = filterDateOnly.getTime()
             switch (filter.operator) {
                 case '=':
-                    return valueDateOnly === filterDateOnly
+                    return valueTime === filterTime
                 case '!=':
-                    return valueDateOnly !== filterDateOnly
+                    return valueTime !== filterTime
                 case '>':
-                    return valueDateOnly > filterDateOnly
+                    return valueTime > filterTime
                 case '>=':
-                    return valueDateOnly >= filterDateOnly
+                    return valueTime >= filterTime
                 case '<':
-                    return valueDateOnly < filterDateOnly
+                    return valueTime < filterTime
                 case '<=':
-                    return valueDateOnly <= filterDateOnly
+                    return valueTime <= filterTime
                 default:
                     return true
             }
@@ -80,46 +82,47 @@ function applyColumnFilter(item, filter, key) {
     }
 }
 
-export function fetchPaginatedData({
-    page = 1,
-    perPage = 10,
-    searchTerm = '',
-    columnFilters = {},
-    sort = {}
-}) {
-    let items = [...allItems]
+export const fetchPaginatedData =
+    (timeoutMillis = 300) =>
+    ({ page = 1, perPage = 10, searchTerm = '', columnFilters = {}, sort = {} }) => {
+        let items = [...allItems]
 
-    // Per-column filters (type-based)
-    Object.entries(columnFilters).forEach(([key, filter]) => {
-        if (filter && filter.value !== undefined && filter.value !== null && filter.value !== '') {
-            items = items.filter(item => applyColumnFilter(item, filter, key))
-        }
-    })
-
-    // Global search: match any field
-    if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase()
-        items = items.filter(item =>
-            Object.values(item).some(val => String(val).toLowerCase().includes(searchLower))
-        )
-    }
-
-    // Sorting
-    if (sort.key) {
-        items.sort((a, b) => {
-            if (sort.dir === 'desc') {
-                return a[sort.key] < b[sort.key] ? 1 : -1
-            } else {
-                return a[sort.key] > b[sort.key] ? 1 : -1
+        // Per-column filters (type-based)
+        Object.entries(columnFilters).forEach(([key, filter]) => {
+            if (
+                filter &&
+                filter.value !== undefined &&
+                filter.value !== null &&
+                filter.value !== ''
+            ) {
+                items = items.filter(item => applyColumnFilter(item, filter, key))
             }
         })
+
+        // Global search: match any field
+        if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase()
+            items = items.filter(item =>
+                Object.values(item).some(val => String(val).toLowerCase().includes(searchLower))
+            )
+        }
+
+        // Sorting
+        if (sort.key) {
+            items.sort((a, b) => {
+                if (sort.dir === 'desc') {
+                    return a[sort.key] < b[sort.key] ? 1 : -1
+                } else {
+                    return a[sort.key] > b[sort.key] ? 1 : -1
+                }
+            })
+        }
+
+        const totalItems = items.length
+        const start = (page - 1) * perPage
+        const pagedItems = items.slice(start, start + perPage)
+
+        return new Promise(resolve => {
+            setTimeout(() => resolve({ items: pagedItems, totalItems }), timeoutMillis)
+        })
     }
-
-    const totalItems = items.length
-    const start = (page - 1) * perPage
-    const pagedItems = items.slice(start, start + perPage)
-
-    return new Promise(resolve => {
-        setTimeout(() => resolve({ items: pagedItems, totalItems }), 300)
-    })
-}

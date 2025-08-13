@@ -23,7 +23,7 @@ describe('TableComponent with perPage setting', () => {
                 }
             }
         })
-        // Access pageSize through the component's exposed properties
+        // Access pageSize through the computed property that proxies to tableState
         expect(wrapper.vm.pageSize).toBe(10)
     })
 
@@ -72,14 +72,15 @@ describe('TableComponent with perPage setting', () => {
                 }
             }
         })
-        expect(wrapper.vm.tableData.length).toBe(11)
+        // The tableData now refers to the filtered/sorted data through the centralized pipeline
+        expect(wrapper.vm.dataForPagination.length).toBe(11)
         expect(wrapper.vm.numberOfPages).toBe(3)
-        expect(wrapper.vm.getRows().length).toBe(5)
+        expect(wrapper.vm.regularRowsForDisplay.length).toBe(5)
         wrapper.vm.changePage(2)
         expect(wrapper.emitted()).toHaveProperty('page-change')
-        expect(wrapper.vm.getRows().length).toBe(5)
+        expect(wrapper.vm.regularRowsForDisplay.length).toBe(5)
         wrapper.vm.changePage(3)
-        expect(wrapper.vm.getRows().length).toBe(1)
+        expect(wrapper.vm.regularRowsForDisplay.length).toBe(1)
     })
 
     it('should emit per-page-change when page size changes', async () => {
@@ -107,7 +108,7 @@ describe('TableComponent with perPage setting', () => {
                 perPage: 7,
                 searchTerm: null,
                 sort: {
-                    dir: 'desc',
+                    dir: 'asc', 
                     key: ''
                 }
             }
@@ -190,7 +191,7 @@ describe('TableComponent functionality', () => {
         await headers[1].find('.i-tabler-arrows-sort').trigger('click')
 
         expect(wrapper.emitted()).toHaveProperty('sort-change')
-        expect(wrapper.vm.tableData.map(td => td.value)).toStrictEqual([...Array(100).keys()])
+        expect(wrapper.vm.dataForPagination.map(td => td.value)).toStrictEqual([...Array(100).keys()])
 
         const values = intValuesOfColumn(wrapper, 2)
         expect(values).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -207,7 +208,7 @@ describe('TableComponent functionality', () => {
 
         // Second click - descending
         await headers[1].trigger('click')
-        expect(wrapper.vm.tableData.map(td => td.value)).toStrictEqual(
+        expect(wrapper.vm.dataForPagination.map(td => td.value)).toStrictEqual(
             [...Array(100).keys()].reverse()
         )
 
@@ -229,7 +230,7 @@ describe('TableComponent functionality', () => {
 
         expect(wrapper.emitted()).toHaveProperty('filter-change')
         expect(wrapper.emitted()).toHaveProperty('filter-change-debounced')
-        expect(wrapper.vm.tableData.map(td => td.value).sort()).toStrictEqual([
+        expect(wrapper.vm.dataForPagination.map(td => td.value).sort()).toStrictEqual([
             1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 31, 41, 51, 61, 71, 81, 91
         ])
 
@@ -247,7 +248,7 @@ describe('TableComponent functionality', () => {
 
         expect(wrapper.emitted()).toHaveProperty('filter-change')
         expect(wrapper.emitted()).toHaveProperty('filter-change-debounced')
-        expect(wrapper.vm.tableData).toStrictEqual([])
+        expect(wrapper.vm.dataForPagination).toStrictEqual([])
         expect(wrapper.findAll('td')).toStrictEqual([])
     })
 })

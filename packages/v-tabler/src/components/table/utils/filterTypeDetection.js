@@ -1,6 +1,6 @@
 /**
  * Auto-detection utilities for column filter types.
- * 
+ *
  * Typed filters allow for data type-specific filtering logic to improve performance and user experience.
  * This module provides functions to detect the appropriate filter type based on the data in a column,
  * as well as to generate select options for columns that use a select filter.
@@ -22,6 +22,8 @@ const isTypeDetectionNecessary = field => {
         return { typeDetectionNecessary: false, type: field.filterType }
     } else if (field.type === 'numeric') {
         return { typeDetectionNecessary: false, type: 'numeric' }
+    } else if (field.type === 'date') {
+        return { typeDetectionNecessary: false, type: 'date' }
     } else if (field.filterOptions) {
         return { typeDetectionNecessary: false, type: 'select' }
     } else if (!FILTER_DETECTION_CONFIG.enabled) {
@@ -71,7 +73,6 @@ export function detectFilterType(field, data) {
     } else {
         return 'text'
     }
-
 }
 
 /**
@@ -87,15 +88,14 @@ function allNumeric(sampleValues) {
 function isSelectColumn(sampleValues, data, field) {
     const uniqueValues = [...new Set(sampleValues)]
 
-    if (uniqueValues.length <= FILTER_DETECTION_CONFIG.maxSelectUniqueValues &&
-        uniqueValues.length < sampleValues.length * FILTER_DETECTION_CONFIG.selectCardinality) {
-
+    if (
+        uniqueValues.length <= FILTER_DETECTION_CONFIG.maxSelectUniqueValues &&
+        uniqueValues.length < sampleValues.length * FILTER_DETECTION_CONFIG.selectCardinality
+    ) {
         // Double-check against full dataset for high cardinality
-        const allUniqueValues = [...new Set(
-            data
-                .map(item => item[field.key])
-                .filter(val => val != null && val !== '')
-        )]
+        const allUniqueValues = [
+            ...new Set(data.map(item => item[field.key]).filter(val => val != null && val !== ''))
+        ]
 
         // Fallback to text if too many unique values
         if (allUniqueValues.length > FILTER_DETECTION_CONFIG.maxSelectOptions) {
@@ -115,18 +115,18 @@ function isDateColumn(sampleValues, data, field) {
     const allDates = sampleValues.every(val => {
         // More strict date validation - should look like actual dates
         const dateValue = Date.parse(val)
-        return !isNaN(dateValue) &&
+        return (
+            !isNaN(dateValue) &&
             // Exclude obviously non-date strings like "Person 1"
             /^\d{4}-\d{2}-\d{2}|^\d{1,2}\/\d{1,2}\/\d{4}|^\d{1,2}-\d{1,2}-\d{4}/.test(val)
+        )
     })
 
     if (allDates) {
         // Even for dates, check cardinality - if too many unique dates, use text filter
-        const allUniqueValues = [...new Set(
-            data
-                .map(item => item[field.key])
-                .filter(val => val != null && val !== '')
-        )]
+        const allUniqueValues = [
+            ...new Set(data.map(item => item[field.key]).filter(val => val != null && val !== ''))
+        ]
 
         if (allUniqueValues.length > FILTER_DETECTION_CONFIG.maxSelectOptions) {
             return false
@@ -152,15 +152,15 @@ export function generateSelectOptions(field, data, filterType) {
     }
 
     if (filterType === 'select') {
-        const allValues = data
-            .map(item => item[field.key])
-            .filter(val => val != null && val !== '')
+        const allValues = data.map(item => item[field.key]).filter(val => val != null && val !== '')
 
         const uniqueValues = [...new Set(allValues)]
 
         // Safety check - only apply to auto-detected select filters, not explicit ones
         if (!field.filterType && uniqueValues.length > FILTER_DETECTION_CONFIG.maxSelectOptions) {
-            console.warn(`Column "${field.key}" has ${uniqueValues.length} unique values. Consider providing explicit filterOptions for better performance.`)
+            console.warn(
+                `Column "${field.key}" has ${uniqueValues.length} unique values. Consider providing explicit filterOptions for better performance.`
+            )
             // Fallback to text filter for high cardinality data (auto-detected only)
             return []
         }

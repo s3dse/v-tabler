@@ -18,7 +18,8 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
-import { fetchPaginatedData } from '@/components/table/demo/mockApi'
+import { fetchPaginatedData as setupMockApi } from '@/components/table/demo/mockApi'
+const fetchPaginatedData = setupMockApi()
 
 const busy = ref(false)
 const items = ref([])

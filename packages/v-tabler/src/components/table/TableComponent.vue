@@ -66,7 +66,7 @@
 
                 <table-body
                     v-if="topRows.length"
-                    :rows="getRows(topRows, false)"
+                    :rows="topRowsForDisplay"
                     :visible-fields="visibleFields"
                     row-type="top"
                     :get-value="getValue"
@@ -83,7 +83,7 @@
                 </table-body>
 
                 <table-body
-                    :rows="getRows()"
+                    :rows="regularRowsForDisplay"
                     :visible-fields="visibleFields"
                     row-type="regular"
                     row-class="border-y border-border"
@@ -102,7 +102,7 @@
 
                 <table-body
                     v-if="bottomRows.length"
-                    :rows="getRows(bottomRows, false)"
+                    :rows="bottomRowsForDisplay"
                     :visible-fields="visibleFields"
                     row-type="bottom"
                     row-class="border-t border-border"
@@ -157,13 +157,11 @@ import { joinLines } from '@/utils/string-join-lines.js'
 import { useDebounceFn } from '@vueuse/core'
 
 import {
-    useTableData,
-    useTableSorting,
-    useTablePagination,
-    useTableFiltering,
+    useTableState,
+    useTableDataUtils,
+    useTableEvents,
     useTableValidation,
-    useTableStyles,
-    useColumnFiltering
+    useTableStyles
 } from './composables/index.js'
 
 import { TableTitle, TableHeader, TableHead, TableBody, TableFooter } from './components/index.js'
@@ -282,93 +280,14 @@ const emit = defineEmits([
 const id = useId()
 const slots = useSlots()
 
-const {
-    tableData,
-    visibleFields,
-    getValue,
-    getUnformattedValue,
-    getColumnLabel,
-    underscoresToSpaces
-} = useTableData(props)
+const tableState = useTableState(props)
 
-const {
-    columnFilters,
-    setColumnFilter,
-    clearAllColumnFilters,
-    hasActiveFilters,
-    applyColumnFilters
-} = useColumnFiltering({ remotePagination: props.remotePagination })
+const { visibleFields, getValue, getUnformattedValue, getColumnLabel, underscoresToSpaces } =
+    useTableDataUtils(props)
 
-const dataForPagination = computed(() => {
-    return hasActiveFilters.value ? applyColumnFilters(tableData.value) : tableData.value
-})
-
-const itemsPerPage = computed(() => {
-    const safePageSize = pageSize.value || 5
-    const safeTopRowsLength = props.topRows?.length || 0
-    return Math.max(1, safePageSize - safeTopRowsLength)
-})
-const {
-    currentPage,
-    pageSize,
-    numberOfPages,
-    changePage: changePageInternal,
-    getRows
-} = useTablePagination(props, itemsPerPage, dataForPagination)
-
-const { ascending, sortColumnKey, sortState, handleSort, getSortIconClass } = useTableSorting(
-    dataForPagination,
-    props.remotePagination,
-    props.sortNullsFirst
-)
-
-const { searchTerm, filterData } = useTableFiltering(props, props.items, tableData, page => {
-    changePageInternal(page)
-    emit('page-change', createEventPayload('page-change'))
-})
-
-const useTableEvents = ({
-    searchTerm,
-    columnFilters,
-    currentPage,
-    perPage,
-    numberOfPages,
-    ascending,
-    sortColumnKey
-}) => {
-    const createEventPayload = eventName => {
-        // table-state
-        return {
-            eventName,
-            searchTerm: searchTerm.value,
-            columnFilters: Object.fromEntries(columnFilters.value.entries()),
-            page: currentPage.value,
-            perPage: perPage.value,
-            numberOfPages: numberOfPages.value,
-            sort: {
-                dir: ascending.value ? 'asc' : 'desc',
-                key: sortColumnKey.value
-            }
-        }
-    }
-    return {
-        createEventPayload
-    }
-}
-
-const { createEventPayload } = useTableEvents({
-    searchTerm,
-    columnFilters,
-    currentPage,
-    perPage: itemsPerPage,
-    numberOfPages,
-    ascending,
-    sortColumnKey,
-    sortState
-})
+const { createEventPayload } = useTableEvents(tableState)
 
 const { validateProps } = useTableValidation()
-
 const {
     getClassList,
     getTopRowClassList,
@@ -378,6 +297,23 @@ const {
 } = useTableStyles()
 
 const filterInputId = computed(() => `filter_input_${id}`)
+
+// For compatibility with existing template - these now proxy to tableState
+const searchTerm = computed({
+    get: () => tableState.globalSearchTerm.value,
+    set: value => tableState.setGlobalSearch(value)
+})
+const currentPage = tableState.currentPage
+const pageSize = computed({
+    get: () => tableState.pageSize.value,
+    set: value => tableState.setPageSize(value)
+})
+const numberOfPages = tableState.totalPages
+const itemsPerPage = tableState.effectiveItemsPerPage
+const columnFilters = tableState.columnFilters
+const hasActiveFilters = tableState.hasActiveColumnFilters
+const getSortIconClass = tableState.getSortIconClass
+const dataForPagination = tableState.allFilteredData
 
 const debouncedEmitColumnFilterChange = useDebounceFn(
     () => {
@@ -396,34 +332,48 @@ const debouncedEmitFilterChange = useDebounceFn(
 )
 
 const changePage = page => {
-    changePageInternal(page)
+    tableState.setCurrentPage(page)
     emit('page-change', createEventPayload('page-change'))
 }
 
 const handleSortInternal = column => {
-    handleSort(column, page => changePageInternal(page))
+    tableState.setSortColumn(column)
     emit('sort-change', createEventPayload('sort-change'))
 }
 
 const handleFilterInternal = event => {
-    filterData(event)
-    changePageInternal(1)
+    const searchValue = event.target?.value || ''
+    tableState.setGlobalSearch(searchValue)
     emit('filter-change', createEventPayload('filter-change'))
     debouncedEmitFilterChange()
 }
 
 const handleColumnFilterInternal = ({ field, filter }) => {
-    setColumnFilter(field, filter)
-    changePageInternal(1)
+    tableState.setColumnFilter(field, filter)
     emit('column-filter-change', createEventPayload('column-filter-change'))
     debouncedEmitColumnFilterChange()
 }
 
 const clearAllColumnFiltersInternal = () => {
-    clearAllColumnFilters()
+    tableState.clearAllColumnFilters()
     emit('column-filter-change', createEventPayload('column-filter-change'))
     debouncedEmitColumnFilterChange()
 }
+
+const topRowsForDisplay = computed(() => {
+    // Top rows (unpaginated)
+    return props.topRows || []
+})
+
+const regularRowsForDisplay = computed(() => {
+    // Regular rows (filter → sort → paginate)
+    return tableState.tableData.value || []
+})
+
+const bottomRowsForDisplay = computed(() => {
+    // Bottom rows (unpaginated)
+    return props.bottomRows || []
+})
 
 watch(
     () => itemsPerPage.value,
@@ -434,9 +384,7 @@ watch(
     () => props.perPage,
     newPerPage => {
         if (newPerPage > props.topRows.length) {
-            pageSize.value = newPerPage
-        } else {
-            pageSize.value = props.pageSizes.find(e => e > props.topRows.length)
+            tableState.setPageSize(newPerPage)
         }
     }
 )

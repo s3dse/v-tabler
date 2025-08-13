@@ -3,6 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import TableComponent from '@/components/table/TableComponent.vue'
 import ColumnFilter from '@/components/table/components/ColumnFilter.vue'
 import { useColumnFiltering } from '@/components/table/composables/useColumnFiltering.js'
+import { useTableState } from '@/components/table/composables/useTableState.js'
 
 // Test data similar to the demo
 const testData = [
@@ -594,11 +595,14 @@ describe('Column Filtering', () => {
                 }
             })
 
-            // Apply a numeric filter
-            wrapper.vm.setColumnFilter('salary', {
-                type: 'numeric',
-                operator: '=',
-                value: 75000
+            // Apply a numeric filter through the component's event system
+            await wrapper.vm.handleColumnFilterInternal({
+                field: 'salary',
+                filter: {
+                    type: 'numeric',
+                    operator: '=',
+                    value: 75000
+                }
             })
 
             await flushPromises()
@@ -641,7 +645,7 @@ describe('Column Filtering', () => {
             // expect(afterFilterEvents).toBeTruthy()
         })
 
-        it('should handle edge case: empty data array', () => {
+        it('should handle edge case: empty data array', async () => {
             const wrapper = mount(TableComponent, {
                 props: {
                     ...defaultProps,
@@ -658,18 +662,21 @@ describe('Column Filtering', () => {
                 }
             })
 
-            // Apply filter to empty data
-            wrapper.vm.setColumnFilter('salary', {
-                type: 'numeric',
-                operator: '=',
-                value: 75000
+            // Apply filter to empty data through the component's event system
+            await wrapper.vm.handleColumnFilterInternal({
+                field: 'salary',
+                filter: {
+                    type: 'numeric',
+                    operator: '=',
+                    value: 75000
+                }
             })
 
             // Should not throw error and return empty array
             expect(wrapper.vm.dataForPagination).toEqual([])
         })
 
-        it('should keep table header visible when filtering results in zero matches', () => {
+        it('should keep table header visible when filtering results in zero matches', async () => {
             const wrapper = mount(TableComponent, {
                 props: defaultProps,
                 global: {
@@ -681,11 +688,14 @@ describe('Column Filtering', () => {
                 }
             })
 
-            // Apply a filter that will match nothing
-            wrapper.vm.setColumnFilter('salary', {
-                type: 'numeric',
-                operator: '=',
-                value: 999999 // No employee has this salary
+            // Apply a filter that will match nothing through the component's event system
+            await wrapper.vm.handleColumnFilterInternal({
+                field: 'salary',
+                filter: {
+                    type: 'numeric',
+                    operator: '=',
+                    value: 999999 // No employee has this salary
+                }
             })
 
             // Should have zero data rows
@@ -740,24 +750,33 @@ describe('Column Filtering', () => {
             // Apply multiple filters to test different filter types
 
             // 1. Apply a text filter
-            wrapper.vm.setColumnFilter('name', {
-                type: 'text',
-                operator: 'contains',
-                value: 'Alice'
+            await wrapper.vm.handleColumnFilterInternal({
+                field: 'name',
+                filter: {
+                    type: 'text',
+                    operator: 'contains',
+                    value: 'Alice'
+                }
             })
 
             // 2. Apply a numeric filter
-            wrapper.vm.setColumnFilter('salary', {
-                type: 'numeric',
-                operator: '=',
-                value: 75000
+            await wrapper.vm.handleColumnFilterInternal({
+                field: 'salary',
+                filter: {
+                    type: 'numeric',
+                    operator: '=',
+                    value: 75000
+                }
             })
 
             // 3. Apply a select filter
-            wrapper.vm.setColumnFilter('department', {
-                type: 'select',
-                operator: 'in',
-                value: ['Engineering']
+            await wrapper.vm.handleColumnFilterInternal({
+                field: 'department',
+                filter: {
+                    type: 'select',
+                    operator: 'in',
+                    value: ['Engineering']
+                }
             })
 
             await flushPromises()
@@ -902,6 +921,155 @@ describe('Column Filtering', () => {
 
             expect(wrapper.vm.i18nSettings.placeholder).toBe('Search options...')
             expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Select values:')
+        })
+    })
+})
+
+describe('Centralized State Management Integration', () => {
+    describe('useTableState with column filtering', () => {
+        const mockProps = {
+            items: testData,
+            fields: testFields,
+            topRows: [],
+            bottomRows: [],
+            paginate: true,
+            perPage: 10,
+            pageSizes: [5, 10, 25],
+            remotePagination: false,
+            sortNullsFirst: null
+        }
+
+        it('should properly integrate column filters with the data pipeline', () => {
+            const tableState = useTableState(mockProps)
+
+            // Initially, all data should be present
+            expect(tableState.allFilteredData.value).toHaveLength(5)
+
+            // Apply column filter for Engineering department
+            tableState.setColumnFilter('department', {
+                type: 'text',
+                operator: 'contains',
+                value: 'Engineering'
+            })
+
+            // Should filter to only Engineering employees
+            const filteredData = tableState.allFilteredData.value
+            expect(filteredData).toHaveLength(2)
+            expect(filteredData.every(emp => emp.department === 'Engineering')).toBe(true)
+            expect(filteredData.map(emp => emp.name)).toEqual(['Alice Johnson', 'Carol Davis'])
+        })
+
+        it('should reset to first page when column filter is applied', () => {
+            const tableState = useTableState({
+                ...mockProps,
+                perPage: 2 // Small page size to force pagination
+            })
+
+            // Go to page 2
+            tableState.setCurrentPage(2)
+            expect(tableState.currentPage.value).toBe(2)
+
+            // Apply column filter - should reset to page 1
+            tableState.setColumnFilter('department', {
+                type: 'text',
+                operator: 'contains',
+                value: 'Engineering'
+            })
+
+            expect(tableState.currentPage.value).toBe(1)
+        })
+
+        it('should work correctly with sorting after column filtering', () => {
+            const tableState = useTableState(mockProps)
+
+            // Apply column filter first
+            tableState.setColumnFilter('department', {
+                type: 'text',
+                operator: 'contains',
+                value: 'Engineering'
+            })
+
+            expect(tableState.allFilteredData.value).toHaveLength(2)
+
+            // Then apply sorting by salary
+            const salaryField = testFields.find(f => f.key === 'salary')
+            tableState.setSortColumn(salaryField)
+
+            // Should be sorted ascending by salary within Engineering dept
+            const sortedData = tableState.allFilteredData.value
+            expect(sortedData.map(emp => emp.salary)).toEqual([75000, 85000])
+            expect(sortedData.map(emp => emp.name)).toEqual(['Alice Johnson', 'Carol Davis'])
+
+            // Reverse sort
+            tableState.setSortColumn(salaryField)
+            const reverseSortedData = tableState.allFilteredData.value
+            expect(reverseSortedData.map(emp => emp.salary)).toEqual([85000, 75000])
+            expect(reverseSortedData.map(emp => emp.name)).toEqual(['Carol Davis', 'Alice Johnson'])
+        })
+
+        it('should handle numeric filters correctly in integrated state', () => {
+            const tableState = useTableState(mockProps)
+
+            // Filter for salaries greater than 70000
+            tableState.setColumnFilter('salary', {
+                type: 'numeric',
+                operator: '>',
+                value: 70000
+            })
+
+            const filteredData = tableState.allFilteredData.value
+            expect(filteredData).toHaveLength(2)
+            expect(filteredData.every(emp => emp.salary > 70000)).toBe(true)
+            expect(filteredData.map(emp => emp.name)).toEqual(['Alice Johnson', 'Carol Davis'])
+        })
+
+        it('should handle multiple column filters simultaneously', () => {
+            const tableState = useTableState(mockProps)
+
+            // Filter for Engineering department
+            tableState.setColumnFilter('department', {
+                type: 'text',
+                operator: 'contains',
+                value: 'Engineering'
+            })
+
+            // Also filter for salary >= 80000
+            tableState.setColumnFilter('salary', {
+                type: 'numeric',
+                operator: '>=',
+                value: 80000
+            })
+
+            const filteredData = tableState.allFilteredData.value
+            expect(filteredData).toHaveLength(1)
+            expect(filteredData[0].name).toBe('Carol Davis')
+            expect(filteredData[0].department).toBe('Engineering')
+            expect(filteredData[0].salary).toBe(85000)
+        })
+
+        it('should clear all filters correctly', () => {
+            const tableState = useTableState(mockProps)
+
+            // Apply multiple filters
+            tableState.setColumnFilter('department', {
+                type: 'text',
+                operator: 'contains',
+                value: 'Engineering'
+            })
+            tableState.setColumnFilter('salary', {
+                type: 'numeric',
+                operator: '>',
+                value: 70000
+            })
+
+            expect(tableState.allFilteredData.value).toHaveLength(2)
+            expect(tableState.hasActiveColumnFilters.value).toBe(true)
+
+            // Clear all filters
+            tableState.clearAllColumnFilters()
+
+            expect(tableState.allFilteredData.value).toHaveLength(5)
+            expect(tableState.hasActiveColumnFilters.value).toBe(false)
         })
     })
 })
