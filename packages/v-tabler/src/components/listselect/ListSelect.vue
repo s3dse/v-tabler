@@ -14,7 +14,8 @@ import ListSelectInput from './ListSelectInput.vue'
 import ListSelectItem from './ListSelectItem.vue'
 import ListSelectExcessIndicator from './ListSelectExcessIndicator.vue'
 import ListSelectPreview from './ListSelectPreview.vue'
-import delay from '../../utils/delay.js'
+import delay from '@/utils/delay.js'
+import { preserveArray } from '@/utils/preserve-array.js'
 
 const props = defineProps({
     options: { type: Array, default: () => [] },
@@ -43,18 +44,6 @@ const props = defineProps({
 })
 
 const listLengthExceeded = ref(false)
-
-const preserveArray = (value, multiple) => {
-    if (!Array.isArray(value)) {
-        return value ? [value] : []
-    } else {
-        if (multiple) {
-            return value
-        } else {
-            return value.slice(-1)
-        }
-    }
-}
 
 const handleListLengthExceeded = value => {
     listLengthExceeded.value = true
@@ -199,7 +188,7 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
                 class="min-w-20 fixed left-0 w-fit h-100 bg-surface shadow-lg rounded border border-border"
                 :class="props.dropdownClasses"
                 :style="{ width: props.dropDownWidth, zIndex: props.dropDownZIndex }"
-                position-strategy="fixed" 
+                position-strategy="fixed"
                 position="popper"
                 align="start"
                 @keydown.esc="close"

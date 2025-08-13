@@ -42,18 +42,7 @@
 import { watch, useTemplateRef, toValue, toRef } from 'vue'
 import { useSmartMultiSelect } from './useSmartSelect'
 import { useListKeyboardNavigation } from './useListKeyboardNavigation'
-
-const preserveArray = (value, multiple) => {
-    if (!Array.isArray(value)) {
-        return value ? [value] : []
-    } else {
-        if (multiple) {
-            return value
-        } else {
-            return value.slice(-1)
-        }
-    }
-}
+import { preserveArray } from '@/utils/preserve-array'
 
 const modelValue = defineModel({
     type: Array,
