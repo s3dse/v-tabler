@@ -322,15 +322,10 @@ const { ascending, sortColumnKey, sortState, handleSort, getSortIconClass } = us
     props.sortNullsFirst
 )
 
-const { searchTerm, filterData, setupDebouncedEmission } = useTableFiltering(
-    props,
-    props.items,
-    tableData,
-    page => {
-        changePageInternal(page)
-        emit('page-change', createEventPayload('page-change'))
-    }
-)
+const { searchTerm, filterData } = useTableFiltering(props, props.items, tableData, page => {
+    changePageInternal(page)
+    emit('page-change', createEventPayload('page-change'))
+})
 
 const useTableEvents = ({
     searchTerm,
