@@ -24,9 +24,9 @@ To migrate to the new version, you need to adapt all your table event handlers t
 
 The table will no longer emit the following events:
 
-- after-page-change
-- after-sort
-- after-filter
-- after-column-filter
+- `after-page-change`
+- `after-sort`
+- `after-filter`
+- `after-column-filter`
 
 The semantics of these events were never really clear, and they are now obsolete.
