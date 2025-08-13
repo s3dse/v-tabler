@@ -11,7 +11,7 @@
             @page-change="tableState => fetchRemoteData(tableState)"
             @per-page-change="tableState => fetchRemoteData(tableState)"
             @sort-change="tableState => fetchRemoteData(tableState)"
-            @column-filter-change="tableState => fetchRemoteData(tableState)"
+            @column-filter-change-debounced="tableState => fetchRemoteData(tableState)"
             @filter-change-debounced="tableState => fetchRemoteData(tableState)"
         />
     </div>
@@ -44,11 +44,9 @@ const fields = ref([
 const fetchRemoteData = tableState => {
     console.log('Fetching remote data with state:', tableState)
 
-    const columnFilters = Object.fromEntries(tableState.columnFilters.entries())
     busy.value = true
     return fetchPaginatedData({
-        ...tableState,
-        columnFilters
+        ...tableState
     }).then(data => {
         items.value = data.items
         totalItems.value = data.totalItems

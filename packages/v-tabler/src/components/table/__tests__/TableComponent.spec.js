@@ -100,7 +100,7 @@ describe('TableComponent with perPage setting', () => {
         expect(wrapper.emitted()['per-page-change']).toBeTruthy()
         expect(wrapper.emitted()['per-page-change'][0]).toEqual([
             {
-                columnFilters: new Map(),
+                columnFilters: {},
                 page: 1,
                 eventName: 'per-page-change',
                 numberOfPages: 1,

@@ -12,7 +12,7 @@ export function useTableSorting(tableDataArray, isRemotePaginationEnabled, shoul
 
     function executeColumnSort(columnDefinition, navigateToFirstPageCallback) {
         const isClickingOnSameColumn = currentlySortedColumnKey.value === columnDefinition.key
-        
+
         if (isClickingOnSameColumn) {
             isSortedInAscendingOrder.value = !isSortedInAscendingOrder.value
         } else {
@@ -20,18 +20,18 @@ export function useTableSorting(tableDataArray, isRemotePaginationEnabled, shoul
             currentlySortedColumnKey.value = columnDefinition.key
         }
 
-        const sortEventData = { 
-            column: columnDefinition, 
-            ascending: isSortedInAscendingOrder.value 
+        const sortEventData = {
+            column: columnDefinition,
+            ascending: isSortedInAscendingOrder.value
         }
-        
+
         const shouldHandleSortingLocally = !isRemotePaginationEnabled
         if (shouldHandleSortingLocally) {
-            sortTable(tableDataArray.value, columnDefinition, { 
-                ascending: isSortedInAscendingOrder.value, 
-                nullsFirst: shouldSortNullsFirst 
+            sortTable(tableDataArray.value, columnDefinition, {
+                ascending: isSortedInAscendingOrder.value,
+                nullsFirst: shouldSortNullsFirst
             })
-            
+
             const shouldResetToFirstPage = navigateToFirstPageCallback
             if (shouldResetToFirstPage) {
                 navigateToFirstPageCallback(1)
@@ -39,21 +39,19 @@ export function useTableSorting(tableDataArray, isRemotePaginationEnabled, shoul
         }
 
         return {
-            shouldEmitSortChange: true,
-            shouldEmitAfterSort: shouldHandleSortingLocally,
             eventData: sortEventData
         }
     }
 
     function determineSortIconClass(columnKey) {
         const isColumnCurrentlySorted = columnKey === currentlySortedColumnKey.value
-        
+
         if (!isColumnCurrentlySorted) {
             return 'i-tabler-arrows-sort'
         }
-        
-        return isSortedInAscendingOrder.value 
-            ? 'i-tabler-sort-ascending' 
+
+        return isSortedInAscendingOrder.value
+            ? 'i-tabler-sort-ascending'
             : 'i-tabler-sort-descending'
     }
 

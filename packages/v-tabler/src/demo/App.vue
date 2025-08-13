@@ -316,7 +316,6 @@ const showTableSkeleton = ref(true)
 
 <template>
     <PageTitle tag="h1">Theme & Components</PageTitle>
-    <RemoteTableDemo />
     <CollapsibleCard class="my-4" heading="Buttons">
         <div class="p-4 flex flex-col gap-2">
             <h1 class="header-2 text-default">Basic Buttons</h1>
@@ -736,6 +735,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
             </table-component>
         </loading-overlay>
     </card-component>
+    <RemoteTableDemo />
 
     <CollapsibleCard class="my-4">
         <template #header>

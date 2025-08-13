@@ -2,13 +2,13 @@ import { ref, computed } from 'vue'
 
 export function useTablePagination(componentProps, itemsPerPageValue, currentTableData) {
     const currentlyViewedPageNumber = ref(1)
-    
+
     const findFirstValidPageSizeOption = () => {
         const topRowsCount = componentProps.topRows?.length || 0
         const suitablePageSize = componentProps.pageSizes?.find(size => size > topRowsCount)
         return suitablePageSize || 5
     }
-    
+
     const internalPageSizeValue = ref(
         componentProps.perPage > (componentProps.topRows?.length || 0)
             ? componentProps.perPage
@@ -19,7 +19,7 @@ export function useTablePagination(componentProps, itemsPerPageValue, currentTab
         get() {
             const topRowsCount = componentProps.topRows?.length || 0
             const currentValueIsValid = internalPageSizeValue.value > topRowsCount
-            
+
             return currentValueIsValid
                 ? internalPageSizeValue.value
                 : findFirstValidPageSizeOption()
@@ -27,9 +27,9 @@ export function useTablePagination(componentProps, itemsPerPageValue, currentTab
         set(newValue) {
             const topRowsCount = componentProps.topRows?.length || 0
             const proposedValueIsValid = newValue > topRowsCount
-            
-            internalPageSizeValue.value = proposedValueIsValid 
-                ? newValue 
+
+            internalPageSizeValue.value = proposedValueIsValid
+                ? newValue
                 : findFirstValidPageSizeOption()
         }
     })
@@ -37,7 +37,7 @@ export function useTablePagination(componentProps, itemsPerPageValue, currentTab
     const totalAvailablePages = computed(() => {
         const safeItemsPerPage = itemsPerPageValue.value || 1
         const isUsingRemotePagination = componentProps.remotePagination
-        
+
         if (isUsingRemotePagination) {
             const totalItemsFromServer = componentProps.totalItems || 0
             return Math.ceil(totalItemsFromServer / safeItemsPerPage)
@@ -50,13 +50,11 @@ export function useTablePagination(componentProps, itemsPerPageValue, currentTab
     function navigateToSpecificPage(targetPageNumber) {
         const isNavigatingToSamePage = targetPageNumber === currentlyViewedPageNumber.value
         if (isNavigatingToSamePage) return null
-        
+
         const previousPageNumber = currentlyViewedPageNumber.value
         currentlyViewedPageNumber.value = targetPageNumber
 
         return {
-            shouldEmitPageChange: true,
-            shouldEmitAfterPageChange: true,
             eventData: {
                 page: targetPageNumber,
                 oldPage: previousPageNumber,
@@ -65,10 +63,13 @@ export function useTablePagination(componentProps, itemsPerPageValue, currentTab
         }
     }
 
-    function extractRowsForCurrentPage(dataSource = currentTableData.value, shouldPaginate = componentProps.paginate) {
+    function extractRowsForCurrentPage(
+        dataSource = currentTableData.value,
+        shouldPaginate = componentProps.paginate
+    ) {
         const safeDataArray = dataSource || []
         const shouldApplyLocalPagination = shouldPaginate && !componentProps.remotePagination
-        
+
         if (shouldApplyLocalPagination) {
             const safeItemsPerPage = itemsPerPageValue.value || 1
             const startingIndex = (currentlyViewedPageNumber.value - 1) * safeItemsPerPage
