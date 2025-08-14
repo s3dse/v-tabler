@@ -34,6 +34,54 @@ app.mount('#app')
 
 ---
 
+## Theme & Color Customization
+
+V-Tabler uses a flexible theme system powered by UnoCSS. You can customize colors and other theme variables by passing a theme object to the preset in your UnoCSS config.
+
+### Customizing Colors
+
+You can override or extend the default color palette by providing a `colors` object to the preset:
+
+```js
+// uno.config.js
+import { defineConfig, presetUno } from 'unocss'
+import presetVTail from '@s3-dse/v-tabler/preset'
+
+const myCustomColors = {
+  primary: {
+    DEFAULT: '#1e88e5',
+    hover: '#1565c0',
+    onprimary: '#fff'
+  },
+  secondary: {
+    DEFAULT: '#ffb300',
+    hover: '#ffa000',
+    onsecondary: '#222'
+  },
+  surface: '#f5f5f5',
+  background: '#fff',
+  border: '#e0e0e0',
+  // Add more custom colors as needed
+}
+
+export default defineConfig({
+  presets: [
+    presetUno(),
+    presetVTail({ colors: myCustomColors })
+  ]
+})
+```
+
+#### Color Keys
+- `primary`, `secondary`, `surface`, `background`, `border`, `onprimary`, `onsecondary`, etc.
+- Each color can have variants (e.g. `hover`, `active`, etc.)
+- You can add your own custom color keys and use them in your components and styles.
+
+#### Usage in Components
+All V-Tabler components use theme colors via CSS variables and UnoCSS utility classes. Your custom colors will be available throughout the library.
+
+---
+
 ## Components
 
 ### TableComponent
@@ -84,19 +132,6 @@ const fields = ref([...])
         </template>
     </table-component>
 </template>
-```
-
----
-
-## Theme Customization
-
-You can override the default theme by passing a custom theme to the preset:
-
-```js
-const myCustomColors = { ... }
-export default defineConfig({
-  presets: [presetUno(), presetVTail({ colors: myCustomColors })]
-})
 ```
 
 ---
