@@ -40,6 +40,8 @@ Modal dialog component with customizable content and actions.
 
 ## Form Components
 
+### [ListSelect](/components/listselect.md)
+
 ### [Select Components](/components/select-components)
 
 Multiple select component variants for different use cases.

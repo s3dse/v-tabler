@@ -371,21 +371,23 @@ const tableData = ref([])
 const totalCount = ref(0)
 const pageSize = ref(10)
 
-const loadPage = async page => {
-    const response = await fetchData({ page, size: pageSize.value })
+// All events expose a TableState object
+const loadPage = async ({ currentPage, pageSize }) => {
+    const response = await fetchData({ page: currentPage, size: pageSize })
     tableData.value = response.data
     totalCount.value = response.total
 }
 
-const handleSort = async ({ column, ascending }) => {
+const handleSort = async ({ sort }) => {
+    const { key, dir } = sort
     const response = await fetchData({
-        sort: column.key,
-        direction: ascending ? 'asc' : 'desc'
+        sort: key,
+        direction: dir
     })
     tableData.value = response.data
 }
 
-const handleFilter = async searchTerm => {
+const handleFilter = async ({ searchTerm }) => {
     const response = await fetchData({ search: searchTerm })
     tableData.value = response.data
     totalCount.value = response.total
