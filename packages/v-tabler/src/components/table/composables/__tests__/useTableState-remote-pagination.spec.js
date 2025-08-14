@@ -133,3 +133,71 @@ describe('useTableState - Remote Pagination Page Reset', () => {
         expect(tableState.currentPage.value).toBe(1) // Should be at least 1
     })
 })
+
+describe('useTableState - Helper Functions', () => {
+    it('should validate page numbers correctly with getValidPageForRemotePagination', () => {
+        const props = {
+            items: [],
+            fields: [],
+            paginate: true,
+            perPage: 5,
+            remotePagination: true,
+            totalItems: 25, // 5 pages total
+            pageSizes: [5, 10, 25]
+        }
+
+        const tableState = useTableState(props)
+
+        // Test valid pages
+        expect(tableState.getValidPageForRemotePagination(1)).toBe(1)
+        expect(tableState.getValidPageForRemotePagination(3)).toBe(3)
+        expect(tableState.getValidPageForRemotePagination(5)).toBe(5) // Last valid page
+
+        // Test invalid pages (beyond max)
+        expect(tableState.getValidPageForRemotePagination(6)).toBe(1) // Should reset to 1
+        expect(tableState.getValidPageForRemotePagination(10)).toBe(1) // Should reset to 1
+
+        // Test edge cases
+        expect(tableState.getValidPageForRemotePagination(0)).toBe(1) // Should be at least 1
+        expect(tableState.getValidPageForRemotePagination(-5)).toBe(1) // Should be at least 1
+    })
+
+    it('should pass through pages unchanged for local pagination', () => {
+        const props = {
+            items: Array(25)
+                .fill(null)
+                .map((_, i) => ({ id: i })),
+            fields: [{ key: 'id' }],
+            paginate: true,
+            perPage: 5,
+            remotePagination: false, // Local pagination
+            pageSizes: [5, 10, 25]
+        }
+
+        const tableState = useTableState(props)
+
+        // For local pagination, the helper should pass through the requested page
+        // (local pagination logic handles validation elsewhere)
+        expect(tableState.getValidPageForRemotePagination(1)).toBe(1)
+        expect(tableState.getValidPageForRemotePagination(6)).toBe(6) // Passes through
+        expect(tableState.getValidPageForRemotePagination(0)).toBe(1) // Still ensures minimum of 1
+    })
+
+    it('should handle zero or undefined totalItems correctly', () => {
+        const props = {
+            items: [],
+            fields: [],
+            paginate: true,
+            perPage: 5,
+            remotePagination: true,
+            totalItems: 0, // No items
+            pageSizes: [5, 10, 25]
+        }
+
+        const tableState = useTableState(props)
+
+        // With no items, any page request should be valid (will show empty state)
+        expect(tableState.getValidPageForRemotePagination(1)).toBe(1)
+        expect(tableState.getValidPageForRemotePagination(5)).toBe(5) // Should pass through
+    })
+})

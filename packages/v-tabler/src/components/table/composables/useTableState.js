@@ -204,18 +204,10 @@ export function useTableState(props) {
     function setCurrentPage(page) {
         const oldPage = currentPage.value
 
-        // For remote pagination, we need to validate against totalPages
-        // For local pagination, the computed totalPages will handle this
-        let targetPage = page
+        // Use helper function to validate page for remote pagination
+        const targetPage = getValidPageForRemotePagination(page)
 
-        if (props.remotePagination && props.paginate) {
-            const maxPages = totalPages.value
-            if (maxPages > 0 && page > maxPages) {
-                targetPage = 1 // Reset to first page if trying to navigate beyond available pages
-            }
-        }
-
-        currentPage.value = Math.max(1, targetPage) // Ensure page is at least 1
+        currentPage.value = targetPage
 
         return {
             eventData: {
@@ -225,7 +217,6 @@ export function useTableState(props) {
             }
         }
     }
-
     function setPageSize(newPageSize) {
         const topRowsCount = props.topRows?.length || 0
         const validPageSize = newPageSize > topRowsCount ? newPageSize : findFirstValidPageSize()
@@ -248,6 +239,31 @@ export function useTableState(props) {
         return suitablePageSize || 5
     }
 
+    /**
+     * Helper function to validate and correct page numbers for remote pagination
+     * This centralizes the logic for ensuring valid page numbers and avoids code duplication.
+     * Used by setCurrentPage(), validateCurrentPage(), and totalItems watcher.
+     * @param {number} requestedPage - The page number to validate
+     * @returns {number} - Valid page number (1 if requested page is invalid)
+     */
+    function getValidPageForRemotePagination(requestedPage) {
+        // Always ensure page is at least 1
+        const minValidPage = Math.max(1, requestedPage)
+
+        if (!props.remotePagination || !props.paginate) {
+            return minValidPage
+        }
+
+        const maxPages = totalPages.value
+        // If there are no pages (totalItems = 0), allow page 1
+        // If trying to navigate beyond available pages, reset to page 1
+        if (maxPages > 0 && minValidPage > maxPages) {
+            return 1 // Reset to first page if trying to navigate beyond available pages
+        }
+
+        return minValidPage
+    }
+
     function getSortIconClass(columnKey) {
         const isColumnCurrentlySorted = columnKey === sortColumnKey.value
 
@@ -259,12 +275,14 @@ export function useTableState(props) {
     }
 
     function validateCurrentPage() {
-        const maxPages = totalPages.value
-        if (maxPages > 0 && currentPage.value > maxPages) {
-            currentPage.value = 1
-            return true // Page was reset
+        const validPage = getValidPageForRemotePagination(currentPage.value)
+        const wasReset = validPage !== currentPage.value
+
+        if (wasReset) {
+            currentPage.value = validPage
         }
-        return false // Page is valid
+
+        return wasReset // Returns true if page was reset
     }
 
     // Watch raw data
@@ -291,9 +309,9 @@ export function useTableState(props) {
         () => props.totalItems,
         (newTotalItems, oldTotalItems) => {
             if (props.remotePagination && props.paginate && newTotalItems !== oldTotalItems) {
-                const maxPages = Math.ceil((newTotalItems || 0) / effectiveItemsPerPage.value)
-                if (maxPages > 0 && currentPage.value > maxPages) {
-                    currentPage.value = 1
+                const validPage = getValidPageForRemotePagination(currentPage.value)
+                if (validPage !== currentPage.value) {
+                    currentPage.value = validPage
                 }
             }
         }
@@ -329,6 +347,7 @@ export function useTableState(props) {
 
         // Utilities
         getSortIconClass,
-        validateCurrentPage
+        validateCurrentPage,
+        getValidPageForRemotePagination
     }
 }
