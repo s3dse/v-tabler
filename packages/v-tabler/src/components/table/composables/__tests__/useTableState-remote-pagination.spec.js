@@ -196,8 +196,7 @@ describe('useTableState - Helper Functions', () => {
 
         const tableState = useTableState(props)
 
-        // With no items, any page request should be valid (will show empty state)
         expect(tableState.getValidPageForRemotePagination(1)).toBe(1)
-        expect(tableState.getValidPageForRemotePagination(5)).toBe(5) // Should pass through
+        expect(tableState.getValidPageForRemotePagination(5)).toBe(1)
     })
 })

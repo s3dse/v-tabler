@@ -10,24 +10,11 @@ import { applyFilter as applyColumnFilter } from '../utils/column-filtering'
  * different table operations.
  */
 export function useTableState(props) {
-    // ============================================================================
-    // STATE
-    // ============================================================================
-
-    // Source data
     const rawTableData = ref([...(props.items || [])])
-
-    // Global search
     const globalSearchTerm = ref(null)
-
-    // Column filters
     const columnFilters = ref(new Map())
-
-    // Sorting
     const sortColumnKey = ref('')
     const sortAscending = ref(true)
-
-    // Pagination
     const currentPage = ref(1)
     const pageSize = ref(
         props.perPage > (props.topRows?.length || 0) ? props.perPage : findFirstValidPageSize()
@@ -104,10 +91,6 @@ export function useTableState(props) {
         return sortedData.value.slice(startIndex, endIndex)
     })
 
-    // ============================================================================
-    // COMPUTED METADATA
-    // ============================================================================
-
     const effectiveItemsPerPage = computed(() => {
         const topRowsCount = props.topRows?.length || 0
         return Math.max(1, pageSize.value - topRowsCount)
@@ -132,13 +115,8 @@ export function useTableState(props) {
         ascending: sortAscending.value
     }))
 
-    // ============================================================================
-    // ACTIONS
-    // ============================================================================
-
     function setGlobalSearch(searchTerm) {
         globalSearchTerm.value = searchTerm
-        // Reset to first page when search changes (both local and remote)
         if (props.paginate) {
             currentPage.value = 1
         }
@@ -157,7 +135,6 @@ export function useTableState(props) {
             columnFilters.value.delete(fieldKey)
         }
 
-        // Reset to first page when filters change (both local and remote)
         if (props.paginate) {
             currentPage.value = 1
         }
@@ -188,7 +165,6 @@ export function useTableState(props) {
             sortAscending.value = true
         }
 
-        // Reset to first page when sort changes (both local and remote)
         if (props.paginate) {
             currentPage.value = 1
         }
@@ -203,10 +179,7 @@ export function useTableState(props) {
 
     function setCurrentPage(page) {
         const oldPage = currentPage.value
-
-        // Use helper function to validate page for remote pagination
         const targetPage = getValidPageForRemotePagination(page)
-
         currentPage.value = targetPage
 
         return {
@@ -220,10 +193,7 @@ export function useTableState(props) {
     function setPageSize(newPageSize) {
         const topRowsCount = props.topRows?.length || 0
         const validPageSize = newPageSize > topRowsCount ? newPageSize : findFirstValidPageSize()
-
         pageSize.value = validPageSize
-
-        // Reset to first page when page size changes (both local and remote)
         currentPage.value = 1
 
         return {
@@ -241,25 +211,17 @@ export function useTableState(props) {
 
     /**
      * Helper function to validate and correct page numbers for remote pagination
-     * This centralizes the logic for ensuring valid page numbers and avoids code duplication.
-     * Used by setCurrentPage(), validateCurrentPage(), and totalItems watcher.
      * @param {number} requestedPage - The page number to validate
-     * @returns {number} - Valid page number (1 if requested page is invalid)
+     * @returns {number} - Valid page number: `1` if requested page is invalid, otherwise `requestedPage`
      */
     function getValidPageForRemotePagination(requestedPage) {
-        // Always ensure page is at least 1
         const minValidPage = Math.max(1, requestedPage)
 
         if (!props.remotePagination || !props.paginate) {
             return minValidPage
         }
 
-        const maxPages = totalPages.value
-        // If there are no pages (totalItems = 0), allow page 1
-        // If trying to navigate beyond available pages, reset to page 1
-        if (maxPages > 0 && minValidPage > maxPages) {
-            return 1 // Reset to first page if trying to navigate beyond available pages
-        }
+        if (minValidPage > totalPages.value) return 1
 
         return minValidPage
     }
@@ -316,10 +278,6 @@ export function useTableState(props) {
             }
         }
     )
-
-    // ============================================================================
-    // RETURN API
-    // ============================================================================
 
     return {
         tableData: paginatedData, // paginated data to render for the current page
