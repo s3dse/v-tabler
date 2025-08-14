@@ -138,8 +138,8 @@ export function useTableState(props) {
 
     function setGlobalSearch(searchTerm) {
         globalSearchTerm.value = searchTerm
-        // Reset to first page when search changes
-        if (props.paginate && !props.remotePagination) {
+        // Reset to first page when search changes (both local and remote)
+        if (props.paginate) {
             currentPage.value = 1
         }
 
@@ -157,8 +157,8 @@ export function useTableState(props) {
             columnFilters.value.delete(fieldKey)
         }
 
-        // Reset to first page when filters change
-        if (props.paginate && !props.remotePagination) {
+        // Reset to first page when filters change (both local and remote)
+        if (props.paginate) {
             currentPage.value = 1
         }
 
@@ -188,8 +188,8 @@ export function useTableState(props) {
             sortAscending.value = true
         }
 
-        // Reset to first page when sort changes
-        if (props.paginate && !props.remotePagination) {
+        // Reset to first page when sort changes (both local and remote)
+        if (props.paginate) {
             currentPage.value = 1
         }
 
@@ -203,13 +203,25 @@ export function useTableState(props) {
 
     function setCurrentPage(page) {
         const oldPage = currentPage.value
-        currentPage.value = page
+
+        // For remote pagination, we need to validate against totalPages
+        // For local pagination, the computed totalPages will handle this
+        let targetPage = page
+
+        if (props.remotePagination && props.paginate) {
+            const maxPages = totalPages.value
+            if (maxPages > 0 && page > maxPages) {
+                targetPage = 1 // Reset to first page if trying to navigate beyond available pages
+            }
+        }
+
+        currentPage.value = Math.max(1, targetPage) // Ensure page is at least 1
 
         return {
             eventData: {
-                page: page,
+                page: currentPage.value,
                 oldPage: oldPage,
-                newPage: page
+                newPage: currentPage.value
             }
         }
     }
@@ -220,7 +232,7 @@ export function useTableState(props) {
 
         pageSize.value = validPageSize
 
-        // Reset to first page when page size changes
+        // Reset to first page when page size changes (both local and remote)
         currentPage.value = 1
 
         return {
@@ -246,6 +258,16 @@ export function useTableState(props) {
         return sortAscending.value ? 'i-tabler-sort-ascending' : 'i-tabler-sort-descending'
     }
 
+    function validateCurrentPage() {
+        const maxPages = totalPages.value
+        if (maxPages > 0 && currentPage.value > maxPages) {
+            currentPage.value = 1
+            return true // Page was reset
+        }
+        return false // Page is valid
+    }
+
+    // Watch raw data
     watch(
         () => props.items,
         newItems => {
@@ -253,6 +275,7 @@ export function useTableState(props) {
         }
     )
 
+    // Watch for changes in per-page
     watch(
         () => props.perPage,
         newPerPage => {
@@ -262,14 +285,27 @@ export function useTableState(props) {
         }
     )
 
+    // Watch for changes in totalItems for remote pagination
+    // Reset to page 1 if current page becomes invalid
+    watch(
+        () => props.totalItems,
+        (newTotalItems, oldTotalItems) => {
+            if (props.remotePagination && props.paginate && newTotalItems !== oldTotalItems) {
+                const maxPages = Math.ceil((newTotalItems || 0) / effectiveItemsPerPage.value)
+                if (maxPages > 0 && currentPage.value > maxPages) {
+                    currentPage.value = 1
+                }
+            }
+        }
+    )
+
     // ============================================================================
     // RETURN API
     // ============================================================================
 
     return {
-        // Data (read-only, computed through pipeline)
-        tableData: paginatedData,
-        allFilteredData: sortedData, // For components that need unfiltered data
+        tableData: paginatedData, // paginated data to render for the current page
+        allFilteredData: sortedData, // For components that need unfiltered data, e.g. pagination
 
         // State (read-only)
         globalSearchTerm: computed(() => globalSearchTerm.value),
@@ -292,6 +328,7 @@ export function useTableState(props) {
         setPageSize,
 
         // Utilities
-        getSortIconClass
+        getSortIconClass,
+        validateCurrentPage
     }
 }
