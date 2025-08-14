@@ -42,15 +42,16 @@ Modal dialog component with customizable content and actions.
 
 ### [ListSelect](/components/listselect.md)
 
+Flexible select component with single & multi mode, search, virtualisation, and custom rendering.
+
 ### [Select Components](/components/select-components)
 
-Multiple select component variants for different use cases.
+Lightweight select component variants for different use cases.
 
 **Variants:**
 
 - `SingleSelect` - Single value selection
 - `MultiSelect` - Multiple value selection
-- `ListSelect` - List-based selection interface
 
 ### [ToggleComponent](/components/toggle-component)
 

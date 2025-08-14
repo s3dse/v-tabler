@@ -23,6 +23,7 @@ export default defineConfig({
             }
         }
     },
+    head: [['link', { rel: 'icon', type: 'image/x-icon', href: '/base/favicon.ico' }]],
     title: 'V-Tabler',
     description: 'A comprehensive Vue 3 component library with advanced table functionality',
 
