@@ -43,8 +43,8 @@ export default defineConfig({
                         { text: 'Card Component', link: '/components/card-component' },
                         { text: 'Dialog Component', link: '/components/dialog-component' },
                         { text: 'Dropdown Component', link: '/components/dropdown-component' },
-                        { text: 'ListSelect Component', link: '/components/listselect' },
                         { text: 'Select Components', link: '/components/select-components' },
+                        { text: 'ListSelect Component', link: '/components/listselect' },
                         { text: 'Toggle Component', link: '/components/toggle-component' },
                         { text: 'Typography', link: '/components/typography' }
                     ]
