@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import TableComponent from '@/components/table/TableComponent.vue'
 import ColumnFilter from '@/components/table/components/ColumnFilter.vue'
-import { useColumnFiltering } from '@/components/table/composables/useColumnFiltering.js'
 import { useTableState } from '@/components/table/composables/useTableState.js'
+import { applyFilter } from '@/components/table/utils/column-filtering.js'
 
 // Test data similar to the demo
 const testData = [
@@ -89,60 +89,155 @@ const testFields = [
 ]
 
 describe('Column Filtering', () => {
-    describe('useColumnFiltering composable', () => {
-        let columnFiltering
+    describe('applyFilter utility function', () => {
+        it('should handle numeric equals filter correctly', () => {
+            const filter = {
+                type: 'numeric',
+                operator: '=',
+                value: 75000
+            }
+
+            expect(applyFilter(75000, filter)).toBe(true)
+            expect(applyFilter(65000, filter)).toBe(false)
+            expect(applyFilter('75000', filter)).toBe(true) // String numbers should work
+        })
+
+        it('should handle numeric greater than filter', () => {
+            const filter = {
+                type: 'numeric',
+                operator: '>',
+                value: 70000
+            }
+
+            expect(applyFilter(75000, filter)).toBe(true)
+            expect(applyFilter(85000, filter)).toBe(true)
+            expect(applyFilter(70000, filter)).toBe(false)
+            expect(applyFilter(65000, filter)).toBe(false)
+        })
+
+        it('should handle numeric less than or equal filter', () => {
+            const filter = {
+                type: 'numeric',
+                operator: '<=',
+                value: 65000
+            }
+
+            expect(applyFilter(65000, filter)).toBe(true)
+            expect(applyFilter(55000, filter)).toBe(true)
+            expect(applyFilter(75000, filter)).toBe(false)
+        })
+
+        it('should return false for invalid numeric values', () => {
+            const filter = {
+                type: 'numeric',
+                operator: '=',
+                value: 75000
+            }
+
+            expect(applyFilter('invalid', filter)).toBe(false)
+            expect(applyFilter(null, filter)).toBe(false)
+            expect(applyFilter(undefined, filter)).toBe(false)
+        })
+
+        it('should return false for empty filter values', () => {
+            expect(applyFilter(75000, { type: 'numeric', operator: '=', value: '' })).toBe(false)
+            expect(applyFilter(75000, { type: 'numeric', operator: '=', value: null })).toBe(false)
+        })
+
+        it('should handle text contains filter', () => {
+            const filter = {
+                type: 'text',
+                operator: 'contains',
+                value: 'Alice'
+            }
+
+            expect(applyFilter('Alice Johnson', filter)).toBe(true)
+            expect(applyFilter('alice johnson', filter)).toBe(true) // Case insensitive
+            expect(applyFilter('Bob Smith', filter)).toBe(false)
+        })
+
+        it('should handle date filters correctly', () => {
+            const filter = {
+                type: 'date',
+                operator: '>=',
+                value: '2023-01-01'
+            }
+
+            expect(applyFilter('2023-01-15', filter)).toBe(true)
+            expect(applyFilter('2023-05-01', filter)).toBe(true)
+            expect(applyFilter('2022-12-31', filter)).toBe(false)
+        })
+
+        it('should handle select filters with array values', () => {
+            const filter = {
+                type: 'select',
+                operator: 'in',
+                value: ['Engineering', 'Marketing']
+            }
+
+            expect(applyFilter('Engineering', filter)).toBe(true)
+            expect(applyFilter('Marketing', filter)).toBe(true)
+            expect(applyFilter('Sales', filter)).toBe(false)
+        })
+    })
+
+    describe('useTableState column filtering integration', () => {
+        let tableState
+        const mockProps = {
+            items: testData,
+            fields: testFields,
+            paginate: true,
+            perPage: 10,
+            remotePagination: false,
+            topRows: [],
+            sortNullsFirst: false,
+            totalItems: 0,
+            pageSizes: [5, 10, 25, 50]
+        }
 
         beforeEach(() => {
-            columnFiltering = useColumnFiltering()
+            tableState = useTableState(mockProps)
         })
 
-        it('should initialize with empty filters', () => {
-            expect(columnFiltering.columnFilters.value).toEqual(new Map())
-            expect(columnFiltering.hasActiveFilters.value).toBe(false)
-            expect(columnFiltering.activeFiltersCount.value).toBe(0)
+        it('should initialize with empty column filters', () => {
+            expect(tableState.hasActiveColumnFilters.value).toBe(false)
         })
 
-        it('should apply numeric filters correctly', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
+        it('should apply numeric filters through table state', () => {
             // Test equals operator
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '=',
                 value: 75000
             })
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(1)
             expect(filtered[0].name).toBe('Alice Johnson')
             expect(filtered[0].salary).toBe(75000)
         })
 
         it('should handle numeric equals filter with no matches', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '=',
                 value: 99999 // No employee has this salary
             })
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(0)
         })
 
         it('should handle the specific bug: numeric equals filter should not break table rendering', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
             // This was the original bug - when typing a number, all data would vanish
             // and the table header would disappear
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '=',
                 value: 75000
             })
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
 
             // Should return exactly one match (Alice Johnson with salary 75000)
             expect(filtered).toHaveLength(1)
@@ -154,91 +249,81 @@ describe('Column Filtering', () => {
         })
 
         it('should handle numeric greater than filter', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '>',
                 value: 70000
             })
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(2) // Alice (75000) and Carol (85000)
             expect(filtered.map(item => item.name)).toEqual(['Alice Johnson', 'Carol Davis'])
         })
 
         it('should handle numeric less than or equal filter', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '<=',
                 value: 65000
             })
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(2) // Bob (65000) and David (55000)
             expect(filtered.map(item => item.name)).toEqual(['Bob Smith', 'David Wilson'])
         })
 
         it('should handle empty or invalid numeric filter values', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
             // Test empty string
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '=',
                 value: ''
             })
 
-            let filtered = applyColumnFilters(testData)
+            let filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(0) // Should return no results for empty filter
 
             // Test null value
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '=',
                 value: null
             })
 
-            filtered = applyColumnFilters(testData)
+            filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(0) // Should return no results for null filter
 
             // Test NaN value
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '=',
                 value: 'not-a-number'
             })
 
-            filtered = applyColumnFilters(testData)
+            filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(0) // Should return no results for invalid number
         })
 
         it('should handle text filters correctly', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
-            setColumnFilter('name', {
+            tableState.setColumnFilter('name', {
                 type: 'text',
                 operator: 'contains',
                 value: 'johnson'
             })
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(1)
             expect(filtered[0].name).toBe('Alice Johnson')
         })
 
         it('should handle select filters correctly', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
-            setColumnFilter('department', {
+            tableState.setColumnFilter('department', {
                 type: 'select',
                 operator: 'in',
                 value: ['Engineering', 'Marketing']
             })
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(3) // Alice, Bob, Carol
             expect(filtered.map(item => item.department)).toEqual([
                 'Engineering',
@@ -248,91 +333,75 @@ describe('Column Filtering', () => {
         })
 
         it('should handle multiple filters combined', () => {
-            const { applyColumnFilters, setColumnFilter } = columnFiltering
-
             // Filter for Engineering department AND salary > 70000
-            setColumnFilter('department', {
+            tableState.setColumnFilter('department', {
                 type: 'select',
                 operator: 'in',
                 value: ['Engineering']
             })
 
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '>',
                 value: 70000
             })
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(2) // Alice (75000) and Carol (85000)
             expect(filtered.every(item => item.department === 'Engineering')).toBe(true)
             expect(filtered.every(item => item.salary > 70000)).toBe(true)
         })
 
         it('should clear filters correctly', () => {
-            const { applyColumnFilters, setColumnFilter, clearAllColumnFilters } = columnFiltering
-
             // Set a filter
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '=',
                 value: 75000
             })
 
-            expect(columnFiltering.hasActiveFilters.value).toBe(true)
+            expect(tableState.hasActiveColumnFilters.value).toBe(true)
 
             // Clear all filters
-            clearAllColumnFilters()
+            tableState.clearAllColumnFilters()
 
-            expect(columnFiltering.hasActiveFilters.value).toBe(false)
-            expect(columnFiltering.columnFilters.value).toEqual(new Map())
+            expect(tableState.hasActiveColumnFilters.value).toBe(false)
 
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(testData.length) // Should return all data
         })
 
         it('should clear all column filters when clearAllColumnFilters is called', () => {
-            const {
-                applyColumnFilters,
-                setColumnFilter,
-                clearAllColumnFilters,
-                columnFilters,
-                hasActiveFilters
-            } = columnFiltering
-
             // Apply multiple filters
-            setColumnFilter('name', {
+            tableState.setColumnFilter('name', {
                 type: 'text',
                 operator: 'contains',
                 value: 'John'
             })
 
-            setColumnFilter('salary', {
+            tableState.setColumnFilter('salary', {
                 type: 'numeric',
                 operator: '>',
                 value: 70000
             })
 
-            setColumnFilter('department', {
+            tableState.setColumnFilter('department', {
                 type: 'select',
                 operator: 'in',
                 value: ['Engineering']
             })
 
             // Verify filters are active
-            expect(hasActiveFilters.value).toBe(true)
-            expect(columnFilters.value.size).toBe(3)
+            expect(tableState.hasActiveColumnFilters.value).toBe(true)
 
             // Clear all filters
-            clearAllColumnFilters()
+            tableState.clearAllColumnFilters()
 
             // Verify all filters are cleared
-            expect(hasActiveFilters.value).toBe(false)
-            expect(columnFilters.value.size).toBe(0)
-            expect(columnFilters.value).toEqual(new Map())
+            expect(tableState.hasActiveColumnFilters.value).toBe(false)
 
             // Verify no filtering is applied
-            const filtered = applyColumnFilters(testData)
+            const filtered = tableState.allFilteredData.value
             expect(filtered).toHaveLength(testData.length)
         })
     })

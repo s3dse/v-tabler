@@ -103,7 +103,7 @@ export const fetchPaginatedData =
         if (searchTerm) {
             const searchLower = searchTerm.toLowerCase()
             items = items.filter(item =>
-                Object.values(item).some(val => String(val).toLowerCase().includes(searchLower))
+                Object.values(item).join(' ').toLowerCase().includes(searchLower)
             )
         }
 

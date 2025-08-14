@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SelectFilterInput from '../SelectFilterInput.vue'
 import CheckboxComponent from '../../../checkbox/CheckboxComponent.vue'
-import { FILTER_I18N_DEFAULTS } from '../../composables/useColumnFiltering.js'
+import { FILTER_I18N_DEFAULTS } from '../../utils/column-filtering.js'
 
 const mockOptions = [
     { value: 'engineering', label: 'Engineering' },

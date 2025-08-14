@@ -52,7 +52,7 @@ import {
     DropdownMenuContent,
     DropdownMenuSeparator
 } from 'reka-ui'
-import { FILTER_OPERATORS, FILTER_I18N_DEFAULTS } from '../composables/useColumnFiltering.js'
+import { FILTER_OPERATORS, FILTER_I18N_DEFAULTS } from '../utils/column-filtering.js'
 import { detectFilterType, generateSelectOptions } from '../utils/filterTypeDetection.js'
 import TextFilterInput from './TextFilterInput.vue'
 import NumericFilterInput from './NumericFilterInput.vue'
