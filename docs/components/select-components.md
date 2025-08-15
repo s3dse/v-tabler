@@ -26,20 +26,17 @@ const options = [
 ### Usage Example
 
 ```vue
-<SingleSelect v-model="selected" :options="options" :inputPlaceholder="'Choose one...'" />
+<SingleSelect v-model="selected" :options="options" :placeholder="'Choose one...'" />
 ```
 
 ### Props
 
-| Prop               | Type     | Default        | Description                  |
-| ------------------ | -------- | -------------- | ---------------------------- |
-| `options`          | Array    | `[]`           | List of selectable options   |
-| `trackBy`          | String   | `'id'`         | Key to track options         |
-| `inputPlaceholder` | String   |                | Input placeholder text       |
-| `labelFn`          | Function | `o => o.label` | Function to get option label |
-| `dropdownClasses`  | String   | `''`           | Custom classes for dropdown  |
-| `optionSize`       | Number   | `40`           | Option height (px)           |
-| `portal`           | Boolean  | `true`         | Use portal for dropdown      |
+| Prop          | Type   | Default         | Description                             |
+| ------------- | ------ | --------------- | --------------------------------------- |
+| `modelValue`  | Any    | `undefined`     | The selected option bound via `v-model` |
+| `options`     | Array  | `[]`            | List of selectable options              |
+| `labelKey`    | String | `null`          | Key to the option label                 |
+| `placeholder` | String | `Select option` | Placeholder label                       |
 
 ### Events
 
@@ -66,26 +63,19 @@ const options = [
 ### Usage Example
 
 ```vue
-<MultiSelect
-    v-model="selected"
-    :options="options"
-    :maxSelectionLength="3"
-    :inputPlaceholder="'Select multiple...'"
-/>
+<MultiSelect v-model="selected" :options="options" :labelFunction="x => x.name" />
 ```
 
 ### Props
 
-| Prop                 | Type     | Default        | Description                  |
-| -------------------- | -------- | -------------- | ---------------------------- |
-| `options`            | Array    | `[]`           | List of selectable options   |
-| `trackBy`            | String   | `'id'`         | Key to track options         |
-| `inputPlaceholder`   | String   |                | Input placeholder text       |
-| `labelFn`            | Function | `o => o.label` | Function to get option label |
-| `dropdownClasses`    | String   | `''`           | Custom classes for dropdown  |
-| `optionSize`         | Number   | `40`           | Option height (px)           |
-| `maxSelectionLength` | Number   | `10`           | Maximum number of selections |
-| `portal`             | Boolean  | `true`         | Use portal for dropdown      |
+| Prop                  | Type     | Default                   | Description                             |
+| --------------------- | -------- | ------------------------- | --------------------------------------- |
+| `modelValue`          | Array    | `[]`                      | The selection bound via `v-model`       |
+| `options`             | Array    | `[]`                      | List of selectable options              |
+| `isDefaultOption`     | Function | `x => x.id === 'DEFAULT'` | Function to identify the default option |
+| `labelFunction`       | Function | `x => x.label`            | Function to retrieve the option label   |
+| `idFunction`          | Function | `x => x.id`               | Function to retrieve the option id      |
+| `placeholderFunction` | Function | `undefined`               | Function to retrieve the placeholder    |
 
 ### Events
 
