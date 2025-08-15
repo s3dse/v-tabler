@@ -1,25 +1,38 @@
 <template>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 relative">
         <input
+            ref="input"
             type="checkbox"
             :id="$id"
             :value="$name"
             v-model="checked"
             v-bind="attrs"
-            class="relative shrink-0 appearance-none form-inputfield rounded checked:bg-primary h-5 w-5 disabled:cursor-pointer-default peer"
+            :disabled="disabled"
+            :aria-disabled="disabled"
+            :aria-checked="ariaChecked"
+            class="shrink-0 appearance-none form-inputfield rounded checked:bg-primary indeterminate:bg-primary h-5 w-5 disabled:cursor-pointer-default peer"
         />
-        <label :for="$id" class="">{{ label }}</label>
+        <label :for="$id" class="peer-disabled:text-subtle">{{ label }}</label>
         <div
             class="absolute w-5 h-5 hidden text-onprimary i-tabler-check peer-checked:block pointer-events-none"
+        ></div>
+        <div
+            class="absolute w-5 h-5 hidden text-onprimary i-tabler-minus peer-indeterminate:block pointer-events-none"
         ></div>
     </div>
 </template>
 <script setup>
-import { useId, useAttrs } from 'vue'
+import { useId, useAttrs, computed, onMounted, watch, useTemplateRef } from 'vue'
+defineOptions({
+    name: 'CheckboxComponent',
+    inheritAttrs: false
+})
 const props = defineProps({
     name: { type: String, default: null },
     id: { type: String, default: null },
-    label: { type: String, default: '' }
+    label: { type: String, default: '' },
+    indeterminate: { type: Boolean, default: false },
+    disabled: { type: Boolean, default: false }
 })
 
 const attrs = useAttrs()
@@ -31,5 +44,27 @@ const checked = defineModel({
     required: true,
     type: [Boolean, Array]
 })
+
+const inputRef = useTemplateRef('input')
+
+onMounted(() => {
+    if (inputRef.value) {
+        inputRef.value.indeterminate = props.indeterminate
+    }
+})
+
+watch(
+    () => props.indeterminate,
+    val => {
+        if (inputRef.value) {
+            inputRef.value.indeterminate = val
+        }
+    }
+)
+
+const ariaChecked = computed(() => {
+    if (!inputRef.value) return 'false'
+    if (inputRef.value.indeterminate) return 'mixed'
+    return checked.value ? 'true' : 'false'
+})
 </script>
-<style scoped></style>

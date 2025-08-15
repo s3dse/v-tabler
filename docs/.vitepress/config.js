@@ -1,13 +1,12 @@
 import { whyframe } from '@whyframe/core'
 import { whyframeVue } from '@whyframe/vue'
 import { defineConfig } from 'vitepress'
-import UnoCSS from 'unocss/vite' // Temporarily disabled
-// import UnoCSS from 'unocss/vite' // Temporarily disabled
+import UnoCSS from 'unocss/vite'
 
 export default defineConfig({
     vite: {
         plugins: [
-            UnoCSS(), // Temporarily disabled due to VitePress issues
+            UnoCSS(),
             whyframe({
                 defaultSrc: '/frames/default'
             }),
@@ -47,6 +46,8 @@ export default defineConfig({
                         { text: 'Select Components', link: '/components/select-components' },
                         { text: 'ListSelect Component', link: '/components/listselect' },
                         { text: 'Toggle Component', link: '/components/toggle-component' },
+                        { text: 'Checkbox Component', link: '/components/checkbox-component' },
+                        { text: 'Pagination Component', link: '/components/pagination-component' },
                         { text: 'Typography', link: '/components/typography' }
                     ]
                 }

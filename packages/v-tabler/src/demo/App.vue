@@ -805,7 +805,11 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
             <div class="grid grid-cols-2 gap-4 items-center">
                 <div>
                     <h3 class="header-3">Bind to single value</h3>
-                    <CheckboxComponent :label="'Single Checkbox'" v-model="singleChecked" />
+                    <CheckboxComponent
+                        indeterminate
+                        :label="'Single Checkbox'"
+                        v-model="singleChecked"
+                    />
                     <CheckboxComponent
                         :disabled="true"
                         :label="'Single Checkbox disabled'"
@@ -822,7 +826,6 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                         :key="index"
                         :id="name"
                         :label="name"
-                        :value="name"
                         v-model="checkedValues"
                     />
                 </div>
@@ -836,7 +839,6 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                         :key="field.key"
                         :id="field.key"
                         :label="field.key"
-                        :value="field.key"
                         v-model="field.visible"
                     />
                 </div>

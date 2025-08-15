@@ -57,7 +57,7 @@ app.use(VTabler)
 
 ### Forms & Input
 
-- [CheckboxComponent](/components/checkbox) - Styled checkboxes
+- [CheckboxComponent](/components/checkbox-component) - Styled checkboxes
 - [SelectComponents](/components/select) - Single and multi-select dropdowns
 - [ToggleComponent](/components/toggle) - Switch controls
 
