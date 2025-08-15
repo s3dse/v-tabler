@@ -16,7 +16,7 @@ import {
 import { toRefs, computed } from 'vue'
 import { getClass as dispatchClass } from '@/utils/css-class-dispatch.js'
 
-const classes = {
+const classMap = {
     trigger: `inline-flex items-center justify-between gap-2 min-w-[10rem] 
         form-inputfield text-sm text-muted 
         h-[2.375rem] px-3`,
@@ -55,7 +55,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 const { classes: propsClasses, options, labelKey } = toRefs(props)
-const getClass = dispatchClass(propsClasses.value, classes)
+const getClass = dispatchClass(propsClasses.value, classMap)
 
 const getOptionValue = option => (labelKey.value ? option[labelKey.value] : option)
 const getOption = value =>
