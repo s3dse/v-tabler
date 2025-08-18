@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import TableComponent from '@/components/table/TableComponent.vue'
+import { TableComponent } from '@/components/table'
 
 describe('TableComponent with perPage setting', () => {
     const props = {
@@ -108,7 +108,7 @@ describe('TableComponent with perPage setting', () => {
                 perPage: 7,
                 searchTerm: null,
                 sort: {
-                    dir: 'asc', 
+                    dir: 'asc',
                     key: ''
                 }
             }
@@ -191,7 +191,9 @@ describe('TableComponent functionality', () => {
         await headers[1].find('.i-tabler-arrows-sort').trigger('click')
 
         expect(wrapper.emitted()).toHaveProperty('sort-change')
-        expect(wrapper.vm.dataForPagination.map(td => td.value)).toStrictEqual([...Array(100).keys()])
+        expect(wrapper.vm.dataForPagination.map(td => td.value)).toStrictEqual([
+            ...Array(100).keys()
+        ])
 
         const values = intValuesOfColumn(wrapper, 2)
         expect(values).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
