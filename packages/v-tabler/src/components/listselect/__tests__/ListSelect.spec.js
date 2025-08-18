@@ -3,8 +3,6 @@ import { mount, enableAutoUnmount } from '@vue/test-utils'
 import { ref } from 'vue'
 import { busy } from '@/directives/busy/busy'
 import { ComboboxContent } from 'reka-ui'
-// import ListSelectPreview from '../ListSelectPreview.vue'
-// import ListSelect from '@/components/listselect/ListSelect.vue'
 import { ListSelect, ListSelectPreview } from '@/components/listselect'
 
 function initMocksForVirtualizer() {

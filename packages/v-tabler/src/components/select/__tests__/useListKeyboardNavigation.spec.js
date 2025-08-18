@@ -1,5 +1,5 @@
 import { ref, nextTick } from 'vue'
-import { useListKeyboardNavigation } from './useListKeyboardNavigation'
+import { useListKeyboardNavigation } from '../useListKeyboardNavigation'
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 
 describe('useListKeyboardNavigation', () => {
