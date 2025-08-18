@@ -126,11 +126,6 @@ describe('SingleSelect', () => {
         await firstOption.trigger('click')
         await clickTrigger(firstOption)
         await nextTick()
-
-        // Check that the correct event was emitted
-        // const emitted = wrapper.emitted('update:modelValue')
-        // expect(emitted).toBeTruthy()
-        // expect(emitted[0][0]).toEqual(options[0])
     })
 
     it('works with labelKey prop', async () => {
@@ -147,7 +142,6 @@ describe('SingleSelect', () => {
         // Open dropdown
         const trigger = findTrigger(wrapper)
         await clickTrigger(trigger)
-        await nextTick()
         await nextTick()
 
         const contentWrapper = wrapper.getComponent(SelectContent)
@@ -171,7 +165,6 @@ describe('SingleSelect', () => {
         const trigger = findTrigger(wrapper)
         await clickTrigger(trigger)
         await nextTick()
-        await nextTick()
 
         // Check that selected option has indicator
         const selectedOption = document.querySelector('[role=option][aria-selected="true"]')
@@ -189,7 +182,6 @@ describe('SingleSelect', () => {
         // Open dropdown
         const trigger = findTrigger(wrapper)
         await clickTrigger(trigger)
-        await nextTick()
         await nextTick()
 
         // Verify dropdown is open
@@ -212,7 +204,6 @@ describe('SingleSelect', () => {
 
         // Open with Enter key
         await trigger.trigger('keydown', { key: 'Enter' })
-        await nextTick()
         await nextTick()
 
         // Check dropdown is open
