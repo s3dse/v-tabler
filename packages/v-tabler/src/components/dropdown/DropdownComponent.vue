@@ -17,7 +17,7 @@
             <span class="ms-2" :class="[show ? upIcon : downIcon]"></span>
         </div>
         <Teleport to="body">
-            <div
+            <card-component
                 v-show="show"
                 :class="[
                     'dropdown-container absolute z-600',
@@ -51,7 +51,7 @@
                         </slot>
                     </li>
                 </ul>
-            </div>
+            </card-component>
         </Teleport>
     </div>
 </template>
@@ -65,6 +65,7 @@ import {
     useDropdownPosition,
     POSITION_RELATIVE_TO_TRIGGER
 } from '../../composables/use-dropdown-position'
+import { CardComponent } from '@/components/card'
 export default {
     setup() {
         const containerRef = useTemplateRef('dropdown-container')
@@ -83,7 +84,8 @@ export default {
         clickOutside
     },
     components: {
-        Teleport
+        Teleport,
+        CardComponent
     },
     name: 'dropdown-component',
     props: {
@@ -137,9 +139,6 @@ export default {
         currentItem: {
             get() {
                 return this.modelValue || this.value
-            },
-            set(v) {
-                this.internalCurrentItem = v
             }
         }
     },
@@ -150,7 +149,7 @@ export default {
         toggleDropdown() {
             this.show = !this.show
             if (this.show) {
-                this.updateDropdownPosition(this.dropdownContentRef)
+                this.updateDropdownPosition(this.dropdownContentRef.$el)
             }
         },
         setCurrentItem(item) {

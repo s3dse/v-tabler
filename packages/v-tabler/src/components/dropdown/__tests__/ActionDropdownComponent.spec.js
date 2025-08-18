@@ -34,4 +34,14 @@ describe('ActionDropdownComponent', () => {
         expect(wrapper.emitted('on-select')[0]).toEqual(['Action 2'])
         expect(contentWrapper.isVisible()).toBe(false)
     })
+
+    it('allows toggle dropdown via instance method', async () => {
+        expect(wrapper.vm.show).toBe(false)
+        wrapper.vm.toggleDropdown()
+        await wrapper.vm.$nextTick()
+        expect(wrapper.vm.show).toBe(true)
+        wrapper.vm.toggleDropdown()
+        await wrapper.vm.$nextTick()
+        expect(wrapper.vm.show).toBe(false)
+    })
 })
