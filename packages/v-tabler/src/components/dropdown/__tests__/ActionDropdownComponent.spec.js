@@ -35,12 +35,18 @@ describe('ActionDropdownComponent', () => {
         expect(contentWrapper.isVisible()).toBe(false)
     })
 
-    it('allows toggle dropdown via instance method', async () => {
+    it('allows controlling open state via instance methods', async () => {
         expect(wrapper.vm.show).toBe(false)
         wrapper.vm.toggleDropdown()
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.show).toBe(true)
         wrapper.vm.toggleDropdown()
+        await wrapper.vm.$nextTick()
+        expect(wrapper.vm.show).toBe(false)
+        wrapper.vm.toggleDropdown()
+        await wrapper.vm.$nextTick()
+        expect(wrapper.vm.show).toBe(true)
+        wrapper.vm.closeDropdown()
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.show).toBe(false)
     })

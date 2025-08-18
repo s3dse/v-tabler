@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import DialogComponent from '../DialogComponent.vue'
+import { DialogComponent } from '@/components/dialog'
 import { DialogContent, DialogDescription, DialogTitle } from 'reka-ui'
 
 describe('DialogComponent', () => {
