@@ -21,7 +21,8 @@ export default defineConfig(configEnv =>
                         '**/demo/**',
                         'src/install.js',
                         'src/index.js',
-                        'src/components/index.js'
+                        'src/components/index.js',
+                        '**/*.story.vue'
                     ]
                 }
             }
