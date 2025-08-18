@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { mount, enableAutoUnmount } from '@vue/test-utils'
 import { ref } from 'vue'
-import MultiSelect from '../MultiSelect.vue'
+import { MultiSelect } from '@/components/select'
 import MultiSelectContent from '../MultiSelectContent.vue'
 
 const options = [
