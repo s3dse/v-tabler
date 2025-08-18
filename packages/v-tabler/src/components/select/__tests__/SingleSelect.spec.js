@@ -66,7 +66,6 @@ describe('SingleSelect', () => {
         const wrapper = mountSingleSelect()
 
         const trigger = wrapper.find('[role=combobox]')
-        console.log(wrapper.html())
         expect(trigger.exists()).toBe(true)
         expect(trigger.text()).toContain('Select option')
     })
@@ -117,7 +116,6 @@ describe('SingleSelect', () => {
         await nextTick()
         const contentWrapper = wrapper.getComponent(SelectContent)
 
-        console.log(wrapper.html())
         // Click the first option
         const firstOption = contentWrapper.find('[role=option]')
         expect(firstOption).toBeTruthy()

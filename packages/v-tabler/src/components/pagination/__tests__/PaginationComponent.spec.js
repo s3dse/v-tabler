@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 
 import { shallowMount } from '@vue/test-utils'
-import PaginationComponent from '@/components/pagination/PaginationComponent.vue'
+import { PaginationComponent } from '@/components/pagination'
 
 describe('PaginationComponent', () => {
     it('renders properly', () => {
@@ -25,7 +25,10 @@ describe('PaginationComponent', () => {
                 currentPage: 1
             }
         })
-        const paginationLabels = wrapper.findAll('ul.pagination li').map(w => w.text()).filter(e => e)
+        const paginationLabels = wrapper
+            .findAll('ul.pagination li')
+            .map(w => w.text())
+            .filter(e => e)
         const expectedPaginationLabels = ['Previous', '1', '2', '3', '200', 'Next']
         expectedPaginationLabels.every(label => expect(paginationLabels).toContain(label))
         wrapper.unmount()
@@ -39,7 +42,10 @@ describe('PaginationComponent', () => {
                 currentPage: 1
             }
         })
-        const paginationLabels = wrapper.findAll('ul.pagination li').map(w => w.text()).filter(e => e)
+        const paginationLabels = wrapper
+            .findAll('ul.pagination li')
+            .map(w => w.text())
+            .filter(e => e)
         const expectedPaginationLabels = ['Previous', '1', 'Next']
         expectedPaginationLabels.every(label => expect(paginationLabels).toContain(label))
         wrapper.unmount()
@@ -54,8 +60,10 @@ describe('PaginationComponent', () => {
             }
         })
 
-        console.log(wrapper.html())
-        const paginationLabels = wrapper.findAll('ul.pagination li').map(w => w.text()).filter(e => e)
+        const paginationLabels = wrapper
+            .findAll('ul.pagination li')
+            .map(w => w.text())
+            .filter(e => e)
         const expectedPaginationLabels = ['Previous', '1', 'Next']
         expect(paginationLabels).toStrictEqual(expectedPaginationLabels)
         expect(wrapper.find('ul.pagination li:first-child button').isDisabled()).toBe(true)
@@ -72,8 +80,10 @@ describe('PaginationComponent', () => {
             }
         })
 
-        console.log(wrapper.html())
-        const paginationLabels = wrapper.findAll('ul.pagination li').map(w => w.text()).filter(e => e)
+        const paginationLabels = wrapper
+            .findAll('ul.pagination li')
+            .map(w => w.text())
+            .filter(e => e)
         const expectedPaginationLabels = ['Previous', '1', 'Next']
         expect(paginationLabels).toStrictEqual(expectedPaginationLabels)
         expect(wrapper.find('ul.pagination li:first-child button').isDisabled()).toBe(true)
@@ -97,7 +107,7 @@ describe('PaginationComponent', () => {
         expect(pageChangedEvents.length).toBe(1)
         expect(pageChangedEvents[0][0]).toBe(3)
 
-        await wrapper.setProps({ currentPage: 3})
+        await wrapper.setProps({ currentPage: 3 })
         expect(wrapper.find('ul.pagination li:nth-last-child(3)').text()).toBe('4')
         wrapper.unmount()
     })
