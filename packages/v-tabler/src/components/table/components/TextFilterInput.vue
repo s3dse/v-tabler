@@ -15,7 +15,7 @@
 </template>
 <script setup>
 import { DropdownMenuLabel } from 'reka-ui'
-const props = defineProps({
+defineProps({
     inputId: String,
     placeholder: String
 })

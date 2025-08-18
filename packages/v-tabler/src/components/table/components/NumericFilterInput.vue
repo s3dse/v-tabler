@@ -28,7 +28,7 @@
 </template>
 <script setup>
 import { DropdownMenuLabel, ToggleGroupRoot, ToggleGroupItem } from 'reka-ui'
-const props = defineProps({
+defineProps({
     inputId: String,
     operators: Array,
     placeholder: { type: String, default: 'Value...' }
