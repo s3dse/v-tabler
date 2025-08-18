@@ -12,7 +12,9 @@
             :aria-checked="ariaChecked"
             class="shrink-0 appearance-none form-inputfield rounded checked:bg-primary indeterminate:bg-primary h-5 w-5 disabled:cursor-pointer-default peer"
         />
-        <label :for="$id" class="peer-disabled:text-subtle">{{ label }}</label>
+        <label :for="$id" :class="[disabled ? `${$attrs.class} text-subtle!` : $attrs.class]">{{
+            label
+        }}</label>
         <div
             class="absolute w-5 h-5 hidden text-onprimary i-tabler-check peer-checked:block pointer-events-none"
         ></div>
