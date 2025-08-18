@@ -47,38 +47,33 @@ const props = defineProps({
     placeholder: {
         type: String,
         default: 'Select option'
-    },
-    modelValue: {
-        type: [String, Boolean, Number, Object],
-        required: false
     }
 })
-const emit = defineEmits(['update:modelValue'])
-const { classes: propsClasses, options, labelKey } = toRefs(props)
+const { classes: propsClasses, options } = toRefs(props)
 const getClass = dispatchClass(propsClasses.value, classMap)
 
-const getOptionValue = option => (labelKey.value ? option[labelKey.value] : option)
-const getOption = value =>
-    props.labelKey !== null ? props.options.find(o => o[props.labelKey] === value) : value
-const selected = computed({
-    get: () => (props.labelKey !== null ? props.modelValue[props.labelKey] : props.modelValue),
-    set: value => emit('update:modelValue', getOption(value))
+const getOptionValue = option => (props.labelKey && option ? option[props.labelKey] : option)
+
+const selected = defineModel({ type: [String, Boolean, Number, Object] })
+
+const $placeholder = computed(() => {
+    return getOptionValue(selected.value) || props.placeholder
 })
+
+defineEmits(['update:modelValue'])
 </script>
 
 <template>
     <SelectRoot v-model="selected">
         <SelectTrigger :class="getClass('trigger')" v-bind="$attrs">
-            <SelectValue :placeholder="placeholder">
-                <slot name="triggerLabel">
-                    <span>{{ selected }}</span>
-                </slot>
+            <SelectValue :placeholder="$placeholder">
+                <slot name="triggerLabel" v-bind="{ getOptionValue, selected }"> </slot>
             </SelectValue>
             <span class="i-tabler-chevron-down font-light text-muted text-2xl block"></span>
         </SelectTrigger>
 
         <SelectPortal>
-            <SelectContent :class="getClass('content')" :side-offset="5">
+            <SelectContent :class="getClass('content')" :side-offset="5" :body-lock="false">
                 <SelectScrollUpButton class="flex items-center justify-center">
                     <span class="i-tabler-chevron-up block text-default"></span>
                 </SelectScrollUpButton>
@@ -87,7 +82,7 @@ const selected = computed({
                         <SelectItem
                             v-for="(option, index) in options"
                             :key="index"
-                            :value="getOptionValue(option)"
+                            :value="option"
                             :class="getClass('item')"
                         >
                             <SelectItemIndicator
@@ -95,7 +90,9 @@ const selected = computed({
                             >
                                 <span class="i-tabler-check block"></span>
                             </SelectItemIndicator>
-                            <SelectItemText>{{ getOptionValue(option) }}</SelectItemText>
+                            <SelectItemText class="single-select-item-label">{{
+                                getOptionValue(option)
+                            }}</SelectItemText>
                         </SelectItem>
                     </SelectGroup>
                 </SelectViewport>

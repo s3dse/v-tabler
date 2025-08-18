@@ -779,6 +779,7 @@ text-mix:txt-DEFAULT@50:primary-DEFAULT</pre
                 <single-select
                     :options="singleSelectOptions"
                     v-model="singleSelectValue"
+                    placeholder="Select an option"
                     label-key="name"
                     class="w-fit mb-2"
                 ></single-select>
