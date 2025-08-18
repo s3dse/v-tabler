@@ -20,7 +20,8 @@ export default defineConfig(configEnv =>
                         'uno.config.js',
                         '**/demo/**',
                         'src/install.js',
-                        'src/index.js'
+                        'src/index.js',
+                        'src/components/index.js'
                     ]
                 }
             }
