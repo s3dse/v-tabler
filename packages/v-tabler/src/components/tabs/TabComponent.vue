@@ -1,10 +1,12 @@
 <template>
     <li v-if="help">
         <div class="flex gap-2">
-        <span>{{ title }}</span>
-        <help-component>
-            <template #content><p class="text-sm font-light normal-case" v-html="help"></p></template>
-        </help-component>
+            <span>{{ title }}</span>
+            <help-component>
+                <template #content
+                    ><p class="text-sm font-light normal-case" v-html="help"></p
+                ></template>
+            </help-component>
         </div>
     </li>
     <li v-else class="">
@@ -12,7 +14,7 @@
     </li>
 </template>
 <script setup>
-import HelpComponent from '../help/HelpComponent.vue';
+import { HelpComponent } from '@/components/help'
 defineProps({
     title: {
         type: String
