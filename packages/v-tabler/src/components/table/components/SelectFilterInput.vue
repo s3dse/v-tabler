@@ -3,16 +3,27 @@
         <DropdownMenuLabel class="block text-xs font-medium text-muted mb-2">
             {{ selectionText }}
         </DropdownMenuLabel>
-        <input v-model="searchTerm" type="text" class="form-inputfield w-full text-default mb-2"
-            :placeholder="placeholder" @keydown.stop />
+        <input
+            v-model="searchTerm"
+            type="text"
+            class="form-inputfield w-full text-default mb-2"
+            :placeholder="placeholder"
+            @keydown.stop
+        />
         <div class="max-h-32 overflow-y-auto space-y-1">
-            <CheckboxComponent v-for="option in filteredOptions" :key="option.value" :name="option.value"
-                :label="option.label" v-model="selectedValues" class="text-default px-1 py-0.5 rounded text-xs" />
+            <CheckboxComponent
+                v-for="option in filteredOptions"
+                :key="option.value"
+                :name="option.value"
+                :label="option.label"
+                v-model="selectedValues"
+                class="text-default px-1 py-0.5 rounded text-xs"
+            />
         </div>
     </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { DropdownMenuLabel } from 'reka-ui'
 import CheckboxComponent from '../../checkbox/CheckboxComponent.vue'
 const props = defineProps({
