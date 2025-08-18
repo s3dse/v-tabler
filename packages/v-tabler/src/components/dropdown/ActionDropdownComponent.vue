@@ -18,7 +18,7 @@
             <span class="ms-2 chevron" :class="[show ? upIcon : downIcon]"></span>
         </div>
         <Teleport to="body">
-            <div
+            <card-component
                 v-show="show"
                 :class="[
                     'dropdown-container absolute z-600',
@@ -33,6 +33,7 @@
                     <li
                         v-for="(item, index) in options"
                         :key="index"
+                        role="menuitem"
                         :class="[
                             liClassList
                                 ? liClassList
@@ -45,7 +46,7 @@
                         </slot>
                     </li>
                 </ul>
-            </div>
+            </card-component>
         </Teleport>
     </div>
 </template>
@@ -55,7 +56,11 @@ import 'virtual:uno.css'
 
 import { useTemplateRef, Teleport } from 'vue'
 import { clickOutside } from '@/directives/click-outside'
-import { useDropdownPosition, POSITION_RELATIVE_TO_TRIGGER } from '../../composables/use-dropdown-position'
+import {
+    useDropdownPosition,
+    POSITION_RELATIVE_TO_TRIGGER
+} from '../../composables/use-dropdown-position'
+import { CardComponent } from '@/components/card'
 export default {
     setup() {
         const containerRef = useTemplateRef('dropdown-container')
@@ -69,6 +74,10 @@ export default {
             dropdownStyles,
             dropdownContentRef
         }
+    },
+    components: {
+        CardComponent,
+        Teleport
     },
     directives: {
         clickOutside
@@ -116,7 +125,7 @@ export default {
         toggleDropdown() {
             this.show = !this.show
             if (this.show) {
-                this.updateDropdownPosition(this.dropdownContentRef)
+                this.updateDropdownPosition(this.dropdownContentRef.$el)
             }
         },
         onSelect(item) {

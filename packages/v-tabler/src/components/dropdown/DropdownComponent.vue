@@ -61,7 +61,10 @@ import 'virtual:uno.css'
 
 import { useTemplateRef, Teleport } from 'vue'
 import { clickOutside } from '../../directives/click-outside'
-import { useDropdownPosition, POSITION_RELATIVE_TO_TRIGGER } from '../../composables/use-dropdown-position'
+import {
+    useDropdownPosition,
+    POSITION_RELATIVE_TO_TRIGGER
+} from '../../composables/use-dropdown-position'
 export default {
     setup() {
         const containerRef = useTemplateRef('dropdown-container')
@@ -78,6 +81,9 @@ export default {
     },
     directives: {
         clickOutside
+    },
+    components: {
+        Teleport
     },
     name: 'dropdown-component',
     props: {
