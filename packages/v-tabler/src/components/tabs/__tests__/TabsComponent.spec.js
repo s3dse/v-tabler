@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import TabsComponent from '../TabsComponent.vue'
-import TabComponent from '../TabComponent.vue'
+import { TabsComponent, TabComponent } from '@/components/tabs'
 
 const tabs = [
     { label: 'Tab 1', name: 'tab1' },
