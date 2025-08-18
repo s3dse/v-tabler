@@ -1,10 +1,11 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { mount, enableAutoUnmount } from '@vue/test-utils'
 import { ref } from 'vue'
-import ListSelect from '@/components/listselect/ListSelect.vue'
 import { busy } from '@/directives/busy/busy'
 import { ComboboxContent } from 'reka-ui'
-import ListSelectPreview from '../ListSelectPreview.vue'
+// import ListSelectPreview from '../ListSelectPreview.vue'
+// import ListSelect from '@/components/listselect/ListSelect.vue'
+import { ListSelect, ListSelectPreview } from '@/components/listselect'
 
 function initMocksForVirtualizer() {
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
@@ -189,7 +190,7 @@ describe('ListSelect', () => {
         it('emits an update event when the value changes', async () => {
             const { wrapper, modelValue } = mountListSelect({ multiple: false })
             await wrapper.find('.listselect--dropdown-toggle').trigger('click')
-            
+
             const content = wrapper.findComponent(ComboboxContent)
             await content.findAll('.listselect__option').at(1).trigger('click')
             expect(wrapper.emitted('update:modelValue')).toBeTruthy()
@@ -197,7 +198,7 @@ describe('ListSelect', () => {
                 [{ id: '2', label: 'option2' }]
             ])
             expect(modelValue.value).toStrictEqual([{ id: '2', label: 'option2' }])
-            
+
             await wrapper.find('.listselect--dropdown-toggle').trigger('click')
             await content.findAll('.listselect__option').at(2).trigger('click')
             expect(wrapper.emitted('update:modelValue').length).toBe(2)
@@ -210,11 +211,11 @@ describe('ListSelect', () => {
         it('allows deselection of the selected option', async () => {
             const { wrapper, modelValue } = mountListSelect({ multiple: false })
             await wrapper.find('.listselect--dropdown-toggle').trigger('click')
-            
+
             const content = wrapper.findComponent(ComboboxContent)
             await content.findAll('.listselect__option').at(1).trigger('click')
             expect(modelValue.value).toStrictEqual([{ id: '2', label: 'option2' }])
-            
+
             // Deselecting the option
             await wrapper.find('.listselect--dropdown-toggle').trigger('click')
             await content.findAll('.listselect__option').at(1).trigger('click')
