@@ -5,6 +5,7 @@
             type="checkbox"
             :id="$id"
             :value="$name"
+            :name="$name"
             v-model="checked"
             v-bind="attrs"
             :disabled="disabled"
@@ -66,7 +67,7 @@ watch(
 
 const ariaChecked = computed(() => {
     if (!inputRef.value) return 'false'
-    if (inputRef.value.indeterminate) return 'mixed'
+    if (props.indeterminate) return 'mixed'
     return checked.value ? 'true' : 'false'
 })
 </script>
