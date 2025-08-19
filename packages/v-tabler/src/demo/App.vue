@@ -2,13 +2,14 @@
     <div class="app-container">
         <nav class="navigation">
             <ul>
-                <li @click="currentSection = 'buttons'">Buttons</li>
-                <li @click="currentSection = 'dialogs'">Dialogs</li>
-                <li @click="currentSection = 'dropdowns'">Dropdowns</li>
-                <li @click="currentSection = 'loading'">Loading Indicators</li>
-                <li @click="currentSection = 'tables'">Tables</li>
-                <li @click="currentSection = 'typography'">Typography</li>
-                <li @click="currentSection = 'checkbox'">Checkboxes</li>
+                <li
+                    v-for="section in sections"
+                    :key="section.id"
+                    @click="currentSection = section.id"
+                    :data-active="currentSection === section.id"
+                >
+                    {{ section.label }}
+                </li>
             </ul>
         </nav>
 
@@ -35,14 +36,21 @@ import TypographySection from './sections/TypographySection.vue'
 import CheckboxSection from './sections/CheckboxSection.vue'
 
 const currentSection = ref('buttons')
+
+const sections = [
+    { id: 'buttons', label: 'Buttons' },
+    { id: 'dialogs', label: 'Dialogs' },
+    { id: 'dropdowns', label: 'Dropdowns' },
+    { id: 'loading', label: 'Loading Indicators' },
+    { id: 'tables', label: 'Tables' },
+    { id: 'typography', label: 'Typography' },
+    { id: 'checkbox', label: 'Checkboxes' }
+]
 </script>
 
 <style>
 .app-container {
     --at-apply: 'flex flex-col h-100vh';
-    /* display: flex; */
-    /* flex-direction: column; */
-    /* height: 100vh; */
 }
 
 .navigation {
@@ -56,6 +64,8 @@ const currentSection = ref('buttons')
 .navigation li {
     --at-apply: 'cursor-pointer p-2 rounded transition-colors duration-200';
     --at-apply: 'hover:bg-surface-hover';
+    --at-apply: 'border border-2 border-transparent';
+    --at-apply: 'data-[active=true]:(border border-2 border-primary) ';
 }
 
 .content {
