@@ -3,10 +3,10 @@
         <nav class="navigation">
             <ul>
                 <li
-                    v-for="section in sections"
-                    :key="section.id"
-                    @click="currentSection = section.id"
-                    :data-active="currentSection === section.id"
+                    v-for="(section, id) in sections"
+                    :key="id"
+                    @click="currentSection = id"
+                    :data-active="currentSection === id"
                 >
                     {{ section.label }}
                 </li>
@@ -14,38 +14,16 @@
         </nav>
 
         <main class="content">
-            <ButtonsSection v-if="currentSection === 'buttons'" />
-            <DialogsSection v-if="currentSection === 'dialogs'" />
-            <DropdownsSection v-if="currentSection === 'dropdowns'" />
-            <LoadingSection v-if="currentSection === 'loading'" />
-            <TablesSection v-if="currentSection === 'tables'" />
-            <TypographySection v-if="currentSection === 'typography'" />
-            <CheckboxSection v-if="currentSection === 'checkbox'" />
+            <component :is="sections[currentSection].component" />
         </main>
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import ButtonsSection from './sections/ButtonsSection.vue'
-import DialogsSection from './sections/DialogsSection.vue'
-import DropdownsSection from './sections/DropdownsSection.vue'
-import LoadingSection from './sections/LoadingSection.vue'
-import TablesSection from './sections/TablesSection.vue'
-import TypographySection from './sections/TypographySection.vue'
-import CheckboxSection from './sections/CheckboxSection.vue'
+import { sections } from './sections'
 
 const currentSection = ref('buttons')
-
-const sections = [
-    { id: 'buttons', label: 'Buttons' },
-    { id: 'dialogs', label: 'Dialogs' },
-    { id: 'dropdowns', label: 'Dropdowns' },
-    { id: 'loading', label: 'Loading Indicators' },
-    { id: 'tables', label: 'Tables' },
-    { id: 'typography', label: 'Typography' },
-    { id: 'checkbox', label: 'Checkboxes' }
-]
 </script>
 
 <style>
