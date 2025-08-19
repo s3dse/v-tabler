@@ -23,21 +23,23 @@
                 :side-offset="4"
                 @click.stop
             >
-                <div class="p-3">
-                    <component
-                        :is="filterComponent"
-                        v-bind="filterProps"
-                        @update:modelValue="onFilterValueUpdate"
-                        @update:operator="onOperatorUpdate"
-                    />
-                    <DropdownMenuSeparator class="my-2 h-px bg-border" />
-                    <button
-                        class="w-full btn-transparent-default text-xs text-default hover:text-primary hover:bg-surface-hover px-2 py-1 rounded cursor-pointer"
-                        @click="clearFilter"
-                    >
-                        {{ i18nSettings.clearFilterLabel }}
-                    </button>
-                </div>
+                <slot name="filter-content" v-bind="{ field, data, filterProps }">
+                    <div class="p-3">
+                        <component
+                            :is="filterComponent"
+                            v-bind="filterProps"
+                            @update:modelValue="onFilterValueUpdate"
+                            @update:operator="onOperatorUpdate"
+                        />
+                        <DropdownMenuSeparator class="my-2 h-px bg-border" />
+                        <button
+                            class="w-full btn-transparent-default text-xs text-default hover:text-primary hover:bg-surface-hover px-2 py-1 rounded cursor-pointer"
+                            @click="clearFilter"
+                        >
+                            {{ i18nSettings.clearFilterLabel }}
+                        </button>
+                    </div>
+                </slot>
             </DropdownMenuContent>
         </DropdownMenuPortal>
     </DropdownMenuRoot>

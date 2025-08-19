@@ -152,6 +152,7 @@ export interface TableState {
 | `pagination-label`      | Custom pagination label                 | `{ perPage, currentPage, totalEntries }`     |
 | `th(${fieldKey})`       | Custom header cell content              | `{ field, column }`                          |
 | `cell(${fieldKey})`     | Custom cell content                     | `{ value, unformatted, item, field, index }` |
+| `filter-content`        | Custom column filter content            | `{ field, data, filterProps }`               |
 
 ### Dynamic Slots
 
