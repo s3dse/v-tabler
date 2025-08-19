@@ -4,7 +4,7 @@ layout: home
 hero:
     name: 'V-Tabler'
     text: 'Vue 3 Component Library'
-    tagline: 'Comprehensive table functionality and beautiful UI components'
+    tagline: 'Flexible UI Components and Design System'
     actions:
         - theme: brand
           text: Get Started
@@ -40,12 +40,11 @@ app.use(VTabler)
 ## ✨ Features
 
 - **Advanced Table Component** - Sorting, filtering, pagination, and customization
-- **Modern UI Components** - Cards, dialogs, forms, and navigation
-- **TypeScript Support** - Full type definitions included
-- **UnoCSS Integration** - Atomic CSS utilities for rapid styling
-- **Vue 3 Composition API** - Built with modern Vue patterns
-- **Accessibility First** - WCAG compliant components
-- **Dark Mode** - Built-in theme switching
+- **Flexible Select and Combobox Components** - Handle complex selection use cases and large option lists
+- **Modern UI Components** - Cards, tabs, dialogs, form fields, and navigation
+- **UnoCSS Integration** - Preset with Atomic CSS utilities for rapid styling
+- **Dark & Light Theme As You Go** - No longer bother about light and dark styles
+- **Custom color theme** - Change specific colors, or provide an entire color theme
 
 ## 📋 Components
 
@@ -53,17 +52,17 @@ app.use(VTabler)
 
 - [TableComponent](/components/table-component) - Feature-rich data tables
 - [CardComponent](/components/card) - Flexible content containers
-- [PaginationComponent](/components/pagination) - Navigate large datasets
+- [PaginationComponent](/components/pagination-component) - Navigate large datasets
 
 ### Forms & Input
 
 - [CheckboxComponent](/components/checkbox-component) - Styled checkboxes
-- [SelectComponents](/components/select) - Single and multi-select dropdowns
-- [ToggleComponent](/components/toggle) - Switch controls
+- [SelectComponents](/components/select-components) - Single and multi-select dropdowns
+- [ToggleComponent](/components/toggle-component) - Switch controls
 
 ### Feedback & Overlay
 
-- [DialogComponent](/components/dialog) - Modal dialogs and confirmations
+- [DialogComponent](/components/dialog-component) - Modal dialogs and confirmations
 - [LoadingOverlay](/components/loading-overlay) - Loading states and spinners
 
 ### Navigation

@@ -88,46 +88,6 @@ form-inputfield-lg /* Large form input */
 with-scrollbar     /* Custom scrollbar styling */
 ```
 
-## Theme Variables
-
-V-Tabler uses CSS custom properties for theming:
-
-```css
-:root {
-    /* Primary colors */
-    --color-primary: #3b82f6;
-    --color-primary-hover: #2563eb;
-
-    /* Background colors */
-    --color-background: #ffffff;
-    --color-surface: #f8fafc;
-
-    /* Text colors */
-    --color-text: #1f2937;
-    --color-text-muted: #6b7280;
-
-    /* Border colors */
-    --color-border: #e5e7eb;
-
-    /* Table specific */
-    --color-thead-background: #f9fafb;
-    --color-thead-text: #374151;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --color-background: #111827;
-        --color-surface: #1f2937;
-        --color-text: #f9fafb;
-        --color-text-muted: #9ca3af;
-        --color-border: #374151;
-        --color-thead-background: #1f2937;
-        --color-thead-text: #e5e7eb;
-    }
-}
-```
-
 ## Component Configuration
 
 ### Global Component Props
@@ -169,38 +129,4 @@ Configure components individually in your templates:
         :pagination-next-label="'Next Page'"
     />
 </template>
-```
-
-## Environment-Specific Configuration
-
-### Development
-
-```javascript
-// vite.config.js
-export default defineConfig({
-    plugins: [vue(), UnoCSS()],
-    define: {
-        __VUE_OPTIONS_API__: false,
-        __VUE_PROD_DEVTOOLS__: true
-    }
-})
-```
-
-### Production
-
-```javascript
-// vite.config.js
-export default defineConfig({
-    plugins: [vue(), UnoCSS()],
-    build: {
-        rollupOptions: {
-            external: ['vue'],
-            output: {
-                globals: {
-                    vue: 'Vue'
-                }
-            }
-        }
-    }
-})
 ```
