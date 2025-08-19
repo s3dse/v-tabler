@@ -18,12 +18,12 @@
         </div>
         <div>
             <heading tag="h2">Customized via slots</heading>
-            <CardComponent class="bg-primary-lt border-primary">
+            <CardComponent class="bg-primary-lt/25 border-primary/50">
                 <template #header>
                     <heading tag="h2" class="text-center">Card Header</heading>
                 </template>
                 <template #header-border>
-                    <div class="border-b border-primary border-solid"></div>
+                    <div class="border-b border-primary/50 border-solid"></div>
                 </template>
 
                 <div class="p-4">
@@ -32,7 +32,7 @@
 
                 <template #footer>
                     <div class="flex justify-end pe-4 pb-4">
-                        <button class="btn-primary-md rounded">Action</button>
+                        <button class="btn-ghost-md rounded">Action</button>
                     </div>
                 </template>
             </CardComponent>
