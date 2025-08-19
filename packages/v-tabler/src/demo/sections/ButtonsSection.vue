@@ -36,7 +36,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-// No additional logic required for this section.
-</script>

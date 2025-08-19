@@ -51,7 +51,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { CheckboxComponent } from '@s3_dse/v-tabler'
 const singleChecked = ref(false)
 const checkableNames = ['Checkbox 1', 'Checkbox 2', 'Checkbox 3']
 const checkedValues = ref([])

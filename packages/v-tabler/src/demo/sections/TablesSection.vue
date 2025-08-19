@@ -86,7 +86,7 @@
     </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import RemoteTableDemo from '../components/RemoteTableDemo.vue'
 import data from '../assets/MOCK_DATA-2.json'
 
@@ -308,11 +308,6 @@ const fields = ref([
 ])
 const tableStatus = ref({ busy: false })
 
-const logItem = item => {
-    console.log(item)
-}
-
-// Column filter event handlers
 const handleColumnFilterChange = event => {
     console.log('Column filter changed:', event)
 }
@@ -321,5 +316,4 @@ const handleAfterColumnFilter = event => {
     console.log('Active column filters:', event.activeFilters)
     console.log('Total active filters:', Object.keys(event.activeFilters).length)
 }
-// Add any necessary setup code here
 </script>
