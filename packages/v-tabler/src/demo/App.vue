@@ -58,7 +58,7 @@ const sections = [
 }
 
 .navigation ul {
-    --at-apply: 'flex gap-4 list-none p-0 m-0 text-default font-semibold tracking-wide';
+    --at-apply: 'flex justify-center gap-4 list-none p-0 m-0 text-default font-semibold tracking-wide';
 }
 
 .navigation li {
