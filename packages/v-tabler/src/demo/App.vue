@@ -35,8 +35,7 @@ import TablesSection from './sections/TablesSection.vue'
 import TypographySection from './sections/TypographySection.vue'
 import CheckboxSection from './sections/CheckboxSection.vue'
 
-// const currentSection = ref('buttons')
-const currentSection = ref('checkbox')
+const currentSection = ref('buttons')
 
 const sections = [
     { id: 'buttons', label: 'Buttons' },
