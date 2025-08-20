@@ -136,4 +136,41 @@ describe('PaginationComponent', () => {
         await wrapper.setProps({ currentPage: 197 })
         expect(wrapper.find('ul.pagination li:nth-last-child(3)').text()).toBe('198')
     })
+    it('emits event on first page click', async () => {
+        const wrapper = shallowMount(PaginationComponent, {
+            props: {
+                totalPages: 10,
+                currentPage: 5
+            }
+        })
+        await wrapper.find('ul.pagination li:nth-child(2) button').trigger('click')
+        const pageChangedEvents = wrapper.emitted()['page-changed']
+        expect(pageChangedEvents).toBeDefined()
+        expect(pageChangedEvents[0][0]).toBe(1)
+    })
+
+    it('emits event on last page click', async () => {
+        const wrapper = shallowMount(PaginationComponent, {
+            props: {
+                totalPages: 10,
+                currentPage: 5
+            }
+        })
+        await wrapper.find('ul.pagination li:nth-last-child(2) button').trigger('click')
+        const pageChangedEvents = wrapper.emitted()['page-changed']
+        expect(pageChangedEvents).toBeDefined()
+        expect(pageChangedEvents[0][0]).toBe(10)
+    })
+
+    it('handles edge case when clicking on the current page', async () => {
+        const wrapper = shallowMount(PaginationComponent, {
+            props: {
+                totalPages: 10,
+                currentPage: 5
+            }
+        })
+        await wrapper.find('ul.pagination li button[disabled]').trigger('click')
+        const pageChangedEvents = wrapper.emitted()['page-changed']
+        expect(pageChangedEvents).toBeUndefined()
+    })
 })

@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { mount, enableAutoUnmount } from '@vue/test-utils'
 import { ref } from 'vue'
-import { busy } from '@/directives/busy/busy'
+import { busy } from '@/directives'
 import { ComboboxContent } from 'reka-ui'
 import { ListSelect, ListSelectPreview } from '@/components/listselect'
 

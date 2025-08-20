@@ -1,7 +1,14 @@
 <template>
     <div class="flex gap-4 flex-wrap justify-between w-[100%]" data-pagination-component>
         <div class="pagination-label text-muted">
-            <slot name="pagination-label" :data="{ perPage: perPage || 0, currentPage: currentPage || 1, totalEntries: totalEntries || 0 }">
+            <slot
+                name="pagination-label"
+                :data="{
+                    perPage: perPage || 0,
+                    currentPage: currentPage || 1,
+                    totalEntries: totalEntries || 0
+                }"
+            >
                 {{ paginationLabel }}
             </slot>
         </div>
@@ -23,9 +30,12 @@
                         type="button"
                         :disabled="isPageSelected(page)"
                         @click="onClickPage(page)"
-                        :class="[' text-default', isPageSelected(page) ? activeClasses : inactiveClasses]"
+                        :class="[
+                            ' text-default',
+                            isPageSelected(page) ? activeClasses : inactiveClasses
+                        ]"
                     >
-                        {{ page > Number.MAX_SAFE_INTEGER ? '...': page }}
+                        {{ page > Number.MAX_SAFE_INTEGER ? '...' : page }}
                     </button>
                 </li>
 
@@ -45,7 +55,7 @@
 </template>
 
 <script>
-import { usePagination } from '@/composables/usePagination'
+import { usePagination } from '@/composables'
 
 export default {
     name: 'pagination-component',
@@ -108,20 +118,20 @@ export default {
             isInLastPage,
             last,
             paginationLabel,
-            onClickFirstPage,
+            // onClickFirstPage,
             onClickPreviousPage,
             onClickPage,
             onClickNextPage,
-            onClickLastPage,
+            // onClickLastPage,
             isPageSelected
         } = usePagination(props)
 
-        const handleFirstPageClick = () => {
-            const result = onClickFirstPage()
-            if (result?.shouldEmitPageChanged) {
-                emit(result.eventName, result.eventData)
-            }
-        }
+        // const handleFirstPageClick = () => {
+        //     const result = onClickFirstPage()
+        //     if (result?.shouldEmitPageChanged) {
+        //         emit(result.eventName, result.eventData)
+        //     }
+        // }
 
         const handlePreviousPageClick = () => {
             const result = onClickPreviousPage()
@@ -130,7 +140,7 @@ export default {
             }
         }
 
-        const handlePageClick = (page) => {
+        const handlePageClick = page => {
             const result = onClickPage(page)
             if (result?.shouldEmitPageChanged) {
                 emit(result.eventName, result.eventData)
@@ -144,12 +154,12 @@ export default {
             }
         }
 
-        const handleLastPageClick = () => {
-            const result = onClickLastPage()
-            if (result?.shouldEmitPageChanged) {
-                emit(result.eventName, result.eventData)
-            }
-        }
+        // const handleLastPageClick = () => {
+        //     const result = onClickLastPage()
+        //     if (result?.shouldEmitPageChanged) {
+        //         emit(result.eventName, result.eventData)
+        //     }
+        // }
 
         return {
             pages,
@@ -157,11 +167,11 @@ export default {
             isInLastPage,
             last,
             paginationLabel,
-            onClickFirstPage: handleFirstPageClick,
+            // onClickFirstPage: handleFirstPageClick,
             onClickPreviousPage: handlePreviousPageClick,
             onClickPage: handlePageClick,
             onClickNextPage: handleNextPageClick,
-            onClickLastPage: handleLastPageClick,
+            // onClickLastPage: handleLastPageClick,
             isPageSelected
         }
     }

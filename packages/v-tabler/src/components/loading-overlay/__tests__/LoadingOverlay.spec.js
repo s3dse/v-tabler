@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { LoadingOverlay } from '@/components/loading-overlay'
-import { busy } from '@/directives/busy/busy'
+import { busy } from '@/directives'
 
 describe('LoadingOverlay', () => {
     let wrapper

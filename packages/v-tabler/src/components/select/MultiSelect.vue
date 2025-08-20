@@ -50,7 +50,7 @@
 
 <script setup>
 import { computed, ref, useTemplateRef, useId, nextTick } from 'vue'
-import { useDropdownPosition } from '../../composables/use-dropdown-position'
+import { useDropdownPosition } from '../../composables'
 import MultiSelectContent from './MultiSelectContent.vue'
 import { vOnClickOutside } from '@vueuse/components'
 
