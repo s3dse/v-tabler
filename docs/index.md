@@ -51,7 +51,7 @@ app.use(VTabler)
 ### Data Display
 
 - [TableComponent](/components/table-component) - Feature-rich data tables
-- [CardComponent](/components/card) - Flexible content containers
+- [CardComponent](/components/card-component) - Flexible content containers
 - [PaginationComponent](/components/pagination-component) - Navigate large datasets
 
 ### Forms & Input

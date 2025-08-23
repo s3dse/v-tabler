@@ -6,7 +6,7 @@ import { presetScrollbar } from 'unocss-preset-scrollbar'
 export default defineConfig({
     content: {
         pipeline: {
-            include: [/\.(vue|html|js|ts)($|\?)/]
+            include: [/\.(md|vue|html|js|ts)($|\?)/]
         }
     },
     presets: [presetWind3(), presetScrollbar(), presetVTabler({ enableSemanticSpacing: false })],

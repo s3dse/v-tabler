@@ -61,5 +61,27 @@
                 </template>
             </CardComponent>
         </div>
+        <div>
+            <heading tag="h2">Customized card</heading>
+            <CardComponent class="border-4 border-primary rounded-2xl">
+                <template #header>
+                    <h2 class="text-center">Custom Header</h2>
+                </template>
+                <template #header-border>
+                    <div class="border-b-4 border-primary border-dashed"></div>
+                </template>
+                <div class="p-4">
+                    <p>This is a simple card component.</p>
+                </div>
+                <template #footer-border>
+                    <div class="border-t-4 border-primary border-double"></div>
+                </template>
+                <template #footer>
+                    <div class="bg-red-400/15 text-default px-4 py-2">
+                        <p>Some footer content...</p>
+                    </div>
+                </template>
+            </CardComponent>
+        </div>
     </div>
 </template>
