@@ -10,7 +10,10 @@
                 <div :class="getHeaderFlexClasses(col)">
                     <div class="hover:cursor-pointer flex items-center" @click="sortTable(col)">
                         {{ underscoresToSpaces(getColumnLabel(col)) }}
-                        <div class="inline-block ml-1" :class="getSortIconClass(col?.key)"></div>
+                        <div
+                            class="inline-block w-4 h-4 ml-1"
+                            :class="getSortIconClass(col?.key)"
+                        ></div>
                     </div>
 
                     <column-filter
