@@ -1,9 +1,60 @@
+import { useI18n } from '../../../composables/useI18n.js'
+
 export const FILTER_I18N_DEFAULTS = {
     selectFilterPlaceholder: 'Search options...',
     selectFilterNoSelectionText: 'Select values:',
     selectFilterSingleSelectionTextFn: value => value,
     selectFilterMultipleSelectionTextFn: count => `${count} selected`,
     clearFilterLabel: 'Clear Filter'
+}
+
+/**
+ * Get filter i18n settings with vue-i18n integration
+ * Fallbacks in order:
+ * 1. Field-level i18n
+ * 2. Default constants
+ */
+export function getFilterI18n(fieldI18n = {}) {
+    const { t } = useI18n()
+
+    return {
+        textLabel: fieldI18n.textLabel || t('vTabler.table.filters.textLabel', 'Contains text:'),
+        numericLabel:
+            fieldI18n.numericLabel || t('vTabler.table.filters.numericLabel', 'Number filter:'),
+        dateLabel: fieldI18n.dateLabel || t('vTabler.table.filters.dateLabel', 'Date filter:'),
+        selectLabel:
+            fieldI18n.selectLabel || t('vTabler.table.filters.selectLabel', 'Select values:'),
+        clearFilterLabel:
+            fieldI18n.clearFilterLabel ||
+            t('vTabler.table.filters.clearFilterLabel', FILTER_I18N_DEFAULTS.clearFilterLabel),
+        placeholder:
+            fieldI18n.placeholder ||
+            t(
+                'vTabler.table.filters.searchPlaceholder',
+                FILTER_I18N_DEFAULTS.selectFilterPlaceholder
+            ),
+        noSelectionText:
+            fieldI18n.noSelectionText ||
+            t(
+                'vTabler.table.filters.noSelectionText',
+                FILTER_I18N_DEFAULTS.selectFilterNoSelectionText
+            ),
+        singleSelectionTextFn:
+            fieldI18n.singleSelectionTextFn ||
+            FILTER_I18N_DEFAULTS.selectFilterSingleSelectionTextFn,
+        multipleSelectionTextFn:
+            fieldI18n.multipleSelectionTextFn ||
+            FILTER_I18N_DEFAULTS.selectFilterMultipleSelectionTextFn,
+        textPlaceholder:
+            fieldI18n.textPlaceholder ||
+            t('vTabler.table.filters.textPlaceholder', 'Enter text...'),
+        numericPlaceholder:
+            fieldI18n.numericPlaceholder ||
+            t('vTabler.table.filters.numericPlaceholder', 'Value...'),
+        datePlaceholder:
+            fieldI18n.datePlaceholder ||
+            t('vTabler.table.filters.datePlaceholder', 'Select date...')
+    }
 }
 
 export const COMPARISON_OPERATORS = [

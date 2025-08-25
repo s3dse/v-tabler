@@ -201,65 +201,223 @@ These shortcuts should be used in `thClassList` for header alignment and corresp
 
 ### Field i18n Configuration
 
-The `i18n` field property allows you to customize internationalization settings for column filters on a per-field basis. This is particularly useful for select filters where you want to customize the placeholder text, selection display text, and other filter-specific labels.
+### v-tabler Vue-i18n Integration Guide
 
-#### i18n Properties
+v-tabler now supports vue-i18n for comprehensive internationalization. This guide shows you how to set up i18n for your TableComponent filters.
 
-| Property                  | Type       | Default                            | Description                                                 |
-| ------------------------- | ---------- | ---------------------------------- | ----------------------------------------------------------- |
-| `placeholder`             | `String`   | `'Search options...'`              | Placeholder text for the filter input field                 |
-| `noSelectionText`         | `String`   | `'Select values...'`               | Text displayed when no items are selected                   |
-| `singleSelectionTextFn`   | `Function` | `(value) => value`                 | Function to format the display text for single selections   |
-| `multipleSelectionTextFn` | `Function` | `(count) => \`${count} selected\`` | Function to format the display text for multiple selections |
+#### Installation
 
-#### Example i18n Configuration
+First, ensure you have vue-i18n installed:
+
+```bash
+npm install vue-i18n@9
+# or
+yarn add vue-i18n@9
+```
+
+#### Basic Setup
+
+1. Configure vue-i18n in your main application
 
 ```javascript
-const fields = [
-    {
-        key: 'department',
-        label: 'Department',
-        filterType: 'select',
-        filterOptions: [
-            { value: 'eng', label: 'Engineering' },
-            { value: 'sales', label: 'Sales' },
-            { value: 'marketing', label: 'Marketing' }
-        ],
-        i18n: {
-            placeholder: 'Search departments...',
-            noSelectionText: 'Choose departments...',
-            singleSelectionTextFn: value => `Selected: ${value}`,
-            multipleSelectionTextFn: count => `${count} departments selected`
+// main.js or main.ts
+import { createApp } from 'vue'
+import { createI18n } from 'vue-i18n'
+import { getDefaultTranslationKeys } from '@s3dse/v-tabler'
+import App from './App.vue'
+
+// Get default v-tabler translations
+const vTablerDefaults = getDefaultTranslationKeys()
+
+const messages = {
+    en: {
+        ...vTablerDefaults,
+        // Your own app translations
+        app: {
+            title: 'My App'
+            // ... other translations
         }
     },
+    de: {
+        // German translations for v-tabler
+        'vTabler.table.filters.textLabel': 'Enthält Text:',
+        'vTabler.table.filters.numericLabel': 'Zahlenfilter:',
+        'vTabler.table.filters.dateLabel': 'Datumsfilter:',
+        'vTabler.table.filters.selectLabel': 'Werte auswählen:',
+        'vTabler.table.filters.clearFilterLabel': 'Filter löschen',
+        'vTabler.table.filters.searchPlaceholder': 'Optionen durchsuchen...',
+        'vTabler.table.filters.noSelectionText': 'Werte auswählen:',
+        'vTabler.table.filters.textPlaceholder': 'Text eingeben...',
+        'vTabler.table.filters.numericPlaceholder': 'Wert...',
+        'vTabler.table.filters.datePlaceholder': 'Datum auswählen...',
+
+        // Your own app translations
+        app: {
+            title: 'Meine App'
+            // ... other translations
+        }
+    }
+}
+
+const i18n = createI18n({
+    legacy: false,
+    locale: 'en',
+    fallbackLocale: 'en',
+    messages
+})
+
+const app = createApp(App)
+app.use(i18n)
+app.mount('#app')
+```
+
+2. Use TableComponent (no changes required!)
+
+```vue
+<template>
+    <TableComponent :data="tableData" :columns="columns" :enable-filtering="true" />
+</template>
+
+<script setup>
+import { TableComponent } from '@s3dse/v-tabler'
+
+const tableData = [
+    { id: 1, name: 'John', age: 30, created: '2024-01-15' },
+    { id: 2, name: 'Jane', age: 25, created: '2024-02-20' }
+]
+
+const columns = [
+    { key: 'name', label: 'Name' },
+    { key: 'age', label: 'Age' },
+    { key: 'created', label: 'Created Date' }
+]
+</script>
+```
+
+#### Advanced Configuration
+
+You can still override individual filter labels at the field level:
+
+```vue
+<script setup>
+const columns = [
     {
-        key: 'status',
-        label: 'Status',
-        filterType: 'select',
-        filterOptions: [
-            { value: 'active', label: 'Active' },
-            { value: 'inactive', label: 'Inactive' }
-        ],
+        key: 'name',
+        label: 'Name',
         i18n: {
-            placeholder: 'Filter by status...',
-            noSelectionText: 'All statuses',
-            singleSelectionTextFn: value => `Status: ${value}`,
-            multipleSelectionTextFn: count => `${count} statuses`
+            textLabel: 'Search Name:', // Override just this filter's label
+            textPlaceholder: 'Type to search names...'
+        }
+    },
+    { key: 'age', label: 'Age' }, // Will use global i18n settings
+    { key: 'created', label: 'Created Date' }
+]
+</script>
+```
+
+If you prefer not to use the `vTabler.` prefix in your translations, you can define them without it:
+
+```javascript
+const messages = {
+    en: {
+        table: {
+            filters: {
+                textLabel: 'Contains text:',
+                numericLabel: 'Number filter:',
+                dateLabel: 'Date filter:'
+                // ... other translations
+            }
+        }
+    }
+}
+```
+
+#### Custom Selection Text Functions
+
+For select filters, you can provide custom functions for selection text:
+
+```javascript
+// In your i18n setup
+const messages = {
+    en: {
+        // ... other translations
+    },
+    de: {
+        // For German, you might need different pluralization
+        // Handle this in your component or use vue-i18n's pluralization features
+    }
+}
+```
+
+#### Fallback Behavior
+
+v-tabler's i18n system has a robust fallback chain:
+
+1. **Field-level i18n** (highest priority): `column.i18n.textLabel`
+2. **vue-i18n translations**: `$t('vTabler.table.filters.textLabel')` or `$t('table.filters.textLabel')`
+3. **Built-in defaults** (lowest priority): English fallback values
+
+This ensures your table always displays meaningful text, even if some translations are missing.
+
+#### Complete Translation Keys Reference
+
+Here are all the available translation keys:
+
+```javascript
+const allKeys = {
+    'vTabler.table.filters.textLabel': 'Contains text:',
+    'vTabler.table.filters.numericLabel': 'Number filter:',
+    'vTabler.table.filters.dateLabel': 'Date filter:',
+    'vTabler.table.filters.selectLabel': 'Select values:',
+    'vTabler.table.filters.clearFilterLabel': 'Clear Filter',
+    'vTabler.table.filters.searchPlaceholder': 'Search options...',
+    'vTabler.table.filters.noSelectionText': 'Select values:',
+    'vTabler.table.filters.textPlaceholder': 'Enter text...',
+    'vTabler.table.filters.numericPlaceholder': 'Value...',
+    'vTabler.table.filters.datePlaceholder': 'Select date...'
+}
+```
+
+#### Migration from Previous Version
+
+If you were using the previous custom i18n system:
+
+##### Before
+
+```vue
+<script setup>
+const columns = [
+    {
+        key: 'name',
+        label: 'Name',
+        i18n: {
+            clearFilterLabel: 'Clear Filter',
+            placeholder: 'Search options...'
         }
     }
 ]
+</script>
 ```
 
-#### Global i18n Fallbacks
+##### After
 
-If field-level `i18n` settings are not provided, the component will fall back to built-in default values:
+```vue
+<!-- No changes needed! Field-level i18n still works as fallback -->
+<script setup>
+const columns = [
+    {
+        key: 'name',
+        label: 'Name',
+        i18n: {
+            clearFilterLabel: 'Clear Filter',
+            placeholder: 'Search options...'
+        }
+    }
+]
+</script>
+```
 
-- **placeholder**: `'Search options...'`
-- **noSelectionText**: `'Select values...'`
-- **singleSelectionTextFn**: `(value) => value`
-- **multipleSelectionTextFn**: `(count) => \`${count} selected\``
-
-This provides consistent behavior across all select filters while still allowing field-specific customization when needed.
+The new system is fully backward compatible!
 
 ### Filter Type Auto-Detection
 

@@ -1,7 +1,7 @@
 <template>
     <div>
         <DropdownMenuLabel class="block text-xs font-medium text-muted mb-1" :for="inputId">
-            Contains text:
+            {{ label }}
         </DropdownMenuLabel>
         <input
             :id="inputId"
@@ -15,9 +15,18 @@
 </template>
 <script setup>
 import { DropdownMenuLabel } from 'reka-ui'
-defineProps({
+import { useI18n } from '../../../composables/useI18n.js'
+
+const props = defineProps({
     inputId: String,
-    placeholder: String
+    placeholder: String,
+    label: String
 })
+
+const { t } = useI18n()
+
+// Use prop label if provided, otherwise use i18n
+const label = props.label || t('vTabler.table.filters.textLabel', 'Contains text:')
+
 const modelValue = defineModel({ type: String, default: '' })
 </script>

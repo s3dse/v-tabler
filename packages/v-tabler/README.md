@@ -139,6 +139,45 @@ const fields = ref([...])
 
 See the `/docs` folder for full API documentation and usage guides for all components.
 
+## Internationalization
+
+v-tabler includes built-in support for vue-i18n. Filter labels and UI text are automatically translated when vue-i18n is available in your application.
+
+### Quick Setup
+
+1. Install vue-i18n: `npm install vue-i18n@9`
+2. Get default translation keys and set up your i18n:
+
+```js
+import { createI18n } from 'vue-i18n'
+import VTabler, { getDefaultTranslationKeys } from '@s3-dse/v-tabler'
+
+const vTablerDefaults = getDefaultTranslationKeys()
+
+const messages = {
+    en: { ...vTablerDefaults },
+    de: {
+        'vTabler.table.filters.textLabel': 'Enthält Text:',
+        'vTabler.table.filters.numericLabel': 'Zahlenfilter:'
+        // ... other German translations
+    }
+}
+
+const i18n = createI18n({
+    legacy: false,
+    locale: 'en',
+    messages
+})
+
+// Install with i18n integration
+app.use(i18n)
+app.use(VTabler, { i18n })
+```
+
+3. Use TableComponent as usual - translations are applied automatically!
+
+For detailed setup instructions, see the [i18n setup guide](src/i18n/setup-guide.md).
+
 ---
 
 ## License

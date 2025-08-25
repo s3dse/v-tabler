@@ -13,6 +13,9 @@ import { CheckboxComponent } from '@/components/checkbox'
 import { Heading, PageTitle } from '@/components/typography'
 import { TableSkeleton } from '@/components/skeleton'
 
+// Import i18n utilities
+import { getDefaultTranslationKeys, setVTablerI18n } from '@/composables/useI18n.js'
+
 // Import the Vue plugin for default export
 import VTabler from '@/install.js'
 
@@ -40,5 +43,7 @@ export {
     CheckboxComponent,
     Heading,
     PageTitle,
-    TableSkeleton
+    TableSkeleton,
+    getDefaultTranslationKeys,
+    setVTablerI18n
 }
