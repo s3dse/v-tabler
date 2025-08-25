@@ -1,6 +1,6 @@
 # V-Tabler
 
-A modern Vue 3 component library for building beautiful, data-rich web applications. Includes advanced table, form, and UI components, built with UnoCSS and designed for flexibility and developer experience.
+A Vue 3 component library for building data-rich web applications. Includes advanced table, form, and UI components, built with UnoCSS and designed for flexibility.
 
 ## Installation
 
