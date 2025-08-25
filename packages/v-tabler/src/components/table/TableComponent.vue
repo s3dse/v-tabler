@@ -390,6 +390,12 @@ watch(
 )
 
 onMounted(() => {
-    validateProps(pageSize.value, props.topRows.length, props.remotePagination, props.totalItems)
+    validateProps(
+        pageSize.value,
+        props.topRows.length,
+        props.remotePagination,
+        props.totalItems,
+        props.fields
+    )
 })
 </script>
