@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { CardComponent } from '../..'
+</script>
+
 <template>
     <div class="text-default">
         <heading tag="h1">Buttons</heading>
@@ -17,7 +21,7 @@
                 <button disabled class="btn-base-lg">Base LG</button>
                 <button disabled class="btn-base-default">Base Default</button>
             </div>
-            <heading tag="h2" class="header-2 text-default">Primary Buttons</heading>
+            <heading tag="h2">Primary Buttons</heading>
             <pre class="text-default text-base">btn-primary-(sm|md|lg|default)</pre>
             <div class="flex flex-row gap-8">
                 <button class="btn-primary-sm">Primary SM</button>
@@ -33,6 +37,36 @@
                 <button class="btn-primary-default" disabled>Primary Default</button>
             </div>
             <button class="btn-primary-formfield rounded" disabled>Primary FormField</button>
+
+            <heading tag="h2" class="pt-4">Transparent Buttons</heading>
+            <pre class="text-default text-base">btn-transparent-(sm|md|lg|default)</pre>
+            <div class="flex flex-row gap-8">
+                <button class="btn-transparent-sm">Transparent SM</button>
+                <button class="btn-transparent-md">Transparent MD</button>
+                <button class="btn-transparent-lg">Transparent LG</button>
+                <button class="btn-transparent-default">Transparent Default</button>
+            </div>
+            <div class="flex flex-row gap-8">
+                <button class="btn-transparent-sm" disabled>Transparent SM</button>
+                <button class="btn-transparent-md" disabled>Transparent MD</button>
+                <button class="btn-transparent-lg" disabled>Transparent LG</button>
+                <button class="btn-transparent-default" disabled>Transparent Default</button>
+            </div>
+
+            <heading tag="h2" class="pt-4">Ghost Buttons</heading>
+            <pre class="text-default text-base">btn-ghost-(sm|md|lg|default)</pre>
+            <div class="flex flex-row gap-8">
+                <button class="btn-ghost-sm">Ghost SM</button>
+                <button class="btn-ghost-md">Ghost MD</button>
+                <button class="btn-ghost-lg">Ghost LG</button>
+                <button class="btn-ghost-default">Ghost Default</button>
+            </div>
+            <div class="flex flex-row gap-8">
+                <button class="btn-ghost-sm" disabled>Ghost SM</button>
+                <button class="btn-ghost-md" disabled>Ghost MD</button>
+                <button class="btn-ghost-lg" disabled>Ghost LG</button>
+                <button class="btn-ghost-default" disabled>Ghost Default</button>
+            </div>
         </div>
     </div>
 </template>
