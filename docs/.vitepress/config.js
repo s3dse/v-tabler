@@ -62,6 +62,10 @@ export default defineConfig({
                     ]
                 },
                 {
+                    text: 'Advanced Features',
+                    items: [{ text: 'Internationalization', link: '/guide/internationalization' }]
+                },
+                {
                     text: 'Migration',
                     items: [
                         {

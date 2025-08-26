@@ -26,6 +26,8 @@
 import { ref, computed } from 'vue'
 import { DropdownMenuLabel } from 'reka-ui'
 import CheckboxComponent from '../../checkbox/CheckboxComponent.vue'
+import { useI18n } from '../../../composables/useI18n.js'
+
 const props = defineProps({
     options: Array,
     placeholder: String,
@@ -34,12 +36,14 @@ const props = defineProps({
     multipleSelectionTextFn: { type: Function, default: x => `${x} selected` }
 })
 
+const { t } = useI18n()
+
 const selectedValues = defineModel('modelValue', { type: Array, default: () => [] })
 const searchTerm = ref('')
 
 const selectionText = computed(() => {
     if (!selectedValues.value || selectedValues.value.length === 0) {
-        return props.noSelectionText
+        return props.noSelectionText || t('vTabler.table.filters.noSelectionText', 'Select values:')
     }
 
     if (selectedValues.value.length === 1) {
