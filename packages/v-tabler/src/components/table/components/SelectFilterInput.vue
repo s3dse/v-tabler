@@ -10,14 +10,14 @@
             :placeholder="placeholder"
             @keydown.stop
         />
-        <div class="max-h-32 overflow-y-auto space-y-1">
+        <div class="max-h-32 overflow-y-auto flex flex-col gap-2 p-1.5">
             <CheckboxComponent
                 v-for="option in filteredOptions"
                 :key="option.value"
                 :name="option.value"
                 :label="option.label"
                 v-model="selectedValues"
-                class="text-default px-1 py-0.5 rounded text-xs"
+                class="text-default text-xs"
             />
         </div>
     </div>
