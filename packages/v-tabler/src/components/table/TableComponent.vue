@@ -136,10 +136,12 @@
             :bottom-rows="bottomRows"
             @page-changed="changePage"
         >
-            <template #pagination-label="{ data }">
+            <template #pagination-label>
                 <slot
                     name="pagination-label"
-                    v-bind="data || { perPage: 0, currentPage: 1, totalEntries: 0 }"
+                    :perPage="itemsPerPage"
+                    :currentPage="currentPage"
+                    :totalEntries="totalItems ?? dataForPagination.length"
                 ></slot>
             </template>
             <template #table-bottom-controls="slotProps">

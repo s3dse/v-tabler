@@ -2,9 +2,6 @@
     <div class="text-default">
         <heading tag="h1">Tables</heading>
         <p>Examples of table components and their features.</p>
-        <!-- <div class="my-4">
-            <tab-card-component :tabs="tabs" :current-tab-index="0"></tab-card-component>
-        </div> -->
         <card-component class="my-4">
             <loading-overlay :show="tableStatus.busy">
                 <table-component
@@ -26,6 +23,10 @@
                         <div :title="data.unformatted">
                             {{ data.value }}
                         </div>
+                    </template>
+                    <template #pagination-label="{ perPage, currentPage, totalEntries }">
+                        Einträge {{ (currentPage - 1) * perPage + 1 }} -
+                        {{ currentPage * perPage }} von {{ totalEntries }}
                     </template>
                 </table-component>
             </loading-overlay>
