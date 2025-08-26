@@ -54,7 +54,7 @@ import {
     DropdownMenuContent,
     DropdownMenuSeparator
 } from 'reka-ui'
-import { FILTER_OPERATORS, FILTER_I18N_DEFAULTS } from '../utils/column-filtering.js'
+import { FILTER_OPERATORS, getFilterI18n } from '../utils/column-filtering.js'
 import { detectFilterType, generateSelectOptions } from '../utils/filterTypeDetection.js'
 import TextFilterInput from './TextFilterInput.vue'
 import NumericFilterInput from './NumericFilterInput.vue'
@@ -99,21 +99,9 @@ function getInitialValueForFilterType(type) {
     }
 }
 
-// Get i18n settings from field level or fallback to defaults
+// Get i18n settings using the new getFilterI18n utility
 const i18nSettings = computed(() => {
-    const fieldI18n = props.field.i18n || {}
-    return {
-        clearFilterLabel: fieldI18n.clearFilterLabel || FILTER_I18N_DEFAULTS.clearFilterLabel,
-        placeholder: fieldI18n.placeholder || FILTER_I18N_DEFAULTS.selectFilterPlaceholder,
-        noSelectionText:
-            fieldI18n.noSelectionText || FILTER_I18N_DEFAULTS.selectFilterNoSelectionText,
-        singleSelectionTextFn:
-            fieldI18n.singleSelectionTextFn ||
-            FILTER_I18N_DEFAULTS.selectFilterSingleSelectionTextFn,
-        multipleSelectionTextFn:
-            fieldI18n.multipleSelectionTextFn ||
-            FILTER_I18N_DEFAULTS.selectFilterMultipleSelectionTextFn
-    }
+    return getFilterI18n(props.field.i18n)
 })
 
 const filterComponent = computed(() => {
@@ -149,17 +137,28 @@ const filterProps = computed(() => {
     if (filterType.value === 'text') {
         return {
             ...baseProps,
-            placeholder:
-                props.field.i18n?.placeholder || `Filter ${props.field.label || props.field.key}...`
+            label: i18nSettings.value.textLabel,
+            placeholder: i18nSettings.value.textPlaceholder
         }
     }
 
-    if (filterType.value === 'numeric' || filterType.value === 'date') {
+    if (filterType.value === 'numeric') {
         return {
             ...baseProps,
+            label: i18nSettings.value.numericLabel,
             operator: filterState.value.operator,
-            operators: FILTER_OPERATORS[filterType.value],
-            placeholder: props.field.i18n?.placeholder
+            operators: FILTER_OPERATORS.numeric,
+            placeholder: i18nSettings.value.numericPlaceholder
+        }
+    }
+
+    if (filterType.value === 'date') {
+        return {
+            ...baseProps,
+            label: i18nSettings.value.dateLabel,
+            operator: filterState.value.operator,
+            operators: FILTER_OPERATORS.date,
+            placeholder: i18nSettings.value.datePlaceholder
         }
     }
 
@@ -167,7 +166,10 @@ const filterProps = computed(() => {
         return {
             ...baseProps,
             options: filteredSelectOptions.value,
-            ...i18nSettings.value
+            placeholder: i18nSettings.value.placeholder,
+            noSelectionText: i18nSettings.value.noSelectionText,
+            singleSelectionTextFn: i18nSettings.value.singleSelectionTextFn,
+            multipleSelectionTextFn: i18nSettings.value.multipleSelectionTextFn
         }
     }
 

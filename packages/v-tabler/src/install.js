@@ -1,14 +1,20 @@
 import * as components from './components'
 import * as directives from './directives'
+import { setVTablerI18n, getDefaultTranslationKeys } from './composables/useI18n.js'
 
 const VTail = {
-    install(Vue) {
+    install(Vue, options = {}) {
         Object.keys(components).forEach(key => {
             Vue.component(key, components[key])
         })
         Object.keys(directives).forEach(key => {
             Vue.directive(key, directives[key])
         })
+
+        // If i18n instance is provided in options, set it up
+        if (options.i18n) {
+            setVTablerI18n(options.i18n)
+        }
     }
 }
 
@@ -19,3 +25,6 @@ export * from './components'
 export * as components from './components'
 export * as directives from './directives'
 export * as composables from './composables'
+
+// Export i18n utilities
+export { setVTablerI18n, getDefaultTranslationKeys }

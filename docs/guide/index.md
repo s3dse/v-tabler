@@ -14,6 +14,7 @@ Welcome to the V-Tabler guide! This section will help you get started, configure
 
 ## Advanced Topics
 
+- [Internationalization (i18n)](./internationalization.md)
 - [Typed Filters](./table-column-alignment-migration.md)
 - [Component API Reference](../components/index.md)
 
