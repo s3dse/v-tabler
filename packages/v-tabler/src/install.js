@@ -1,6 +1,6 @@
 import * as components from './components'
 import * as directives from './directives'
-import { setVTablerI18n } from './composables/useI18n.js'
+import { setVTablerI18n, getDefaultTranslationKeys } from './composables/useI18n.js'
 
 const VTail = {
     install(Vue, options = {}) {
@@ -25,3 +25,6 @@ export * from './components'
 export * as components from './components'
 export * as directives from './directives'
 export * as composables from './composables'
+
+// Export i18n utilities
+export { setVTablerI18n, getDefaultTranslationKeys }

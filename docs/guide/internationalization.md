@@ -37,19 +37,24 @@ const messages = {
             welcome: 'Welcome to our application'
         }
     },
+    // German translations for v-tabler
     de: {
-        // German translations for v-tabler
-        'vTabler.table.filters.textLabel': 'Enthält Text:',
-        'vTabler.table.filters.numericLabel': 'Zahlenfilter:',
-        'vTabler.table.filters.dateLabel': 'Datumsfilter:',
-        'vTabler.table.filters.selectLabel': 'Werte auswählen:',
-        'vTabler.table.filters.clearFilterLabel': 'Filter löschen',
-        'vTabler.table.filters.searchPlaceholder': 'Optionen durchsuchen...',
-        'vTabler.table.filters.noSelectionText': 'Werte auswählen:',
-        'vTabler.table.filters.textPlaceholder': 'Text eingeben...',
-        'vTabler.table.filters.numericPlaceholder': 'Wert...',
-        'vTabler.table.filters.datePlaceholder': 'Datum auswählen...',
-
+        vTabler: {
+            table: {
+                filters: {
+                    textLabel: 'Enthält Text:',
+                    numericLabel: 'Zahlenfilter:',
+                    dateLabel: 'Datumsfilter:',
+                    selectLabel: 'Werte auswählen:',
+                    clearFilterLabel: 'Filter löschen',
+                    searchPlaceholder: 'Optionen durchsuchen...',
+                    noSelectionText: 'Werte auswählen:',
+                    textPlaceholder: 'Text eingeben...',
+                    numericPlaceholder: 'Wert...',
+                    datePlaceholder: 'Datum auswählen...',
+                }
+            }
+        }
         // Your own app translations
         app: {
             title: 'Meine App',
@@ -71,7 +76,12 @@ const app = createApp(App)
 app.use(i18n)
 
 // Install v-tabler with i18n integration
-app.use(VTabler, { i18n })
+app.use(VTabler, { i18n: i18n.global })
+// or use setter Function
+setVTablerI18n(i18n.global)
+// or let VTabler access vue-i18n via injection key
+// choose either '$i18n' or 'i18n'
+app.provide('$i18n', i18n.global)
 
 app.mount('#app')
 ```
@@ -89,9 +99,10 @@ import App from './App.vue'
 
 const vTablerDefaults = getDefaultTranslationKeys()
 const messages = {
-    en: { ...vTablerDefaults },
+    en: { ...vTablerDefaults.en /* , ... English translations */ },
     de: {
-        /* German translations */
+        ...vTablerDefaults.de
+        /* , ...German translations */
     }
 }
 
@@ -213,7 +224,7 @@ This ensures your table always displays meaningful text, even if some translatio
 Here are all available translation keys for table filters:
 
 ```javascript
-const translationKeys = {
+const translationKeys_en = {
     'vTabler.table.filters.textLabel': 'Contains text:',
     'vTabler.table.filters.numericLabel': 'Number filter:',
     'vTabler.table.filters.dateLabel': 'Date filter:',
@@ -227,41 +238,24 @@ const translationKeys = {
 }
 ```
 
-## Example Translations
-
-### German (de)
+V-Tabler provides the German translations.
 
 ```javascript
-{
-  'vTabler.table.filters.textLabel': 'Enthält Text:',
-  'vTabler.table.filters.numericLabel': 'Zahlenfilter:',
-  'vTabler.table.filters.dateLabel': 'Datumsfilter:',
-  'vTabler.table.filters.selectLabel': 'Werte auswählen:',
-  'vTabler.table.filters.clearFilterLabel': 'Filter löschen',
-  'vTabler.table.filters.searchPlaceholder': 'Optionen durchsuchen...',
-  'vTabler.table.filters.noSelectionText': 'Werte auswählen:',
-  'vTabler.table.filters.textPlaceholder': 'Text eingeben...',
-  'vTabler.table.filters.numericPlaceholder': 'Wert...',
-  'vTabler.table.filters.datePlaceholder': 'Datum auswählen...'
+const translationKeys_de = {
+    'vTabler.table.filters.textLabel': 'Enthält Text:',
+    'vTabler.table.filters.numericLabel': 'Zahlenfilter:',
+    'vTabler.table.filters.dateLabel': 'Datumsfilter:',
+    'vTabler.table.filters.selectLabel': 'Werte auswählen:',
+    'vTabler.table.filters.clearFilterLabel': 'Filter löschen',
+    'vTabler.table.filters.searchPlaceholder': 'Optionen durchsuchen...',
+    'vTabler.table.filters.noSelectionText': 'Werte auswählen:',
+    'vTabler.table.filters.textPlaceholder': 'Text eingeben...',
+    'vTabler.table.filters.numericPlaceholder': 'Wert...',
+    'vTabler.table.filters.datePlaceholder': 'Datum auswählen...'
 }
 ```
 
-### French (fr)
-
-```javascript
-{
-  'vTabler.table.filters.textLabel': 'Contient le texte :',
-  'vTabler.table.filters.numericLabel': 'Filtre numérique :',
-  'vTabler.table.filters.dateLabel': 'Filtre de date :',
-  'vTabler.table.filters.selectLabel': 'Sélectionner les valeurs :',
-  'vTabler.table.filters.clearFilterLabel': 'Effacer le filtre',
-  'vTabler.table.filters.searchPlaceholder': 'Rechercher des options...',
-  'vTabler.table.filters.noSelectionText': 'Sélectionner les valeurs :',
-  'vTabler.table.filters.textPlaceholder': 'Entrer le texte...',
-  'vTabler.table.filters.numericPlaceholder': 'Valeur...',
-  'vTabler.table.filters.datePlaceholder': 'Sélectionner la date...'
-}
-```
+For any other language, you need to provide the translation for these keys yourself.
 
 ## Migration Guide
 

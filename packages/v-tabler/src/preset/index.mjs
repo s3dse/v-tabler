@@ -10,7 +10,7 @@ import {
     animation
 } from './theme.js'
 import presetTheme from 'unocss-preset-theme'
-import merge from 'lodash.merge'
+import merge from 'lodash/merge'
 import { getSafelist } from './safelist.js'
 
 const CUSTOM_VARIANTS = Object.freeze({

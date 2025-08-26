@@ -102,9 +102,11 @@ const i18n = createI18n({
 
 const app = createApp(App)
 app.use(i18n)
-app.use(VTabler)
 
-// Manually connect v-tabler to vue-i18n
+app.use(VTabler)
+// or app.use(VTabler, { i18n: i18n.global })
+// or provide via injection key `$i18n`: app.provide('$i18n', i18n.global)
+// or manually connect v-tabler to vue-i18n
 setVTablerI18n(i18n.global)
 
 app.mount('#app')
