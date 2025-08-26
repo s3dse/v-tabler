@@ -15,6 +15,7 @@ const DEFAULT_TRANSLATIONS = {
                 clearAllFiltersLabel: 'Clear All Filters',
                 searchPlaceholder: 'Search options...',
                 noSelectionText: 'Select values:',
+                multipleSelectionText: '{count} selected',
                 textPlaceholder: 'Enter text...',
                 numericPlaceholder: 'Value...',
                 datePlaceholder: 'Select date...'
@@ -36,6 +37,7 @@ const TRANSLATIONS_DE = {
                 clearAllFiltersLabel: 'Alle Filter löschen',
                 searchPlaceholder: 'Optionen durchsuchen...',
                 noSelectionText: 'Werte auswählen:',
+                multipleSelectionText: '{count} ausgewählt',
                 textPlaceholder: 'Text eingeben...',
                 numericPlaceholder: 'Wert...',
                 datePlaceholder: 'Datum auswählen...'

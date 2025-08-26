@@ -44,7 +44,12 @@ export function getFilterI18n(fieldI18n = {}) {
             FILTER_I18N_DEFAULTS.selectFilterSingleSelectionTextFn,
         multipleSelectionTextFn:
             fieldI18n.multipleSelectionTextFn ||
-            FILTER_I18N_DEFAULTS.selectFilterMultipleSelectionTextFn,
+            (x =>
+                t(
+                    'vTabler.table.filters.multipleSelectionText',
+                    FILTER_I18N_DEFAULTS.selectFilterMultipleSelectionTextFn(x),
+                    { count: x }
+                )),
         textPlaceholder:
             fieldI18n.textPlaceholder ||
             t('vTabler.table.filters.textPlaceholder', 'Enter text...'),

@@ -83,6 +83,31 @@
                 </table-component>
             </loading-overlay>
         </card-component>
+        <!-- Column Filtering Demo With Customized Fields -->
+        <card-component class="my-4">
+            <loading-overlay :show="tableStatus.busy">
+                <table-component
+                    :items="columnFilterDemoData"
+                    :fields="columnFilterDemoFieldsCustomized"
+                    title="Column Filtering Demo With Customized Field-I18N"
+                    class="w-[100%] bg-surface text-inverted"
+                    :enable-column-filters="true"
+                    @column-filter-change="handleColumnFilterChange"
+                    @after-column-filter="handleAfterColumnFilter"
+                >
+                    <template #cell(status)="{ value }">
+                        <span
+                            :class="{
+                                'text-green-500 dark:text-green-400': value === 'Active',
+                                'text-red-600 dark:text-red-400': value === 'Inactive'
+                            }"
+                        >
+                            {{ value }}
+                        </span>
+                    </template>
+                </table-component>
+            </loading-overlay>
+        </card-component>
         <RemoteTableDemo />
     </div>
 </template>
@@ -187,6 +212,62 @@ const columnFilterDemoData = ref([
 ])
 
 const columnFilterDemoFields = ref([
+    {
+        key: 'id',
+        label: 'ID',
+        type: 'numeric',
+        thClassList: 'table-col-right px-2',
+        tdClassList: 'text-right px-2 font-mono',
+        filterable: false
+    },
+    {
+        key: 'name',
+        label: 'Employee Name',
+        filterType: 'text',
+        thClassList: 'table-col-left px-2',
+        tdClassList: 'text-left px-2'
+    },
+    {
+        key: 'department',
+        label: 'Department',
+        filterType: 'select',
+        filterOptions: [
+            { value: 'Engineering', label: 'Engineering' },
+            { value: 'Marketing', label: 'Marketing' },
+            { value: 'Sales', label: 'Sales' },
+            { value: 'HR', label: 'Human Resources' }
+        ],
+        thClassList: 'table-col-left px-2',
+        tdClassList: 'text-left px-2'
+    },
+    {
+        key: 'salary',
+        label: 'Salary',
+        type: 'numeric',
+        thClassList: 'table-col-right px-2',
+        tdClassList: 'text-right px-2',
+        formatter: value => (value ? `$${value.toLocaleString()}` : '-')
+    },
+    {
+        key: 'hire_date',
+        label: 'Hire Date',
+        filterType: 'date',
+        thClassList: 'table-col-left px-2',
+        tdClassList: 'text-left px-2'
+    },
+    {
+        key: 'status',
+        label: 'Status',
+        filterType: 'select',
+        filterOptions: [
+            { value: 'Active', label: 'Active' },
+            { value: 'Inactive', label: 'Inactive' }
+        ],
+        thClassList: 'table-col-center px-2',
+        tdClassList: 'text-center px-2'
+    }
+])
+const columnFilterDemoFieldsCustomized = ref([
     {
         key: 'id',
         label: 'ID',
