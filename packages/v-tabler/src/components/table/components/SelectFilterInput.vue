@@ -43,7 +43,7 @@ const searchTerm = ref('')
 
 const selectionText = computed(() => {
     if (!selectedValues.value || selectedValues.value.length === 0) {
-        return props.noSelectionText || t('vTabler.table.filters.noSelectionText', 'Select values:')
+        return props.noSelectionText
     }
 
     if (selectedValues.value.length === 1) {
