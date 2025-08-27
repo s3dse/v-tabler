@@ -1,5 +1,6 @@
 import { inject, ref } from 'vue'
 import _object from 'lodash/object'
+import { interpolate } from '../utils/interpolate'
 
 // Default translations for all components - used as fallback when vue-i18n is not available
 
@@ -106,10 +107,10 @@ function translate(vueI18n, key, fallback = null, values = {}) {
 
     // Fallback to provided value or default translations
     if (fallback !== null) {
-        return fallback
+        return interpolate(fallback, values)
     }
 
-    return _object.get(DEFAULT_TRANSLATIONS, key) || key
+    return interpolate(_object.get(DEFAULT_TRANSLATIONS, key) || key, values)
 }
 
 /**
