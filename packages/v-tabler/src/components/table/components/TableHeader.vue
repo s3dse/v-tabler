@@ -113,8 +113,7 @@ defineProps({
         default: true
     },
     clearAllFiltersButtonText: {
-        type: String,
-        default: 'Clear All Filters'
+        type: String
     }
 })
 

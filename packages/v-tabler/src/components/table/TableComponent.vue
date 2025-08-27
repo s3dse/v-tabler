@@ -23,7 +23,7 @@
             :enable-column-filters="enableColumnFilters"
             :has-active-filters="hasActiveFilters"
             :show-clear-all-filters-button="showClearAllFiltersButton"
-            :clear-all-filters-button-text="clearAllFiltersButtonText"
+            :clear-all-filters-button-text="$clearAllFiltersButtonText"
             @filter-data="handleFilterInternal"
             @clear-all-filters="clearAllColumnFiltersInternal"
         >
@@ -157,6 +157,9 @@ import 'virtual:uno.css'
 import { computed, useId, useSlots, watch, onMounted } from 'vue'
 import { joinLines } from '@/utils/string-join-lines.js'
 import { useDebounceFn } from '@vueuse/core'
+import { useI18n } from '../../composables/useI18n.js'
+
+const { t } = useI18n()
 
 import {
     useTableState,
@@ -264,8 +267,7 @@ const props = defineProps({
         default: true
     },
     clearAllFiltersButtonText: {
-        type: String,
-        default: 'Clear All Filters'
+        type: String
     }
 })
 
@@ -375,6 +377,10 @@ const regularRowsForDisplay = computed(() => {
 const bottomRowsForDisplay = computed(() => {
     // Bottom rows (unpaginated)
     return props.bottomRows || []
+})
+
+const $clearAllFiltersButtonText = computed(() => {
+    return props.clearAllFiltersButtonText || t('vTabler.table.filters.clearAllFiltersLabel')
 })
 
 watch(
