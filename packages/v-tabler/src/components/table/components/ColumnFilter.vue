@@ -101,7 +101,7 @@ function getInitialValueForFilterType(type) {
 
 // Get i18n settings using the new getFilterI18n utility
 const i18nSettings = computed(() => {
-    return getFilterI18n(props.field.i18n)
+    return getFilterI18n(props.field.i18n, props.field.label || props.field.key)
 })
 
 const filterComponent = computed(() => {
@@ -167,9 +167,7 @@ const filterProps = computed(() => {
             ...baseProps,
             options: filteredSelectOptions.value,
             placeholder: i18nSettings.value.placeholder,
-            noSelectionText: i18nSettings.value.noSelectionText,
-            singleSelectionTextFn: i18nSettings.value.singleSelectionTextFn,
-            multipleSelectionTextFn: i18nSettings.value.multipleSelectionTextFn
+            label: i18nSettings.value.selectLabel
         }
     }
 

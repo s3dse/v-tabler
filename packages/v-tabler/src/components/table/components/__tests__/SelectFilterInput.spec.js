@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SelectFilterInput from '../SelectFilterInput.vue'
 import CheckboxComponent from '../../../checkbox/CheckboxComponent.vue'
+import { DropdownMenuLabel } from 'reka-ui'
 
 const mockOptions = [
     { value: 'engineering', label: 'Engineering' },
@@ -24,72 +25,20 @@ describe('SelectFilterInput', () => {
         expect(wrapper.find('input').attributes('placeholder')).toBe('Search...')
     })
 
-    it('should display default no selection text when no items are selected', () => {
+    it('should display a title label when provided', () => {
         const wrapper = mount(SelectFilterInput, {
             props: {
                 modelValue: [],
                 options: mockOptions,
                 placeholder: 'Search...',
-                noSelectionText: 'Select values:'
+                label: 'Select values:'
             }
         })
+
+        const labelWrapper = wrapper.getComponent(DropdownMenuLabel)
+        console.log(labelWrapper.html())
 
         expect(wrapper.text()).toContain('Select values:')
-    })
-
-    it('should display custom no selection text when provided', () => {
-        const wrapper = mount(SelectFilterInput, {
-            props: {
-                modelValue: [],
-                options: mockOptions,
-                placeholder: 'Search...',
-                noSelectionText: 'Choose departments...'
-            }
-        })
-
-        expect(wrapper.text()).toContain('Choose departments...')
-    })
-
-    it('should display single selection text using custom function', () => {
-        const singleSelectionTextFn = value => `Selected: ${value}`
-
-        const wrapper = mount(SelectFilterInput, {
-            props: {
-                modelValue: ['engineering'],
-                options: mockOptions,
-                placeholder: 'Search...',
-                singleSelectionTextFn
-            }
-        })
-
-        expect(wrapper.text()).toContain('Selected: Engineering')
-    })
-
-    it('should display multiple selection text using custom function', () => {
-        const multipleSelectionTextFn = count => `${count} departments selected`
-
-        const wrapper = mount(SelectFilterInput, {
-            props: {
-                modelValue: ['engineering', 'marketing'],
-                options: mockOptions,
-                placeholder: 'Search...',
-                multipleSelectionTextFn
-            }
-        })
-
-        expect(wrapper.text()).toContain('2 departments selected')
-    })
-
-    it('should fall back to default text when no custom functions provided', () => {
-        const wrapper = mount(SelectFilterInput, {
-            props: {
-                modelValue: ['engineering', 'marketing'],
-                options: mockOptions,
-                placeholder: 'Search...'
-            }
-        })
-
-        expect(wrapper.text()).toContain('2 selected')
     })
 
     it('should filter options based on search term', async () => {

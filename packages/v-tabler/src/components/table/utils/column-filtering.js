@@ -14,16 +14,22 @@ export const FILTER_I18N_DEFAULTS = {
  * 1. Field-level i18n
  * 2. Default constants
  */
-export function getFilterI18n(fieldI18n = {}) {
+export function getFilterI18n(fieldI18n = {}, fieldName) {
     const { t } = useI18n()
 
     return {
-        textLabel: fieldI18n.textLabel || t('vTabler.table.filters.textLabel', 'Contains text:'),
+        textLabel:
+            fieldI18n.textLabel ||
+            t('vTabler.table.filters.textLabel', 'Contains text:', { fieldName }),
         numericLabel:
-            fieldI18n.numericLabel || t('vTabler.table.filters.numericLabel', 'Number filter:'),
-        dateLabel: fieldI18n.dateLabel || t('vTabler.table.filters.dateLabel', 'Date filter:'),
+            fieldI18n.numericLabel ||
+            t('vTabler.table.filters.numericLabel', 'Number filter:', { fieldName }),
+        dateLabel:
+            fieldI18n.dateLabel ||
+            t('vTabler.table.filters.dateLabel', 'Date filter:', { fieldName }),
         selectLabel:
-            fieldI18n.selectLabel || t('vTabler.table.filters.selectLabel', 'Select values:'),
+            fieldI18n.selectLabel ||
+            t('vTabler.table.filters.selectLabel', 'Select values:', { fieldName }),
         clearFilterLabel:
             fieldI18n.clearFilterLabel ||
             t('vTabler.table.filters.clearFilterLabel', FILTER_I18N_DEFAULTS.clearFilterLabel),
@@ -37,7 +43,8 @@ export function getFilterI18n(fieldI18n = {}) {
             fieldI18n.noSelectionText ||
             t(
                 'vTabler.table.filters.noSelectionText',
-                FILTER_I18N_DEFAULTS.selectFilterNoSelectionText
+                FILTER_I18N_DEFAULTS.selectFilterNoSelectionText,
+                { fieldName }
             ),
         singleSelectionTextFn:
             fieldI18n.singleSelectionTextFn ||

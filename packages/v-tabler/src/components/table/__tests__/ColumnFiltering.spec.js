@@ -4,6 +4,7 @@ import TableComponent from '@/components/table/TableComponent.vue'
 import ColumnFilter from '@/components/table/components/ColumnFilter.vue'
 import { useTableState } from '@/components/table/composables/useTableState.js'
 import { applyFilter } from '@/components/table/utils/column-filtering.js'
+import { useI18n, getDefaultTranslationKeys } from '@/composables/useI18n'
 
 // Test data similar to the demo
 const testData = [
@@ -933,6 +934,31 @@ describe('Column Filtering', () => {
     })
 
     describe('Field-level i18n configuration', () => {
+        it('should follow the fallback chain: vue-i18n, DEFAULT_TRANSLATIONS, fallback string, then key', () => {
+            // Mock useI18n to simulate no vue-i18n and no DEFAULT_TRANSLATIONS entry
+            const originalDefaultTranslations = { ...getDefaultTranslationKeys().en }
+
+            // Remove the translation key from DEFAULT_TRANSLATIONS
+            const missingKey = 'vTabler.table.filters.missingLabel'
+            delete originalDefaultTranslations.vTabler.table.filters.missingLabel
+
+            // Simulate useI18n without vue-i18n
+            const { t } = useI18n()
+
+            // 1. Key missing in vue-i18n and DEFAULT_TRANSLATIONS, fallback provided
+            const fallbackString = 'Fallback label for {fieldName}'
+            const result = t(missingKey, fallbackString, { fieldName: 'TestField' })
+            expect(result).toBe('Fallback label for TestField')
+
+            // 2. Key missing in vue-i18n and DEFAULT_TRANSLATIONS, no fallback provided
+            const resultNoFallback = t(missingKey, null, { fieldName: 'TestField' })
+            expect(resultNoFallback).toBe(missingKey)
+
+            // 3. Key present in DEFAULT_TRANSLATIONS
+            const presentKey = 'vTabler.table.filters.textLabel'
+            const resultDefault = t(presentKey, null, { fieldName: 'TestField' })
+            expect(resultDefault).toBe('Filter by TestField:')
+        })
         it('should use field-level i18n settings for select filters', () => {
             const fieldWithI18n = {
                 key: 'department',
@@ -989,7 +1015,7 @@ describe('Column Filtering', () => {
             })
 
             expect(wrapper.vm.i18nSettings.placeholder).toBe('Search options...')
-            expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Select values:')
+            expect(wrapper.vm.i18nSettings.noSelectionText).toBe('Filter by Department:')
         })
     })
 })

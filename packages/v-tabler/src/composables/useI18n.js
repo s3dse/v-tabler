@@ -8,14 +8,14 @@ const DEFAULT_TRANSLATIONS = {
     vTabler: {
         table: {
             filters: {
-                textLabel: 'Contains text:',
-                numericLabel: 'Number filter:',
-                dateLabel: 'Date filter:',
-                selectLabel: 'Select values:',
+                textLabel: 'Filter by {fieldName}:',
+                numericLabel: 'Filter by {fieldName}:',
+                dateLabel: 'Filter by {fieldName}:',
+                selectLabel: 'Filter by {fieldName}:',
                 clearFilterLabel: 'Clear Filter',
                 clearAllFiltersLabel: 'Clear All Filters',
                 searchPlaceholder: 'Search options...',
-                noSelectionText: 'Select values:',
+                noSelectionText: 'Filter by {fieldName}:',
                 multipleSelectionText: '{count} selected',
                 textPlaceholder: 'Enter text...',
                 numericPlaceholder: 'Value...',
@@ -30,14 +30,14 @@ const TRANSLATIONS_DE = {
     vTabler: {
         table: {
             filters: {
-                textLabel: 'Enthält Text:',
-                numericLabel: 'Zahlenfilter:',
-                dateLabel: 'Datumsfilter:',
-                selectLabel: 'Werte auswählen:',
+                textLabel: 'Filtern nach {fieldName}:',
+                numericLabel: 'Filtern nach {fieldName}:',
+                dateLabel: 'Filtern nach {fieldName}:',
+                selectLabel: 'Filtern nach {fieldName}:',
                 clearFilterLabel: 'Filter löschen',
                 clearAllFiltersLabel: 'Alle Filter löschen',
                 searchPlaceholder: 'Optionen durchsuchen...',
-                noSelectionText: 'Werte auswählen:',
+                noSelectionText: 'Filtern nach {fieldName}:',
                 multipleSelectionText: '{count} ausgewählt',
                 textPlaceholder: 'Text eingeben...',
                 numericPlaceholder: 'Wert...',
@@ -105,12 +105,20 @@ function translate(vueI18n, key, fallback = null, values = {}) {
         }
     }
 
-    // Fallback to provided value or default translations
+    // Try default translation object
+    const locale = window.navigator.language.split('-')[0] === 'de' ? 'de' : 'en'
+    const translation = _object.get(getDefaultTranslationKeys()[locale], key)
+    if (translation) {
+        return interpolate(translation, values)
+    }
+
+    // Fallback to provided value
     if (fallback !== null) {
         return interpolate(fallback, values)
     }
 
-    return interpolate(_object.get(DEFAULT_TRANSLATIONS, key) || key, values)
+    // Last resort: return key
+    return key
 }
 
 /**

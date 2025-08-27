@@ -28,19 +28,13 @@
 </template>
 <script setup>
 import { DropdownMenuLabel, ToggleGroupRoot, ToggleGroupItem } from 'reka-ui'
-import { useI18n } from '../../../composables/useI18n.js'
 
-const props = defineProps({
+defineProps({
     inputId: String,
     operators: Array,
     placeholder: { type: String, default: 'Value...' },
     label: String
 })
-
-const { t } = useI18n()
-
-// Use prop label if provided, otherwise use i18n
-const label = props.label || t('vTabler.table.filters.numericLabel', 'Number filter:')
 
 const modelValue = defineModel({ type: [String, Number] })
 const operatorValue = defineModel('operator', { type: String, default: '=' })
