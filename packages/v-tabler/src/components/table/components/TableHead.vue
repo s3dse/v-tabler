@@ -8,7 +8,11 @@
         >
             <slot :name="`th(${col?.key})`" :field="col">
                 <div :class="getHeaderFlexClasses(col)">
-                    <div class="hover:cursor-pointer flex items-center" @click="sortTable(col)">
+                    <div
+                        v-if="col?.sortable !== false"
+                        class="hover:cursor-pointer flex items-center"
+                        @click="sortTable(col)"
+                    >
                         {{ underscoresToSpaces(getColumnLabel(col)) }}
                         <div class="flex items-center">
                             <span
@@ -16,6 +20,9 @@
                                 :class="getSortIconClass(col?.key)"
                             ></span>
                         </div>
+                    </div>
+                    <div v-else class="flex items-center">
+                        {{ underscoresToSpaces(getColumnLabel(col)) }}
                     </div>
 
                     <column-filter
