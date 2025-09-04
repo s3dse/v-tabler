@@ -159,6 +159,7 @@ export function generateSelectOptions(field, data, filterType) {
         // Safety check - only apply to auto-detected select filters, not explicit ones
         if (!field.filterType && uniqueValues.length > FILTER_DETECTION_CONFIG.maxSelectOptions) {
             console.warn(
+                '[TableComponent]:',
                 `Column "${field.key}" has ${uniqueValues.length} unique values. Consider providing explicit filterOptions for better performance.`
             )
             // Fallback to text filter for high cardinality data (auto-detected only)

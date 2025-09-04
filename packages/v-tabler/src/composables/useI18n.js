@@ -101,7 +101,7 @@ function translate(vueI18n, key, fallback = null, values = {}) {
                 return vueI18n.t(shortKey, values)
             }
         } catch (e) {
-            console.warn(`v-tabler: Error translating key "${key}":`, e)
+            console.warn(`[v-tabler:i18n]: Error translating key "${key}":`, e)
         }
     }
 

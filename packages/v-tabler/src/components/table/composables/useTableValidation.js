@@ -27,6 +27,7 @@ export function useTableValidation() {
         const fieldsHaveDuplicates = duplicateKeys.length > 0
         if (fieldsHaveDuplicates) {
             console.warn(
+                '[TableComponent]:',
                 'Fields have duplicate keys:',
                 duplicateKeys.map(([key]) => key).join(', ')
             )
