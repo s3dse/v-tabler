@@ -10,7 +10,7 @@
             :placeholder="placeholder"
             @keydown.stop
         />
-        <div class="max-h-32 overflow-y-auto flex flex-col gap-2 p-1.5">
+        <div class="max-h-32 overflow-y-auto flex flex-col gap-2 p-1.5 with-scrollbar">
             <CheckboxComponent
                 v-for="option in filteredOptions"
                 :key="option.value"
