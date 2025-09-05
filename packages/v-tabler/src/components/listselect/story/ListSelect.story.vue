@@ -43,9 +43,9 @@
 
 ## Props
 
--   `label` - String: The label to display
--   `selected` - Boolean: Whether the item is selected
--   `truncate` - Boolean: Whether to truncate the label
+- `label` - String: The label to display
+- `selected` - Boolean: Whether the item is selected
+- `truncate` - Boolean: Whether to truncate the label
 </docs>
 <script setup>
 import '@unocss/reset/tailwind-compat.css'
@@ -53,12 +53,6 @@ import 'virtual:uno.css'
 
 import { ListSelect } from '..'
 import { ref } from 'vue'
-
-const vBusy = {
-  mounted: (el, { value }) => {
-    el.setAttribute('title', value)
-  },
-}
 
 function initState(variant) {
     const state = {

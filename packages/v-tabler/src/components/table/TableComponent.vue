@@ -151,9 +151,6 @@
     </div>
 </template>
 <script setup>
-import '@unocss/reset/tailwind-compat.css'
-import 'virtual:uno.css'
-
 import { computed, useId, useSlots, watch, onMounted } from 'vue'
 import { joinLines } from '@/utils/string-join-lines.js'
 import { useDebounceFn } from '@vueuse/core'

@@ -47,9 +47,9 @@
 
 ## Props
 
--   `label` - String: The label to display
--   `selected` - Boolean: Whether the item is selected
--   `truncate` - Boolean: Whether to truncate the label
+- `label` - String: The label to display
+- `selected` - Boolean: Whether the item is selected
+- `truncate` - Boolean: Whether to truncate the label
 </docs>
 <script setup>
 import '@unocss/reset/tailwind-compat.css'
