@@ -1,7 +1,7 @@
 import { defineConfig, presetWind3, transformerDirectives } from 'unocss'
 import transformerVariantGroup from '@unocss/transformer-variant-group'
-import { presetVTabler } from './src/preset/index.mjs'
 import { presetScrollbar } from 'unocss-preset-scrollbar'
+import { presetVTabler } from './src/preset/index.mjs'
 
 export default defineConfig({
     content: {

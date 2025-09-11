@@ -12,6 +12,7 @@ import {
 import presetTheme from 'unocss-preset-theme'
 import merge from 'lodash/merge'
 import { getSafelist } from './safelist.js'
+import { themes } from './themes/index.js'
 
 const CUSTOM_VARIANTS = Object.freeze({
     'checked-and-highlighted': '[&[data-state=checked][data-highlighted]]',
@@ -36,7 +37,8 @@ const generateVariantsAutocomplete = variants => Object.keys(variants).map(name 
 const safelist = getSafelist(shortcuts)
 
 const presetVTabler = definePreset((options = {}) => {
-    const { enableSemanticSpacing = true, theme: themeOverrides = {} } = options
+    const { enableSemanticSpacing = true, theme: themeOverrides = themes.TABLER_LIGHT_AND_DARK } =
+        options
 
     const mergedTheme = merge({}, baseTheme, themeOverrides)
 
@@ -70,4 +72,4 @@ const presetVTabler = definePreset((options = {}) => {
     }
 })
 
-export { presetVTabler, safelist }
+export { presetVTabler, safelist, themes }
