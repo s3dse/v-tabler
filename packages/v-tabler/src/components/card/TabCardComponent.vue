@@ -1,7 +1,11 @@
 <template>
     <div class="card">
         <div class="pt-3 bg-surface">
-            <tabs-component @update:current-tab-index="selectTab" :tabs="tabs"> </tabs-component>
+            <tabs-component
+                :tabs="tabs"
+                :current-tab-index="tabIndex"
+                @update:currentTabIndex="selectTab"
+            />
         </div>
 
         <keep-alive v-if="keepAlive">
