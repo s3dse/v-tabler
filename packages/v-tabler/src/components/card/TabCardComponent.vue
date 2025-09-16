@@ -36,6 +36,7 @@ const props = defineProps({
         default: false
     }
 })
+const emit = defineEmits(['update:currentTabIndex'])
 const component = computed(() => props.tabs[tabIndex.value].component)
 const componentProps = computed(() => props.tabs[tabIndex.value].props)
 const componentEvents = computed(() => props.tabs[tabIndex.value].events || {})
@@ -50,5 +51,6 @@ watch(
 
 const selectTab = index => {
     tabIndex.value = index
+    emit('update:currentTabIndex', index)
 }
 </script>
