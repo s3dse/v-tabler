@@ -12,6 +12,7 @@ import { Collapse, Fade } from './transition'
 import { CheckboxComponent } from './checkbox'
 import { Heading, PageTitle } from './typography'
 import { TableSkeleton } from './skeleton'
+import { RadioGroup } from './radio-group'
 
 export {
     TableComponent,
@@ -34,5 +35,6 @@ export {
     CheckboxComponent,
     Heading,
     PageTitle,
-    TableSkeleton
+    TableSkeleton,
+    RadioGroup
 }

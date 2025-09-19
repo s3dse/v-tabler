@@ -47,10 +47,19 @@
             </div>
         </div>
     </div>
+    <div class="w-20rem">
+        <RadioGroup
+            :values="radioValues"
+            v-model="selectedRadio"
+            prefix="example"
+            aria-label="Example Radio Group"
+        />
+    </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import RadioGroup from '../../components/radio-group/RadioGroup.vue'
 const singleChecked = ref(false)
 const checkableNames = ['Checkbox 1', 'Checkbox 2', 'Checkbox 3']
 const checkedValues = ref([])
@@ -63,4 +72,12 @@ const fieldVisibility = ref([
     { key: 'first_name', visible: true },
     { key: 'last_name', visible: true }
 ])
+
+const radioValues = [
+    { label: 'Option 1', value: '1' },
+    { label: 'Option 2', value: '2' },
+    { label: 'Option 3', value: '3' }
+]
+
+const selectedRadio = ref(null)
 </script>
