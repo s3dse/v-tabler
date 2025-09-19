@@ -2,10 +2,7 @@
 import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import { computed, useId } from 'vue'
 const props = defineProps({
-    values: {
-        type: Array,
-        required: true
-    },
+    values: { type: Array, required: true },
     prefix: {
         type: String,
         required: false,
@@ -25,7 +22,8 @@ const props = defineProps({
         type: String,
         required: false,
         default: 'value'
-    }
+    },
+    disabled: { type: Boolean, default: false }
 })
 const selected = defineModel({ default: null, required: false, type: [String, Object] })
 const id = useId()
@@ -38,10 +36,12 @@ const groupId = computed(() => (props.prefix ? props.prefix : id))
         class="flex justify-between gap-x-2"
         default-value="default"
         :aria-label="ariaLabel"
+        :disabled="disabled"
     >
         <div v-for="(item, index) in values" :key="item[valueKey]" class="flex items-center">
             <RadioGroupItem
                 :id="`${groupId}-r${index}`"
+                :data-disabled="disabled"
                 class="w-[18px] aspect-ratio-square outline-none cursor-pointer rounded-full"
                 :class="[item.icon ? `${item.icon} radio-group-item-icon` : 'radio-group-item']"
                 :value="item"
@@ -52,13 +52,19 @@ const groupId = computed(() => (props.prefix ? props.prefix : id))
                 >
                 </RadioGroupIndicator>
                 <RadioGroupIndicator
+                    :disabled="disabled"
                     v-else
-                    class="flex items-center justify-center w-full h-full relative after:content-[''] after:block after:w-[11px] after:h-[11px] after:rounded-[50%] after:bg-primary"
+                    class="flex items-center justify-center w-full h-full relative"
                 >
+                    <span
+                        :data-disabled="disabled"
+                        class="rounded-full w-[11px] h-[11px] data-[disabled=false]:bg-primary data-[disabled=true]:bg-subtle"
+                    ></span>
                 </RadioGroupIndicator>
             </RadioGroupItem>
             <label
-                class="p-2 text-sm text-default text-nowrap cursor-pointer"
+                class="p-2 text-sm text-default text-nowrap"
+                :class="disabled ? 'cursor-default' : 'cursor-pointer'"
                 :for="`${groupId}-r${index}`"
             >
                 {{ item[labelKey] }}
@@ -68,11 +74,11 @@ const groupId = computed(() => (props.prefix ? props.prefix : id))
 </template>
 <style scoped>
 .radio-group-item-icon {
-    --at-apply: 'bg-gray-900 dark:bg-gray-200 hover:bg-primary';
+    --at-apply: 'bg-gray-900 dark:bg-gray-200 data-[disabled=false]:hover:bg-primary';
 }
 .radio-group-item {
-    --at-apply: 'bg-inherit dark:bg-moon-700';
-    --at-apply: 'hover:bg-primary-lt';
-    --at-apply: 'ring-1 ring-gray-600 dark:ring-moon-500';
+    --at-apply: 'bg-surface';
+    --at-apply: 'data-[disabled=false]:hover:bg-primary-lt';
+    --at-apply: 'ring-1 ring-subtle';
 }
 </style>

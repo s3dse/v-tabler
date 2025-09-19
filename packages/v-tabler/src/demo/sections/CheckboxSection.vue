@@ -47,11 +47,20 @@
             </div>
         </div>
     </div>
+    <div class="card w-20rem mb-8">
+        <RadioGroup
+            :values="radioValues"
+            v-model="selectedRadio"
+            prefix="example1"
+            aria-label="Example Radio Group"
+        />
+    </div>
     <div class="w-20rem">
         <RadioGroup
             :values="radioValues"
             v-model="selectedRadio"
-            prefix="example"
+            prefix="example2"
+            :disabled="true"
             aria-label="Example Radio Group"
         />
     </div>
