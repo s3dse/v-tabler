@@ -1,9 +1,4 @@
-<script setup lang="ts">
-import ChatComponent from '../../components/chat/ChatComponent.vue'
-</script>
-
 <template>
-    <chat-component></chat-component>
     <div class="text-default">
         <heading tag="h1">Buttons</heading>
         <p>Demonstration of various button styles and states.</p>

@@ -1,5 +1,6 @@
 import ButtonsSection from './ButtonsSection.vue'
 import CardSection from './CardSection.vue'
+import ChatSection from './ChatSection.vue'
 import CheckboxSection from './CheckboxSection.vue'
 import DialogsSection from './DialogsSection.vue'
 import DropdownsSection from './DropdownsSection.vue'
@@ -10,6 +11,7 @@ import TypographySection from './TypographySection.vue'
 export const sections = {
     buttons: { label: 'Buttons', component: ButtonsSection },
     card: { label: 'Card', component: CardSection },
+    chat: { label: 'Chat', component: ChatSection },
     checkbox: { label: 'Checkbox', component: CheckboxSection },
     dialogs: { label: 'Dialogs', component: DialogsSection },
     dropdowns: { label: 'Dropdowns', component: DropdownsSection },

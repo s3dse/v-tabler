@@ -5,10 +5,10 @@
                 ref="textareaRef"
                 v-model="localMessage"
                 @keydown="handleKeydown"
-                @input="adjustHeight"
+                @input="handleInput"
                 :placeholder="placeholder"
                 :disabled="disabled"
-                :style="textareaStyle"
+                :style="autoHeightStyle"
                 rows="1"
                 class="flex-1 form-inputfield resize-none overflow-y-auto with-scrollbar"
             />
@@ -29,7 +29,8 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, watch, nextTick } from 'vue'
+import { useAutoHeight } from './useAutoHeight.js'
 
 const props = defineProps({
     modelValue: {
@@ -67,28 +68,26 @@ const emit = defineEmits(['update:modelValue', 'submit'])
 const localMessage = ref(props.modelValue)
 const textareaRef = ref(null)
 
-// Computed style for max-height
-const textareaStyle = computed(() => {
-    const maxHeightValue =
-        typeof props.maxHeight === 'number' ? `${props.maxHeight}px` : props.maxHeight
-    return {
-        'min-height': '2.375rem',
-        'max-height': maxHeightValue
-    }
+// Auto-height functionality
+const { autoHeightStyle, adjustHeight, adjustHeightNextTick } = useAutoHeight({
+    elementRef: textareaRef,
+    maxHeight: props.maxHeight
 })
 
-// Sync with parent
+// Sync with parent (only watch for external changes)
 watch(
     () => props.modelValue,
     newVal => {
         localMessage.value = newVal
-        nextTick(() => adjustHeight())
+        adjustHeightNextTick()
     }
 )
 
-watch(localMessage, newVal => {
-    emit('update:modelValue', newVal)
-})
+const handleInput = () => {
+    // Emit to parent when user types
+    emit('update:modelValue', localMessage.value)
+    adjustHeight()
+}
 
 const handleKeydown = event => {
     // Allow Shift+Enter for new line (default behavior)
@@ -117,20 +116,6 @@ const handleSubmit = event => {
     })
 }
 
-const adjustHeight = () => {
-    const textarea = textareaRef.value
-    if (!textarea) return
-
-    // Reset height to calculate scrollHeight correctly
-    textarea.style.height = 'auto'
-
-    // Convert maxHeight to pixels if it's a number
-    const maxHeightPx =
-        typeof props.maxHeight === 'number' ? props.maxHeight : parseFloat(props.maxHeight)
-    const newHeight = Math.min(textarea.scrollHeight, maxHeightPx)
-    textarea.style.height = `${newHeight}px`
-}
-
 const focus = () => {
     nextTick(() => {
         textareaRef.value?.focus()
@@ -139,7 +124,7 @@ const focus = () => {
 
 const clear = () => {
     localMessage.value = ''
-    nextTick(() => adjustHeight())
+    adjustHeightNextTick()
 }
 
 defineExpose({ focus, clear })
