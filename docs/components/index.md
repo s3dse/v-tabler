@@ -27,6 +27,18 @@ Flexible container component with header, content, and action areas.
 - Elevation and border variants
 - Collapsible functionality
 
+### [ChatComponent](/components/chat-component)
+
+Floating chat interface component for AI assistants and messaging experiences.
+
+**Key Features:**
+
+- Floating chat button with smooth animations
+- Modal chat interface with backdrop
+- Message history with auto-scroll
+- Typing indicators and AI integration
+- Customizable appearance and behavior
+
 ### [DialogComponent](/components/dialog-component)
 
 Modal dialog component with customizable content and actions.

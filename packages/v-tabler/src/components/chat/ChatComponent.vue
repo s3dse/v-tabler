@@ -23,11 +23,13 @@
                     ref="messagesContainer"
                     class="flex-1 overflow-y-auto p-4 space-y-4 bg-background with-scrollbar"
                 >
-                    <ChatMessage
-                        v-for="(message, index) in messages"
-                        :key="index"
-                        :message="message"
-                    />
+                    <slot name="messages" v-bind="{ messages }">
+                        <ChatMessage
+                            v-for="(message, index) in messages"
+                            :key="index"
+                            :message="message"
+                        />
+                    </slot>
 
                     <TypingIndicator v-if="isTyping" />
                 </div>
