@@ -8,11 +8,12 @@
                 @input="adjustHeight"
                 :placeholder="placeholder"
                 :disabled="disabled"
+                :style="textareaStyle"
                 rows="1"
                 class="flex-1 form-inputfield resize-none overflow-y-auto with-scrollbar"
-                style="min-height: 2.375rem; max-height: 150px"
             />
             <button
+                type="button"
                 @click="handleSubmit"
                 :disabled="!localMessage.trim() || disabled"
                 class="btn-primary-md flex-shrink-0"
@@ -28,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 
 const props = defineProps({
     modelValue: {
@@ -46,6 +47,18 @@ const props = defineProps({
     showHint: {
         type: Boolean,
         default: true
+    },
+    maxHeight: {
+        type: [Number, String],
+        default: 150,
+        validator: value => {
+            if (typeof value === 'number') return value > 0
+            if (typeof value === 'string') return /^\d+(\.\d+)?(px|rem|em|%)?$/.test(value)
+            console.warn(
+                `ChatInput: invalid maxHeight value ${value} - expected Number or String with [px|rem|em|%]`
+            )
+            return false
+        }
     }
 })
 
@@ -53,6 +66,16 @@ const emit = defineEmits(['update:modelValue', 'submit'])
 
 const localMessage = ref(props.modelValue)
 const textareaRef = ref(null)
+
+// Computed style for max-height
+const textareaStyle = computed(() => {
+    const maxHeightValue =
+        typeof props.maxHeight === 'number' ? `${props.maxHeight}px` : props.maxHeight
+    return {
+        'min-height': '2.375rem',
+        'max-height': maxHeightValue
+    }
+})
 
 // Sync with parent
 watch(
@@ -71,15 +94,23 @@ const handleKeydown = event => {
     // Allow Shift+Enter for new line (default behavior)
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()
+        event.stopPropagation()
         handleSubmit()
     }
 }
 
-const handleSubmit = () => {
-    if (!localMessage.value.trim() || props.disabled) return
-    emit('submit', localMessage.value)
+const preventFormSubmission = event => {
+    if (event) {
+        event.stopPropagation()
+        event.preventDefault()
+    }
+}
 
-    clear()
+const handleSubmit = event => {
+    if (!localMessage.value.trim() || props.disabled) return
+
+    preventFormSubmission(event)
+    emit('submit', localMessage.value)
 
     nextTick(() => {
         textareaRef.value?.focus()
@@ -93,8 +124,10 @@ const adjustHeight = () => {
     // Reset height to calculate scrollHeight correctly
     textarea.style.height = 'auto'
 
-    // Set height based on content, respecting max-height
-    const newHeight = Math.min(textarea.scrollHeight, 150)
+    // Convert maxHeight to pixels if it's a number
+    const maxHeightPx =
+        typeof props.maxHeight === 'number' ? props.maxHeight : parseFloat(props.maxHeight)
+    const newHeight = Math.min(textarea.scrollHeight, maxHeightPx)
     textarea.style.height = `${newHeight}px`
 }
 

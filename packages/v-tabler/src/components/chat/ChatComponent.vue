@@ -2,6 +2,7 @@
     <div>
         <!-- Floating Chat Button -->
         <button
+            type="button"
             @click="isOpen = !isOpen"
             class="fixed bottom-6 right-6 w-14 h-14 btn-primary-md rounded-full shadow-lg flex items-center justify-center z-50"
             :class="{ 'rotate-90': isOpen }"
@@ -16,7 +17,7 @@
                 v-if="isOpen"
                 class="fixed bottom-24 right-6 w-96 h-[600px] card flex flex-col z-40"
             >
-                <ChatHeader @clear-chat="clearChat" />
+                <ChatHeader @clear-chat="clearChat" :chatTitle="chatTitle" />
 
                 <div
                     ref="messagesContainer"
@@ -36,7 +37,8 @@
                     v-model="inputMessage"
                     :disabled="isTyping"
                     :show-hint="true"
-                    @submit="sendMessage"
+                    :placeholder="placeholder"
+                    @submit="handleSubmit"
                 />
             </div>
         </Transition>
@@ -53,83 +55,51 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue'
+import { ref, watch } from 'vue'
 import ChatInput from './ChatInput.vue'
 import ChatMessage from './ChatMessage.vue'
 import ChatHeader from './ChatHeader.vue'
 import TypingIndicator from './TypingIndicator.vue'
+import { useChatLogic } from './useChatLogic.js'
+
+const props = defineProps({
+    initialMessage: {
+        type: String,
+        default: 'Hello! How can I help you today?'
+    },
+    placeholder: {
+        type: String,
+        default: 'Type your message...'
+    },
+    aiHandler: {
+        type: Function,
+        default: null
+    },
+    chatTitle: {
+        type: String,
+        default: 'AI Assistant'
+    }
+})
 
 const isOpen = ref(false)
 const inputMessage = ref('')
-const messages = ref([
-    {
-        role: 'assistant',
-        content: 'Hello! How can I help you today?',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-])
-const isTyping = ref(false)
 const messagesContainer = ref(null)
 const chatInputRef = ref(null)
 
-const scrollToBottom = () => {
-    nextTick(() => {
-        if (messagesContainer.value) {
-            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-        }
-    })
-}
+const { messages, isTyping, sendMessage, clearChat, scrollToBottom, focusInput } = useChatLogic({
+    initialMessage: props.initialMessage,
+    aiHandler: props.aiHandler,
+    messagesContainer,
+    chatInputRef
+})
 
-const sendMessage = async message => {
-    if (!message?.trim() || isTyping.value) return
-
-    const userMessage = {
-        role: 'user',
-        content: message,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-
-    messages.value.push(userMessage)
-
-    scrollToBottom()
-
-    // Simulate AI response
-    isTyping.value = true
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    const aiMessage = {
-        role: 'assistant',
-        content: `I received your message: "${message}"\n\nThis is a demo response. Integrate your LLM API here!`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-
-    messages.value.push(aiMessage)
-    isTyping.value = false
-    scrollToBottom()
-
-    // Ensure focus returns to input after AI response with a small delay
-    setTimeout(() => {
-        chatInputRef.value?.focus()
-    }, 100)
-}
-
-const clearChat = () => {
-    messages.value = [
-        {
-            role: 'assistant',
-            content: 'Chat cleared. How can I help you?',
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-    ]
+const handleSubmit = async message => {
+    await sendMessage(message)
 }
 
 watch(isOpen, newVal => {
     if (newVal) {
-        scrollToBottom()
-        // Focus input when modal opens with a slight delay to ensure DOM is ready
-        setTimeout(() => {
-            chatInputRef.value?.focus()
-        }, 100)
+        scrollToBottom().then(() => focusInput())
     }
 })
 </script>

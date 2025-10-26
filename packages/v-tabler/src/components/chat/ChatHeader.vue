@@ -4,15 +4,18 @@
     >
         <div class="flex items-center gap-2">
             <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <h3 class="font-semibold">AI Assistant</h3>
+            <h3 class="font-semibold">{{ chatTitle }}</h3>
         </div>
-        <button @click="clearChat" title="Clear chat" class="bg-primary">
+        <button type="button" @click="clearChat" title="Clear chat" class="bg-primary">
             <div class="block i-tabler-trash text-onprimary hover:text-primary-lt w-5 h-5" />
         </button>
     </div>
 </template>
 <script setup>
 const emit = defineEmits(['clear-chat'])
+defineProps({
+    chatTitle: String
+})
 
 function clearChat() {
     emit('clear-chat')
