@@ -83,12 +83,16 @@ export function useChatLogic(options = {}) {
         })
     }
 
+    // Track current request for cancellation
+    const currentAbortController = ref(null)
+
     // Core chat logic
     const sendMessage = async content => {
-        if (!content?.trim() || isTyping.value) return
+        const trimmedContent = content?.trim()
+        if (!trimmedContent || isTyping.value) return
 
         // Add user message
-        const userMessage = addUserMessage(content)
+        const userMessage = addUserMessage(trimmedContent)
         chatInputRef?.value?.clear()
         await scrollToBottom()
 
@@ -100,9 +104,12 @@ export function useChatLogic(options = {}) {
         // Show typing indicator
         isTyping.value = true
 
+        // Create AbortController for this request
+        currentAbortController.value = new AbortController()
+
         try {
-            // Call AI handler function
-            const aiResponse = await aiHandler(userMessage)
+            // Call AI handler function with AbortSignal
+            const aiResponse = await aiHandler(userMessage, currentAbortController.value.signal)
 
             // Add AI response to chat
             const aiMessage = addAiMessage(aiResponse)
@@ -111,17 +118,39 @@ export function useChatLogic(options = {}) {
 
             return { userMessage, aiMessage }
         } catch (error) {
+            // Handle abort specifically - just reset UI state
+            if (error.name === 'AbortError') {
+                console.log('AI request was aborted')
+                return { userMessage, aborted: true }
+            }
+
             console.error('AI handler error:', error)
 
-            // Add error message
+            // Add error message for real errors
             const errorMessage = addErrorMessage()
             await scrollToBottom()
 
             return { userMessage, errorMessage, error }
         } finally {
-            // Always hide typing indicator
+            // Always clear typing indicator and abort controller
             isTyping.value = false
+            currentAbortController.value = null
         }
+    }
+
+    // Cancel current request
+    const cancelCurrentRequest = () => {
+        if (currentAbortController.value) {
+            currentAbortController.value.abort()
+            currentAbortController.value = null
+        }
+    }
+
+    // Recall last submitted message
+    const recallLastMessage = () => {
+        // Find the last user message in the messages array
+        const userMessages = messages.value.filter(msg => msg.role === 'user')
+        return userMessages.length > 0 ? userMessages[userMessages.length - 1].content : ''
     }
 
     // Clear chat and reset to initial state
@@ -153,6 +182,8 @@ export function useChatLogic(options = {}) {
 
         // Core functionality
         sendMessage,
+        cancelCurrentRequest,
+        recallLastMessage,
         clearChat,
         resetMessages,
 

@@ -190,7 +190,8 @@ describe('useChatLogic', () => {
                 expect.objectContaining({
                     role: 'user',
                     content: 'User message'
-                })
+                }),
+                expect.any(AbortSignal)
             )
             expect(messages.value).toHaveLength(3) // Initial + user + AI
             expect(messages.value[2]).toEqual(
@@ -271,6 +272,45 @@ describe('useChatLogic', () => {
 
             resetMessages()
             expect(messages.value).toHaveLength(0)
+        })
+    })
+
+    describe('Message Recall', () => {
+        it('should track and recall the last submitted message', async () => {
+            const { sendMessage, recallLastMessage } = useChatLogic()
+
+            // Initially no last message
+            expect(recallLastMessage()).toBe('')
+
+            // Send a message
+            await sendMessage('First message')
+            expect(recallLastMessage()).toBe('First message')
+
+            // Send another message
+            await sendMessage('Second message')
+            expect(recallLastMessage()).toBe('Second message')
+        })
+
+        it('should trim whitespace when storing last message', async () => {
+            const { sendMessage, recallLastMessage } = useChatLogic()
+
+            await sendMessage('   Message with spaces   ')
+            expect(recallLastMessage()).toBe('Message with spaces')
+        })
+
+        it('should not update last message if content is empty or whitespace', async () => {
+            const { sendMessage, recallLastMessage } = useChatLogic()
+
+            // Send valid message first
+            await sendMessage('Valid message')
+            expect(recallLastMessage()).toBe('Valid message')
+
+            // Try to send empty/whitespace messages
+            await sendMessage('')
+            expect(recallLastMessage()).toBe('Valid message')
+
+            await sendMessage('   ')
+            expect(recallLastMessage()).toBe('Valid message')
         })
     })
 })

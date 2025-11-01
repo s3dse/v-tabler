@@ -38,9 +38,12 @@
                     ref="chatInputRef"
                     v-model="inputMessage"
                     :disabled="isTyping"
+                    :is-typing="isTyping"
                     :show-hint="true"
                     :placeholder="placeholder"
+                    :recall-last-message="recallLastMessage"
                     @submit="handleSubmit"
+                    @cancel="handleCancel"
                 />
             </div>
         </Transition>
@@ -88,7 +91,16 @@ const inputMessage = ref('')
 const messagesContainer = ref(null)
 const chatInputRef = ref(null)
 
-const { messages, isTyping, sendMessage, clearChat, scrollToBottom, focusInput } = useChatLogic({
+const {
+    messages,
+    isTyping,
+    sendMessage,
+    cancelCurrentRequest,
+    recallLastMessage,
+    clearChat,
+    scrollToBottom,
+    focusInput
+} = useChatLogic({
     initialMessage: props.initialMessage,
     aiHandler: props.aiHandler,
     messagesContainer,
@@ -97,6 +109,10 @@ const { messages, isTyping, sendMessage, clearChat, scrollToBottom, focusInput }
 
 const handleSubmit = async message => {
     await sendMessage(message)
+}
+
+const handleCancel = () => {
+    cancelCurrentRequest()
 }
 
 watch(isOpen, newVal => {

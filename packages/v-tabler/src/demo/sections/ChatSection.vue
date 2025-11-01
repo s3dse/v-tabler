@@ -125,14 +125,19 @@
                 </li>
                 <li>Try clicking both send buttons to ensure they work independently</li>
                 <li>Ask the AI different types of questions to see varied responses</li>
+                <li>
+                    <strong>NEW:</strong> During AI processing, the send button becomes a cancel
+                    button (X icon)
+                </li>
+                <li><strong>NEW:</strong> Click the cancel button to abort ongoing AI requests</li>
                 <li>Watch the status panel above to see chat activity tracking</li>
             </ol>
         </div>
 
         <!-- Chat Component -->
         <ChatComponent
-            initial-message="Hello! I'm a demo AI assistant. Try asking me about programming, help, or just say hello!"
-            placeholder="Ask me anything..."
+            initial-message="Hello! I'm a demo AI assistant. Try asking me about programming, help, or just say hello! You can cancel my responses by clicking the X button during processing."
+            placeholder="Ask me anything... (cancel with X button during processing)"
             :ai-handler="handleAiRequest"
         />
     </section>
@@ -176,7 +181,7 @@ const resetForm = () => {
 }
 
 // AI handler function for the chat component
-const handleAiRequest = async message => {
+const handleAiRequest = async (message, signal) => {
     console.log('💬 Chat message received:', message.content)
 
     // Update stats
@@ -189,7 +194,24 @@ const handleAiRequest = async message => {
     try {
         // Simulate AI processing time
         const processingTime = 1000 + Math.random() * 2500 // 1-3.5 seconds
-        await new Promise(resolve => setTimeout(resolve, processingTime))
+
+        // Create a promise that can be aborted
+        await new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(resolve, processingTime)
+
+            // Listen for abort signal
+            if (signal) {
+                signal.addEventListener('abort', () => {
+                    clearTimeout(timeoutId)
+                    reject(new DOMException('Request was cancelled', 'AbortError'))
+                })
+            }
+        })
+
+        // Check if aborted before generating response
+        if (signal?.aborted) {
+            throw new DOMException('Request was cancelled', 'AbortError')
+        }
 
         // Generate AI response
         const aiResponse = generateDemoAiResponse(message.content)
@@ -202,9 +224,14 @@ const handleAiRequest = async message => {
         // Return the response - component will handle adding it to chat
         return aiResponse
     } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log('🚫 AI request was cancelled by user')
+            throw error // Re-throw abort errors so component can handle them
+        }
+
         console.error('❌ Error generating AI response:', error)
 
-        // Return error response
+        // Return error response for other errors
         return 'I apologize, but I encountered an error. Please try again.'
     } finally {
         isAiThinking.value = false
@@ -241,12 +268,21 @@ const generateDemoAiResponse = userMessage => {
 
     // Component questions
     if (lowerMessage.includes('component') || lowerMessage.includes('chat')) {
-        return 'The ChatComponent is designed to be simple yet powerful! It manages its own UI state (open/closed, messages, typing indicators) while letting parent components handle message processing. This means you can easily connect it to any AI service like OpenAI, Claude, or your custom backend. Would you like to know more about how it works?'
+        return 'The ChatComponent is designed to be simple yet powerful! It manages its own UI state (open/closed, messages, typing indicators) while letting parent components handle message processing. New features include cancellable requests - notice how the send button becomes a cancel button (X) during processing! This means you can easily connect it to any AI service like OpenAI, Claude, or your custom backend. Would you like to know more about how it works?'
     }
 
     // Help questions
     if (lowerMessage.includes('help') || lowerMessage.includes('what can you do')) {
-        return "I'm a demo AI assistant showcasing the ChatComponent's capabilities! I can:\n\n• Answer questions about the component\n• Discuss programming topics\n• Show different types of responses\n• Demonstrate the typing indicator\n• Just have a friendly conversation\n\nTry asking me about Vue.js, the ChatComponent, or anything else!"
+        return "I'm a demo AI assistant showcasing the ChatComponent's capabilities! I can:\n\n• Answer questions about the component\n• Discuss programming topics\n• Show different types of responses\n• Demonstrate the typing indicator\n• Show cancellable requests (try clicking X during processing!)\n• Just have a friendly conversation\n\nTry asking me about Vue.js, the ChatComponent, or anything else!"
+    }
+
+    // Cancellation questions
+    if (
+        lowerMessage.includes('cancel') ||
+        lowerMessage.includes('abort') ||
+        lowerMessage.includes('stop')
+    ) {
+        return "Great question about cancellation! The ChatComponent now supports cancellable AI requests. When I'm processing your message, you'll see the send button (📤) change to a cancel button (❌). Click it to abort the current request! This is especially useful for long-running AI operations. The component handles all the cleanup automatically - no error messages, just clean cancellation. Try sending a message and then quickly clicking the X button!"
     }
 
     // Form testing questions

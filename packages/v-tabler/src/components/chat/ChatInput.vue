@@ -14,22 +14,25 @@
             />
             <button
                 type="button"
-                @click="handleSubmit"
-                :disabled="!localMessage.trim() || disabled"
+                @click="handleButtonClick"
+                :disabled="!props.isTyping && (!localMessage.trim() || disabled)"
                 class="btn-primary-md flex-shrink-0"
+                :class="{ 'btn-secondary-md': props.isTyping }"
             >
-                <div class="i-tabler-send w-5 h-5" />
+                <div v-if="props.isTyping" class="i-tabler-x w-5 h-5" />
+                <div v-else class="i-tabler-send w-5 h-5" />
             </button>
         </div>
         <div v-if="showHint" class="text-xs text-muted mt-2">
             Press <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to send,
-            <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> for new line
+            <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> for new line,
+            <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd> to recall last message
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { useAutoHeight } from './useAutoHeight.js'
 
 const props = defineProps({
@@ -60,15 +63,22 @@ const props = defineProps({
             )
             return false
         }
+    },
+    isTyping: {
+        type: Boolean,
+        default: false
+    },
+    recallLastMessage: {
+        type: Function,
+        default: null
     }
 })
 
-const emit = defineEmits(['update:modelValue', 'submit'])
+const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
 
 const localMessage = ref(props.modelValue)
 const textareaRef = ref(null)
 
-// Auto-height functionality
 const { autoHeightStyle, adjustHeight, adjustHeightNextTick } = useAutoHeight({
     elementRef: textareaRef,
     maxHeight: props.maxHeight
@@ -84,12 +94,36 @@ watch(
 )
 
 const handleInput = () => {
-    // Emit to parent when user types
     emit('update:modelValue', localMessage.value)
     adjustHeight()
 }
 
+const recallLastMessageAllowed = computed(() => {
+    const textarea = textareaRef.value
+    const inputEmpty = localMessage.value.trim() === ''
+    const cursorAtStart = textarea && textarea.selectionStart === 0
+    return textarea && (inputEmpty || cursorAtStart)
+})
+
 const handleKeydown = event => {
+    // Handle up arrow to recall last message
+    if (event.key === 'ArrowUp' && props.recallLastMessage) {
+        // Only recall if textarea is empty or cursor is at the beginning
+        if (recallLastMessageAllowed.value) {
+            event.preventDefault()
+            const lastMessage = props.recallLastMessage()
+            if (lastMessage) {
+                localMessage.value = lastMessage
+                // Move cursor to end
+                nextTick(() => {
+                    textareaRef.value.setSelectionRange(lastMessage.length, lastMessage.length)
+                    adjustHeight()
+                })
+            }
+        }
+        return
+    }
+
     // Allow Shift+Enter for new line (default behavior)
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()
@@ -105,8 +139,18 @@ const preventFormSubmission = event => {
     }
 }
 
+const handleButtonClick = () => {
+    if (props.isTyping) {
+        // Cancel current request
+        emit('cancel')
+    } else {
+        // Submit message
+        handleSubmit()
+    }
+}
+
 const handleSubmit = event => {
-    if (!localMessage.value.trim() || props.disabled) return
+    if (!localMessage.value.trim() || props.disabled || props.isTyping) return
 
     preventFormSubmission(event)
     emit('submit', localMessage.value)
