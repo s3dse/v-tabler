@@ -84,7 +84,7 @@ describe('useChatLogic', () => {
             })
 
             const initialLength = messages.value.length
-            const aiMessage = addAiMessage('AI response here')
+            const aiMessage = addAiMessage({ content: 'AI response here' })
 
             expect(aiMessage).toEqual(
                 expect.objectContaining({
@@ -179,7 +179,7 @@ describe('useChatLogic', () => {
         })
 
         it('should handle AI responses successfully', async () => {
-            const mockAiHandler = vi.fn().mockResolvedValue('AI response')
+            const mockAiHandler = vi.fn().mockResolvedValue({ content: 'AI response' })
             const { sendMessage, messages, isTyping } = useChatLogic({
                 aiHandler: mockAiHandler
             })

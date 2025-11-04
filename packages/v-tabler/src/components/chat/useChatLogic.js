@@ -33,9 +33,10 @@ export function useChatLogic(options = {}) {
         })
     }
 
-    const createMessage = (role, content) => ({
+    const createMessage = (role, { content, ...extraData }) => ({
         role,
         content,
+        ...extraData,
         timestamp: createTimestamp()
     })
 
@@ -45,13 +46,13 @@ export function useChatLogic(options = {}) {
     }
 
     const addUserMessage = content => {
-        const message = createMessage('user', content)
+        const message = createMessage('user', { content })
         addMessage(message)
         return message
     }
 
-    const addAiMessage = content => {
-        const message = createMessage('assistant', content)
+    const addAiMessage = aiResponse => {
+        const message = createMessage('assistant', aiResponse)
         addMessage(message)
         return message
     }
@@ -59,7 +60,7 @@ export function useChatLogic(options = {}) {
     const addErrorMessage = (
         content = 'I apologize, but I encountered an error processing your request. Please try again.'
     ) => {
-        const message = createMessage('assistant', content)
+        const message = createMessage('assistant', { content })
         addMessage(message)
         return message
     }

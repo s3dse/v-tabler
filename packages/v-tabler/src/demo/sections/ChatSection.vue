@@ -222,7 +222,7 @@ const handleAiRequest = async (message, signal) => {
         console.log('🤖 AI response generated:', aiResponse)
 
         // Return the response - component will handle adding it to chat
-        return aiResponse
+        return { content: aiResponse, metadata: { demo: true } }
     } catch (error) {
         if (error.name === 'AbortError') {
             console.log('🚫 AI request was cancelled by user')
