@@ -64,6 +64,52 @@
         <!-- Chat Component Demo -->
         <div class="mb-8">
             <h3 class="text-lg text-default font-semibold mb-4">Chat Component</h3>
+
+            <!-- Size Selector -->
+            <div class="mb-4 p-4 bg-surface border border-border rounded">
+                <label class="block text-sm font-medium text-default mb-2">Chat Window Size:</label>
+                <div class="flex gap-3 flex-wrap">
+                    <button
+                        v-for="sizeOption in sizeOptions"
+                        :key="sizeOption.value"
+                        @click="chatSize = sizeOption.value"
+                        class="px-4 py-2 rounded transition-colors"
+                        :class="
+                            chatSize === sizeOption.value
+                                ? 'bg-primary text-white'
+                                : 'bg-surface border border-border text-default hover:bg-surface-hover'
+                        "
+                    >
+                        {{ sizeOption.label }}
+                        <div class="text-xs mt-1 opacity-75">
+                            <span class="hidden md:inline">Mobile: 100%</span>
+                            <span class="hidden md:inline mx-1">•</span>
+                            <span class="md:hidden">Mobile: 100%</span>
+                            <span class="hidden md:inline">{{ sizeOption.desktop }}</span>
+                        </div>
+                    </button>
+                </div>
+                <div class="mt-3 p-2 bg-info/10 border border-info/20 rounded text-xs text-default">
+                    <strong>Current selection:</strong>
+                    {{ chatSize.charAt(0).toUpperCase() + chatSize.slice(1) }}
+                    <span class="mx-2">•</span>
+                    <strong class="md:hidden">On mobile:</strong
+                    ><span class="md:hidden"> Full width</span>
+                    <strong class="hidden md:inline">On desktop:</strong>
+                    <span class="hidden md:inline">
+                        {{ sizeOptions.find(s => s.value === chatSize)?.desktop }}
+                    </span>
+                </div>
+                <p class="text-xs text-muted mt-2">
+                    <strong>Auto:</strong> Fully responsive - grows from compact to wide based on
+                    screen size (resize your window to see!). <strong>Compact:</strong> Best for
+                    simple text conversations. <strong>Default:</strong> Balanced for most content.
+                    <strong>Wide:</strong> Ideal for rich content like charts and visualizations.
+                    <br />
+                    <em>All sizes are responsive: full-width on mobile, fixed width on desktop.</em>
+                </p>
+            </div>
+
             <p class="text-sm text-muted mb-4">
                 The chat component appears as a floating button in the bottom-right corner. This
                 demo shows integration with a mock AI service. Test that:
@@ -136,6 +182,7 @@
 
         <!-- Chat Component -->
         <ChatComponent
+            :size="chatSize"
             initial-message="Hello! I'm a demo AI assistant. Try asking me about programming, help, or just say hello! You can cancel my responses by clicking the X button during processing."
             placeholder="Ask me anything... (cancel with X button during processing)"
             :ai-handler="handleAiRequest"
@@ -153,6 +200,16 @@ const formData = ref({
 })
 
 const submissionResult = ref(null)
+
+// Chat size configuration
+const chatSize = ref('default')
+
+const sizeOptions = [
+    { value: 'auto', label: 'Auto (Responsive)', desktop: 'Responsive: sm→md→lg' },
+    { value: 'compact', label: 'Compact', desktop: '384px (md+)' },
+    { value: 'default', label: 'Default', desktop: '600px (md+)' },
+    { value: 'wide', label: 'Wide', desktop: '700px (md+) / 800px (lg+)' }
+]
 
 // Chat-related state
 const chatStats = ref({

@@ -15,7 +15,7 @@
         <Transition name="modal">
             <div
                 v-if="isOpen"
-                class="fixed bottom-24 right-6 w-96 h-[600px] card flex flex-col z-40"
+                :class="['fixed bottom-24 right-6 h-[600px] card flex flex-col z-40', sizeClasses]"
             >
                 <ChatHeader @clear-chat="clearChat" :chatTitle="chatTitle" />
 
@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import ChatInput from './ChatInput.vue'
 import ChatMessage from './ChatMessage.vue'
 import ChatHeader from './ChatHeader.vue'
@@ -83,7 +83,22 @@ const props = defineProps({
     chatTitle: {
         type: String,
         default: 'AI Assistant'
+    },
+    size: {
+        type: String,
+        default: 'default',
+        validator: value => ['auto', 'compact', 'default', 'wide'].includes(value)
     }
+})
+
+const sizeClasses = computed(() => {
+    const sizeMap = {
+        auto: 'w-full sm:w-96 md:w-[600px] lg:w-[700px] xl:w-[800px]',
+        compact: 'w-full md:w-96',
+        default: 'w-full md:w-[600px]',
+        wide: 'w-full md:w-[700px] lg:w-[800px]'
+    }
+    return sizeMap[props.size]
 })
 
 const isOpen = ref(false)

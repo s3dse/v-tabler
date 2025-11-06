@@ -12,12 +12,13 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 
 ## Props
 
-| Prop Name        | Type     | Default                              | Description                                                                       |
-| ---------------- | -------- | ------------------------------------ | --------------------------------------------------------------------------------- |
-| `initialMessage` | String   | `'Hello! How can I help you today?'` | The first message displayed when the chat is opened                               |
-| `placeholder`    | String   | `'Type your message...'`             | Placeholder text for the message input field                                      |
-| `aiHandler`      | Function | `null`                               | Async function to handle AI responses. Receives user message, returns AI response |
-| `chatTitle`      | String   | `'AI Assistant'`                     | Title displayed in the chat header                                                |
+| Prop Name        | Type     | Default                              | Description                                                                                             |
+| ---------------- | -------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `initialMessage` | String   | `'Hello! How can I help you today?'` | The first message displayed when the chat is opened                                                     |
+| `placeholder`    | String   | `'Type your message...'`             | Placeholder text for the message input field                                                            |
+| `aiHandler`      | Function | `null`                               | Async function to handle AI responses. Receives user message, returns AI response                       |
+| `chatTitle`      | String   | `'AI Assistant'`                     | Title displayed in the chat header                                                                      |
+| `size`           | String   | `'default'`                          | Chat window size: `'auto'` (responsive), `'compact'` (384px), `'default'` (600px), `'wide'` (700-800px) |
 
 ## Slots
 
@@ -54,6 +55,37 @@ import { ChatComponent } from '@s3_dse/v-tabler'
 import { ChatComponent } from '@s3_dse/v-tabler'
 </script>
 ```
+
+### Different Sizes
+
+The `size` prop allows you to adjust the chat window width to suit your content needs. All sizes are responsive (full-width on mobile, fixed on desktop).
+
+```vue
+<template>
+    <!-- Auto: Fully responsive - adapts to all breakpoints -->
+    <ChatComponent size="auto" />
+
+    <!-- Compact: 384px on desktop - good for simple text chat -->
+    <ChatComponent size="compact" />
+
+    <!-- Default: 600px on desktop - balanced for most content -->
+    <ChatComponent size="default" />
+
+    <!-- Wide: 700-800px on desktop - ideal for rich content like charts -->
+    <ChatComponent size="wide" />
+</template>
+
+<script setup>
+import { ChatComponent } from '@s3_dse/v-tabler'
+</script>
+```
+
+**Size Breakdown:**
+
+- `auto`: Responsive across all breakpoints (384px → 600px → 700px → 800px)
+- `compact`: 384px on md+ screens
+- `default`: 600px on md+ screens
+- `wide`: 700px on md+, 800px on lg+ screens
 
 ### Chat with AI Integration
 

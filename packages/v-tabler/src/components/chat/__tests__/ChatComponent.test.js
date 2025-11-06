@@ -375,4 +375,56 @@ describe('ChatComponent', () => {
             expect(mockComposable.focusInput).toHaveBeenCalled()
         })
     })
+
+    describe('size prop', () => {
+        it('should apply default size classes when no size prop is provided', async () => {
+            wrapper = mount(ChatComponent)
+            await wrapper.find('button').trigger('click')
+            await nextTick()
+
+            const modal = wrapper.find('.card')
+            expect(modal.classes()).toContain('w-full')
+            expect(modal.classes()).toContain('md:w-[600px]')
+        })
+
+        it('should apply auto size classes with all breakpoints', async () => {
+            wrapper = mount(ChatComponent, {
+                props: { size: 'auto' }
+            })
+            await wrapper.find('button').trigger('click')
+            await nextTick()
+
+            const modal = wrapper.find('.card')
+            expect(modal.classes()).toContain('w-full')
+            expect(modal.classes()).toContain('sm:w-96')
+            expect(modal.classes()).toContain('md:w-[600px]')
+            expect(modal.classes()).toContain('lg:w-[700px]')
+            expect(modal.classes()).toContain('xl:w-[800px]')
+        })
+
+        it('should apply compact size classes', async () => {
+            wrapper = mount(ChatComponent, {
+                props: { size: 'compact' }
+            })
+            await wrapper.find('button').trigger('click')
+            await nextTick()
+
+            const modal = wrapper.find('.card')
+            expect(modal.classes()).toContain('w-full')
+            expect(modal.classes()).toContain('md:w-96')
+        })
+
+        it('should apply wide size classes', async () => {
+            wrapper = mount(ChatComponent, {
+                props: { size: 'wide' }
+            })
+            await wrapper.find('button').trigger('click')
+            await nextTick()
+
+            const modal = wrapper.find('.card')
+            expect(modal.classes()).toContain('w-full')
+            expect(modal.classes()).toContain('md:w-[700px]')
+            expect(modal.classes()).toContain('lg:w-[800px]')
+        })
+    })
 })
