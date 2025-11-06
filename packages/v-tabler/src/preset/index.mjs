@@ -61,7 +61,18 @@ const presetVTabler = definePreset((options = {}) => {
             presetTheme({ theme: mergedTheme })
         ],
         preflights,
-        safelist: ['text-moon-500'],
+        safelist: [
+            'text-moon-500',
+            // Chat component width classes
+            'w-full',
+            'sm:w-96',
+            'md:w-96',
+            'md:w-[600px]',
+            'md:w-[700px]',
+            'lg:w-[700px]',
+            'lg:w-[800px]',
+            'xl:w-[800px]'
+        ],
         variants: [...generateAttributeVariants(CUSTOM_VARIANTS)],
         autocomplete: {
             templates: [
