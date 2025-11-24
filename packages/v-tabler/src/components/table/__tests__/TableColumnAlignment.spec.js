@@ -126,4 +126,71 @@ describe('Table Column Alignment', () => {
         const columnFilter = wrapper.findComponent({ name: 'ColumnFilter' })
         expect(columnFilter.exists()).toBe(true)
     })
+
+    it('should handle missing column keys without value shifting (regression test)', () => {
+        // Test data with specific structure to reproduce the original bug
+        const bugTestData = [
+            { row_id: 1, brand_name: 'Apple', product_name: 'iPhone' }
+            // Note: missing 'brand_extra_info' key entirely
+        ]
+
+        const fields = [
+            { key: 'row_id', label: 'ID', tdClassList: 'table-col-left' },
+            { key: 'brand_name', label: 'Brand', tdClassList: 'table-col-left' },
+            { key: 'brand_extra_info', label: 'Extra Info', tdClassList: 'table-col-left' }, // Missing in data!
+            { key: 'product_name', label: 'Product', tdClassList: 'table-col-left' }
+        ]
+
+        const wrapper = mount(TableComponent, {
+            props: {
+                items: bugTestData,
+                fields: fields
+            }
+        })
+
+        // Get all table cells in the first data row
+        const tableCells = wrapper.findAll('tbody td')
+        expect(tableCells).toHaveLength(4)
+
+        // Verify that each cell contains the correct data (no shifting)
+        expect(tableCells[0].text()).toBe('1') // row_id should be in first cell
+        expect(tableCells[1].text()).toBe('Apple') // brand_name should be in second cell  
+        expect(tableCells[2].text()).toBe('') // brand_extra_info should be empty (missing key)
+        expect(tableCells[3].text()).toBe('iPhone') // product_name should be in fourth cell
+
+        // Verify CSS classes are applied correctly without conflicts
+        tableCells.forEach(cell => {
+            expect(cell.classes()).toContain('table-col-left')
+            // Should NOT contain justify-* classes in cells (only text alignment)
+            expect(cell.classes().some(cls => cls.startsWith('justify-'))).toBe(false)
+        })
+    })
+
+    it('should not have conflicting justify classes in cell contexts', () => {
+        const fields = [
+            {
+                key: 'name',
+                label: 'Name', 
+                tdClassList: 'table-col-left table-col-right' // Multiple alignment classes
+            }
+        ]
+
+        const wrapper = mount(TableComponent, {
+            props: {
+                items: testData,
+                fields: fields
+            }
+        })
+
+        const tableCell = wrapper.find('tbody td')
+        const classes = tableCell.classes()
+        
+        // Should have text alignment classes
+        expect(classes).toContain('table-col-left')
+        expect(classes).toContain('table-col-right')
+        
+        // Should NOT have any justify-* classes that could interfere with table layout
+        const hasJustifyClasses = classes.some(cls => cls.startsWith('justify-'))
+        expect(hasJustifyClasses).toBe(false)
+    })
 })

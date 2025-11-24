@@ -31,9 +31,9 @@ const shortcuts = [
 
         'color-transition': 'transition-colors duration-150 ease-in-out',
         'table-top-control': `flex rounded-sm text-default text-sm px-2 h-[1.625rem]`,
-        'table-col-left': 'justify-start text-left',
-        'table-col-right': 'justify-end text-right',
-        'table-col-center': 'justify-center text-center'
+        'table-col-left': 'text-left',
+        'table-col-right': 'text-right',
+        'table-col-center': 'text-center'
     },
     [
         /^form-inputfield-(sm|md)$/,
