@@ -7,7 +7,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/s3dse/v-tabler.git"
+        "url": "git+https://github.com/s3dse/v-tabler.git"
     },
     "type": "module",
     "license": "MIT",
