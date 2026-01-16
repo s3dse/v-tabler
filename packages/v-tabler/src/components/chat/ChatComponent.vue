@@ -17,7 +17,7 @@
                 v-if="isOpen"
                 :class="['fixed bottom-24 right-6 h-[600px] card flex flex-col z-40', sizeClasses]"
             >
-                <ChatHeader @clear-chat="clearChat" :chatTitle="chatTitle" />
+                <ChatHeader @clear-chat="handleClearChat" :chatTitle="chatTitle" />
 
                 <div
                     ref="messagesContainer"
@@ -91,6 +91,8 @@ const props = defineProps({
     }
 })
 
+const emit = defineEmits(['clear-chat'])
+
 const sizeClasses = computed(() => {
     const sizeMap = {
         auto: 'w-full sm:w-96 md:w-[600px] lg:w-[700px] xl:w-[800px]',
@@ -128,6 +130,11 @@ const handleSubmit = async message => {
 
 const handleCancel = () => {
     cancelCurrentRequest()
+}
+
+const handleClearChat = () => {
+    clearChat()
+    emit('clear-chat')
 }
 
 watch(isOpen, newVal => {

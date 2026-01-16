@@ -1,4 +1,4 @@
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
 
 /**
  * Composable for chat logic and message management
@@ -45,8 +45,12 @@ export function useChatLogic(options = {}) {
         messages.value.push(message)
     }
 
+    const isFirstUserMessage = () => {
+        return messages.value.some(msg => msg.role === 'user') === false
+    }
+
     const addUserMessage = content => {
-        const message = createMessage('user', { content })
+        const message = createMessage('user', { content, newConversation: isFirstUserMessage() })
         addMessage(message)
         return message
     }
