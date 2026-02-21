@@ -1,4 +1,4 @@
-import { ref, nextTick, computed } from 'vue'
+import { ref, nextTick } from 'vue'
 
 /**
  * Composable for chat logic and message management
@@ -69,7 +69,6 @@ export function useChatLogic(options = {}) {
         return message
     }
 
-    // Scrolling
     const scrollToBottom = () => {
         return nextTick().then(() => {
             if (messagesContainer?.value) {
@@ -91,55 +90,84 @@ export function useChatLogic(options = {}) {
     // Track current request for cancellation
     const currentAbortController = ref(null)
 
-    // Core chat logic
-    const sendMessage = async content => {
+    const validateInput = content => {
         const trimmedContent = content?.trim()
-        if (!trimmedContent || isTyping.value) return
+        return !trimmedContent || isTyping.value ? null : trimmedContent
+    }
 
-        // Add user message
-        const userMessage = addUserMessage(trimmedContent)
+    const updateUIForUserMessage = async () => {
         chatInputRef?.value?.clear()
         await scrollToBottom()
+    }
 
-        // If no AI handler provided, just stop here
+    const updateUIForWaiting = async () => {
+        isTyping.value = true
+        await scrollToBottom()
+    }
+
+    const updateUIForAIResponse = async () => {
+        await scrollToBottom()
+        focusInput()
+    }
+
+    const setupAIRequest = () => {
+        currentAbortController.value = new AbortController()
+        return currentAbortController.value.signal
+    }
+
+    const cleanupAIRequest = () => {
+        currentAbortController.value = null
+    }
+
+    const isAbortError = error => error.name === 'AbortError'
+
+    const logError = error => {
+        if (isAbortError(error)) {
+            console.log('AI request was aborted')
+        } else {
+            console.error('AI handler error:', error)
+        }
+    }
+
+    const handleAbortError = () => ({ aborted: true })
+
+    const handleRequestError = async error => {
+        const errorMessage = addErrorMessage()
+        await scrollToBottom()
+        return { errorMessage, error }
+    }
+
+    const handleAIError = async error => {
+        logError(error)
+        return isAbortError(error) ? handleAbortError() : await handleRequestError(error)
+    }
+
+    // Main message sending function
+    const sendMessage = async content => {
+        const validContent = validateInput(content)
+        if (!validContent) return
+
+        const userMessage = addUserMessage(validContent)
+        await updateUIForUserMessage()
+
         if (!aiHandler) {
             return userMessage
         }
 
-        // Show typing indicator
-        isTyping.value = true
-
-        // Create AbortController for this request
-        currentAbortController.value = new AbortController()
+        await updateUIForWaiting()
+        const signal = setupAIRequest()
 
         try {
-            // Call AI handler function with AbortSignal
-            const aiResponse = await aiHandler(userMessage, currentAbortController.value.signal)
-
-            // Add AI response to chat
+            const aiResponse = await aiHandler(userMessage, signal)
             const aiMessage = addAiMessage(aiResponse)
-            await scrollToBottom()
-            focusInput()
-
+            await updateUIForAIResponse()
             return { userMessage, aiMessage }
         } catch (error) {
-            // Handle abort specifically - just reset UI state
-            if (error.name === 'AbortError') {
-                console.log('AI request was aborted')
-                return { userMessage, aborted: true }
-            }
-
-            console.error('AI handler error:', error)
-
-            // Add error message for real errors
-            const errorMessage = addErrorMessage()
-            await scrollToBottom()
-
-            return { userMessage, errorMessage, error }
+            const errorResult = await handleAIError(error)
+            return { userMessage, ...errorResult }
         } finally {
-            // Always clear typing indicator and abort controller
             isTyping.value = false
-            currentAbortController.value = null
+            cleanupAIRequest()
         }
     }
 
@@ -151,14 +179,11 @@ export function useChatLogic(options = {}) {
         }
     }
 
-    // Recall last submitted message
     const recallLastMessage = () => {
-        // Find the last user message in the messages array
         const userMessages = messages.value.filter(msg => msg.role === 'user')
         return userMessages.length > 0 ? userMessages[userMessages.length - 1].content : ''
     }
 
-    // Clear chat and reset to initial state
     const clearChat = () => {
         messages.value = [
             {
