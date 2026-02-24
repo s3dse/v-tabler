@@ -78,11 +78,27 @@ const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
 
 const localMessage = ref(props.modelValue)
 const textareaRef = ref(null)
+const pendingFocus = ref(false)
 
 const { autoHeightStyle, adjustHeight, adjustHeightNextTick } = useAutoHeight({
     elementRef: textareaRef,
     maxHeight: props.maxHeight
 })
+
+watch(
+    () => props.disabled,
+    isDisabled => {
+        if (!isDisabled && pendingFocus.value) {
+            pendingFocus.value = false
+            // Small delay to avoid stealing focus if user focused elsewhere
+            setTimeout(() => {
+                if (document.activeElement === document.body) {
+                    textareaRef.value?.focus()
+                }
+            }, 50)
+        }
+    }
+)
 
 // Sync with parent (only watch for external changes)
 watch(
@@ -141,10 +157,8 @@ const preventFormSubmission = event => {
 
 const handleButtonClick = () => {
     if (props.isTyping) {
-        // Cancel current request
         emit('cancel')
     } else {
-        // Submit message
         handleSubmit()
     }
 }
@@ -161,9 +175,17 @@ const handleSubmit = event => {
 }
 
 const focus = () => {
-    nextTick(() => {
-        textareaRef.value?.focus()
-    })
+    const textarea = textareaRef.value
+    if (!textarea) {
+        return
+    }
+
+    if (textarea.disabled) {
+        // Mark that focus is pending, watcher will handle it
+        pendingFocus.value = true
+    } else {
+        textarea.focus()
+    }
 }
 
 const clear = () => {
