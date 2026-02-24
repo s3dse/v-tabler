@@ -25,6 +25,9 @@ const DEFAULT_TRANSLATIONS = {
         chat: {
             input: {
                 placeholder: 'Type a message...'
+            },
+            header: {
+                clearChatLabel: 'Clear Chat'
             }
         }
     }
@@ -52,6 +55,9 @@ const TRANSLATIONS_DE = {
         chat: {
             input: {
                 placeholder: 'Nachricht eingeben...'
+            },
+            header: {
+                clearChatLabel: 'Chat löschen'
             }
         }
     }

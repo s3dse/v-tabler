@@ -24,16 +24,24 @@
             </button>
         </div>
         <div v-if="showHint" class="text-xs text-muted mt-2">
-            <div v-if="language.startsWith('de-')">
-                Drücken Sie <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd>, um zu
-                senden, <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> für
-                eine neue Zeile, <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd>, um die
-                letzte Nachricht abzurufen
+            <div v-if="language.startsWith('de-')" class="flex flex-col gap-2">
+                <p>
+                    Drücken Sie <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd>, um
+                    zu senden,
+                    <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> für eine
+                    neue Zeile, <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd>, um die
+                    letzte Nachricht abzurufen
+                </p>
+                <p>AI kann Fehler machen. Bitte überprüfe die Antworten.</p>
             </div>
-            <div v-else>
-                Press <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to send,
-                <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> for new line,
-                <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd> to recall last message
+            <div v-else class="flex flex-col gap-2">
+                <p>
+                    Press <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to send,
+                    <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> for new
+                    line, <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd> to recall last
+                    message
+                </p>
+                <p>AI can make mistakes. Please verify the responses.</p>
             </div>
         </div>
     </div>
