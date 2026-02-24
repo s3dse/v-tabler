@@ -6,7 +6,7 @@
                 v-model="localMessage"
                 @keydown="handleKeydown"
                 @input="handleInput"
-                :placeholder="placeholder"
+                :placeholder="_placeholder"
                 :disabled="disabled"
                 :style="autoHeightStyle"
                 rows="1"
@@ -24,9 +24,17 @@
             </button>
         </div>
         <div v-if="showHint" class="text-xs text-muted mt-2">
-            Press <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to send,
-            <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> for new line,
-            <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd> to recall last message
+            <div v-if="language.startsWith('de-')">
+                Drücken Sie <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd>, um zu
+                senden, <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> für
+                eine neue Zeile, <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd>, um die
+                letzte Nachricht abzurufen
+            </div>
+            <div v-else>
+                Press <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to send,
+                <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd> for new line,
+                <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd> to recall last message
+            </div>
         </div>
     </div>
 </template>
@@ -34,6 +42,10 @@
 <script setup>
 import { ref, watch, nextTick, computed } from 'vue'
 import { useAutoHeight } from './useAutoHeight.js'
+import { useNavigatorLanguage } from '@vueuse/core'
+import { useI18n } from '@/composables/useI18n.js'
+
+const { t } = useI18n()
 
 const props = defineProps({
     modelValue: {
@@ -42,7 +54,7 @@ const props = defineProps({
     },
     placeholder: {
         type: String,
-        default: 'Type your message...'
+        default: null
     },
     disabled: {
         type: Boolean,
@@ -79,6 +91,8 @@ const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
 const localMessage = ref(props.modelValue)
 const textareaRef = ref(null)
 const pendingFocus = ref(false)
+
+const { language } = useNavigatorLanguage()
 
 const { autoHeightStyle, adjustHeight, adjustHeightNextTick } = useAutoHeight({
     elementRef: textareaRef,
@@ -187,6 +201,11 @@ const focus = () => {
         textarea.focus()
     }
 }
+
+const _placeholder = computed(() => {
+    if (props.placeholder !== null && props.placeholder !== undefined) return props.placeholder
+    return t('vTabler.chat.input.placeholder')
+})
 
 const clear = () => {
     localMessage.value = ''

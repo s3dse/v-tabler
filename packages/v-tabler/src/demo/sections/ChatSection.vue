@@ -184,8 +184,8 @@
         <ChatComponent
             :size="chatSize"
             initial-message="Hello! I'm a demo AI assistant. Try asking me about programming, help, or just say hello! You can cancel my responses by clicking the X button during processing."
-            placeholder="Ask me anything... (cancel with X button during processing)"
             :ai-handler="handleAiRequest"
+            placeholder="Ask me anything... (cancel with X button during processing)"
         />
     </section>
 </template>

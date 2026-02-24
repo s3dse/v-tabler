@@ -74,7 +74,7 @@ const props = defineProps({
     },
     placeholder: {
         type: String,
-        default: 'Type your message...'
+        default: null
     },
     aiHandler: {
         type: Function,

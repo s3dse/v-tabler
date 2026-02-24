@@ -21,6 +21,11 @@ const DEFAULT_TRANSLATIONS = {
                 numericPlaceholder: 'Value...',
                 datePlaceholder: 'Select date...'
             }
+        },
+        chat: {
+            input: {
+                placeholder: 'Type a message...'
+            }
         }
     }
 }
@@ -42,6 +47,11 @@ const TRANSLATIONS_DE = {
                 textPlaceholder: 'Text eingeben...',
                 numericPlaceholder: 'Wert...',
                 datePlaceholder: 'Datum auswählen...'
+            }
+        },
+        chat: {
+            input: {
+                placeholder: 'Nachricht eingeben...'
             }
         }
     }
