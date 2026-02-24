@@ -70,7 +70,7 @@ describe('useChatLogic', () => {
                 expect.objectContaining({
                     role: 'user',
                     content: 'Hello there!',
-                    timestamp: expect.any(String)
+                    timestamp: expect.any(Date)
                 })
             )
             expect(messages.value).toHaveLength(initialLength + 1)
@@ -90,7 +90,7 @@ describe('useChatLogic', () => {
                 expect.objectContaining({
                     role: 'assistant',
                     content: 'AI response here',
-                    timestamp: expect.any(String)
+                    timestamp: expect.any(Date)
                 })
             )
             expect(messages.value).toHaveLength(initialLength + 1)
