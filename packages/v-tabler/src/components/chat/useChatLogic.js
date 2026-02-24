@@ -14,23 +14,17 @@ export function useChatLogic(options = {}) {
         onFocusInput = null
     } = options
 
-    // State
     const messages = ref([
         {
             role: 'assistant',
             content: initialMessage,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            timestamp: new Date()
         }
     ])
     const isTyping = ref(false)
 
-    // Utilities
     const createTimestamp = () => {
-        return new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        })
+        return new Date()
     }
 
     const createMessage = (role, { content, ...extraData }) => ({
@@ -40,7 +34,6 @@ export function useChatLogic(options = {}) {
         timestamp: createTimestamp()
     })
 
-    // Message management
     const addMessage = message => {
         messages.value.push(message)
     }

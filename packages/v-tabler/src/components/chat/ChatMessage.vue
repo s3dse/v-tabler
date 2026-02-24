@@ -2,8 +2,10 @@
     <div class="flex" :class="alignmentClass">
         <div class="max-w-[80%] rounded px-4 py-2 shadow-sm" :class="messageClass">
             <p class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
-            <span class="text-xs mt-1 block opacity-70">
-                {{ message.timestamp }}
+            <span class="text-xs mt-1 block opacity-70" :title="message.timestamp.toLocaleString()">
+                {{
+                    message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }}
             </span>
         </div>
     </div>
