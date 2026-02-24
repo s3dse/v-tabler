@@ -15,7 +15,7 @@
         <Transition name="modal">
             <div
                 v-if="isOpen"
-                :class="['fixed bottom-24 right-6 h-[600px] card flex flex-col z-40', sizeClasses]"
+                :class="['fixed bottom-24 right-6 card flex flex-col z-40', sizeClasses]"
             >
                 <ChatHeader @clear-chat="handleClearChat" :chatTitle="chatTitle" />
 
@@ -95,10 +95,10 @@ const emit = defineEmits(['clear-chat'])
 
 const sizeClasses = computed(() => {
     const sizeMap = {
-        auto: 'w-full sm:w-96 md:w-[600px] lg:w-[700px] xl:w-[800px]',
-        compact: 'w-full md:w-96',
-        default: 'w-full md:w-[600px]',
-        wide: 'w-full md:w-[700px] lg:w-[800px]'
+        auto: 'w-full sm:w-96 md:w-[600px] lg:w-[700px] xl:w-[800px] min-h-[600px] max-h-[75%]',
+        compact: 'w-full md:w-96 h-[600px]',
+        default: 'w-full md:w-[600px] h-[600px]',
+        wide: 'w-full md:w-[700px] lg:w-[800px] h-[600px]'
     }
     return sizeMap[props.size]
 })
