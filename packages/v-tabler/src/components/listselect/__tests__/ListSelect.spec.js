@@ -257,7 +257,8 @@ describe('ListSelect', () => {
         it('is hidden when nothing is selected', () => {
             const { wrapper } = mountListSelect()
             const clearButton = wrapper.find('.i-tabler-x')
-            expect(clearButton.classes()).toContain('opacity-0')
+            expect(clearButton.exists()).toBe(false)
+            // expect(clearButton.classes()).toContain('opacity-0')
         })
 
         it('is visible when options are selected', async () => {
@@ -268,7 +269,8 @@ describe('ListSelect', () => {
             await content.findAll('.listselect__option').at(0).trigger('click')
 
             const clearButton = wrapper.find('.i-tabler-x')
-            expect(clearButton.classes()).toContain('opacity-100')
+            expect(clearButton.exists()).toBe(true)
+            // expect(clearButton.classes()).toContain('opacity-100')
         })
     })
 

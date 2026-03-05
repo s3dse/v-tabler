@@ -16,12 +16,8 @@
             @click.prevent="searchTerm = ''"
         ></div>
         <span
+            v-if="selectionLength > 0"
             class="shrink-0 listselect--clear-selection i-tabler-x block text-xl text-subtle hover:text-muted"
-            :class="[
-                selectionLength && selectionLength > 0
-                    ? 'opacity-100 hover:cursor-pointer'
-                    : 'opacity-0'
-            ]"
             @click.prevent="$emit('clear-selection')"
             ref="clearSelectionButton"
         ></span>
