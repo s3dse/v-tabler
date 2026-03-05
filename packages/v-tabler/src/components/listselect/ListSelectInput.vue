@@ -15,12 +15,24 @@
             ref="clearSearchButton"
             @click.prevent="searchTerm = ''"
         ></div>
-        <div v-busy="optionsLoading">
-            <span
-                class="shrink-0 listselect--dropdown-toggle i-tabler-chevron-down block text-2xl text-muted mr-2 hover:cursor-pointer"
-                @click.prevent="toggleOpen"
-                ref="dropdownToggle"
-            ></span>
+        <div>
+            <div class="relative overflow-hidden flex items-center gap-0" v-busy="optionsLoading">
+                <span
+                    class="shrink-0 listselect--clear-selection i-tabler-x block text-xl text-subtle hover:text-muted"
+                    :class="[
+                        selectionLength && selectionLength > 0
+                            ? 'opacity-100 hover:cursor-pointer'
+                            : 'opacity-0'
+                    ]"
+                    @click.prevent="$emit('clear-selection')"
+                    ref="clearSelectionButton"
+                ></span>
+                <span
+                    class="shrink-0 listselect--dropdown-toggle i-tabler-chevron-down block text-2xl text-muted mr-2 hover:cursor-pointer"
+                    @click.prevent="toggleOpen"
+                    ref="dropdownToggle"
+                ></span>
+            </div>
         </div>
     </label>
 </template>
@@ -30,8 +42,11 @@ const props = defineProps({
     inputClasses: String,
     optionsLoading: Boolean,
     inputPlaceholder: String,
-    toggleOpen: Function
+    toggleOpen: Function,
+    selectionLength: Number,
+    isMultiple: Boolean
 })
+defineEmits(['clear-selection'])
 const searchTerm = defineModel('searchTerm', { type: String, default: null })
 
 const id = `listselect-input-${useId()}`

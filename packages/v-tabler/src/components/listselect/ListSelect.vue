@@ -176,8 +176,11 @@ const showFooter = computed(() => props.multiple && open.value && selectedOption
                     :optionsLoading="props.optionsLoading"
                     :inputPlaceholder="$inputPlaceholder"
                     :toggleOpen="toggleOpen"
+                    :selectionLength="selectedOptions.length"
+                    :isMultiple="props.multiple"
                     @keydown.arrow-down="open = true"
                     @keydown.arrow-up="open = true"
+                    @clear-selection="selectedOptions = []"
                     class="form-inputfield-within"
                     ref="listselectInput"
                 />

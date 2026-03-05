@@ -221,6 +221,57 @@ describe('ListSelect', () => {
         })
     })
 
+    describe('deselect all', () => {
+        it('clears all selected options in multiple mode', async () => {
+            const { wrapper, modelValue } = mountListSelect({ multiple: true })
+            await wrapper.find('.listselect--dropdown-toggle').trigger('click')
+
+            const content = wrapper.findComponent(ComboboxContent)
+            await content.findAll('.listselect__option').at(0).trigger('click')
+            await content.findAll('.listselect__option').at(1).trigger('click')
+            await content.findAll('.listselect__option').at(2).trigger('click')
+            expect(modelValue.value).toStrictEqual([
+                { id: '1', label: 'option1' },
+                { id: '2', label: 'option2' },
+                { id: '3', label: 'option3' }
+            ])
+
+            const clearButton = wrapper.find('.i-tabler-x')
+            await clearButton.trigger('click')
+            expect(modelValue.value).toStrictEqual([])
+        })
+
+        it('clears the selected option in single mode', async () => {
+            const { wrapper, modelValue } = mountListSelect({ multiple: false })
+            await wrapper.find('.listselect--dropdown-toggle').trigger('click')
+
+            const content = wrapper.findComponent(ComboboxContent)
+            await content.findAll('.listselect__option').at(1).trigger('click')
+            expect(modelValue.value).toStrictEqual([{ id: '2', label: 'option2' }])
+
+            const clearButton = wrapper.find('.i-tabler-x')
+            await clearButton.trigger('click')
+            expect(modelValue.value).toStrictEqual([])
+        })
+
+        it('is hidden when nothing is selected', () => {
+            const { wrapper } = mountListSelect()
+            const clearButton = wrapper.find('.i-tabler-x')
+            expect(clearButton.classes()).toContain('opacity-0')
+        })
+
+        it('is visible when options are selected', async () => {
+            const { wrapper } = mountListSelect({ multiple: true })
+            await wrapper.find('.listselect--dropdown-toggle').trigger('click')
+
+            const content = wrapper.findComponent(ComboboxContent)
+            await content.findAll('.listselect__option').at(0).trigger('click')
+
+            const clearButton = wrapper.find('.i-tabler-x')
+            expect(clearButton.classes()).toContain('opacity-100')
+        })
+    })
+
     describe('in multiple mode', () => {
         it('supports multiple selection when multiple is true', async () => {
             const { wrapper, modelValue } = mountListSelect({ multiple: true })
