@@ -280,6 +280,8 @@ const props = defineProps({
     }
 })
 
+const expandedModel = defineModel('expanded', { type: Array, default: undefined })
+
 const emit = defineEmits([
     'per-page-change',
     'sort-change',
@@ -310,7 +312,7 @@ const {
     rightPadLastCol
 } = useTableStyles()
 
-const { toggleRowExpanded, isExpanded } = useTableExpand()
+const { toggleRowExpanded, isExpanded, expandedArray } = useTableExpand(expandedModel)
 
 const filterInputId = computed(() => `filter_input_${id}`)
 
@@ -379,6 +381,7 @@ const clearAllColumnFiltersInternal = () => {
 const handleExpandToggle = (item, index) => {
     toggleRowExpanded(item)
     emit('row-expand-toggle', { item, index, expanded: isExpanded(item) })
+    expandedModel.value = expandedArray.value
 }
 
 const topRowsForDisplay = computed(() => {

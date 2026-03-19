@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { ref, nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 import { TableComponent } from '@/components/table'
 import { useTableExpand } from '@/components/table/composables/useTableExpand'
@@ -53,6 +54,49 @@ describe('useTableExpand composable', () => {
         toggleRowExpanded(row1)
         expect(isExpanded(row1)).toBe(true)
         expect(isExpanded(row2)).toBe(false)
+    })
+
+    it('expandedArray returns array representation of expanded rows', () => {
+        const { toggleRowExpanded, expandedArray } = useTableExpand()
+        const row1 = { id: 1 }
+        const row2 = { id: 2 }
+
+        expect(expandedArray.value).toEqual([])
+
+        toggleRowExpanded(row1)
+        toggleRowExpanded(row2)
+        expect(expandedArray.value).toHaveLength(2)
+        expect(expandedArray.value.some(r => r.id === 1)).toBe(true)
+        expect(expandedArray.value.some(r => r.id === 2)).toBe(true)
+    })
+
+    it('syncs inbound from external ref', async () => {
+        const row1 = { id: 1 }
+        const row2 = { id: 2 }
+        const external = ref([row1])
+
+        const { isExpanded } = useTableExpand(external)
+
+        expect(isExpanded(row1)).toBe(true)
+        expect(isExpanded(row2)).toBe(false)
+
+        external.value = [row1, row2]
+        await nextTick()
+        expect(isExpanded(row1)).toBe(true)
+        expect(isExpanded(row2)).toBe(true)
+
+        external.value = []
+        await nextTick()
+        expect(isExpanded(row1)).toBe(false)
+        expect(isExpanded(row2)).toBe(false)
+    })
+
+    it('works without external ref (standalone mode)', () => {
+        const { toggleRowExpanded, isExpanded } = useTableExpand()
+        const row = { id: 1 }
+
+        toggleRowExpanded(row)
+        expect(isExpanded(row)).toBe(true)
     })
 })
 
@@ -128,6 +172,44 @@ describe('TableComponent expandable integration', () => {
         wrapper.vm.handleExpandToggle(manyItems[1], 1)
 
         expect(wrapper.vm.regularRowsForDisplay.length).toBe(5)
+    })
+
+    it('handleExpandToggle emits update:expanded with array of expanded items', () => {
+        const wrapper = mount(TableComponent, {
+            props: { items, fields, expandable: true },
+            ...globalStubs
+        })
+
+        wrapper.vm.handleExpandToggle(items[0], 0)
+
+        expect(wrapper.emitted()).toHaveProperty('update:expanded')
+        const emitted = wrapper.emitted()['update:expanded'][0][0]
+        expect(emitted).toHaveLength(1)
+        expect(emitted[0].name).toBe('item-0')
+    })
+
+    it('handleExpandToggle emits update:expanded with empty array after collapsing', () => {
+        const wrapper = mount(TableComponent, {
+            props: { items, fields, expandable: true },
+            ...globalStubs
+        })
+
+        wrapper.vm.handleExpandToggle(items[0], 0)
+        wrapper.vm.handleExpandToggle(items[0], 0)
+
+        const emissions = wrapper.emitted()['update:expanded']
+        expect(emissions[1][0]).toEqual([])
+    })
+
+    it('v-model:expanded syncs inbound — setting expanded prop expands rows', async () => {
+        const wrapper = mount(TableComponent, {
+            props: { items, fields, expandable: true, expanded: [items[1], items[3]] },
+            ...globalStubs
+        })
+
+        expect(wrapper.vm.isExpanded(items[1])).toBe(true)
+        expect(wrapper.vm.isExpanded(items[3])).toBe(true)
+        expect(wrapper.vm.isExpanded(items[0])).toBe(false)
     })
 
     it('expanding a row, navigating to page 2 and back — row stays expanded', () => {

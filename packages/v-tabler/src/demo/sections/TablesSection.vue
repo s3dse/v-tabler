@@ -10,11 +10,15 @@
                     title="Test With Expand (Drilldown)"
                     class="w-[100%] bg-surface text-inverted"
                     expandable
+                    v-model:expanded="expandedItems"
                 >
                     <template #table-top-controls>
-                        <div class="btn-transparent-default table-top-control ms-auto">
-                            some control
-                        </div>
+                        <button
+                            class="btn-transparent-default table-top-control ms-auto"
+                            @click="handleDownload"
+                        >
+                            Download CSV
+                        </button>
                     </template>
                     <template #page-size-label="{ pageSize }">
                         Einträge pro Seite: {{ pageSize }}
@@ -41,6 +45,7 @@
 </template>
 <script setup>
 import { ref } from 'vue'
+import { downloadCSVWithSchema } from '@/utils/downloadCSV'
 import {
     baseDrilldownItems as baseItems,
     drilldownFields,
@@ -72,6 +77,19 @@ const detailFields = [
         formatter: v => `${v} years`
     }
 ]
+
+const expandedItems = ref([])
+
+const handleDownload = () => {
+    const rows = []
+    for (const item of items.value) {
+        rows.push(item)
+        if (expandedItems.value.includes(item)) {
+            rows.push(...getDetailsForDepartment(item.id))
+        }
+    }
+    downloadCSVWithSchema({ filename: 'departments', data: rows, schema: drilldownFields })
+}
 
 const tableStatus = ref({ busy: false })
 </script>

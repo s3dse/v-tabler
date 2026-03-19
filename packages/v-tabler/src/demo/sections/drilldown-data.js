@@ -1,72 +1,72 @@
 export const baseDrilldownItems = [
     {
         id: 'dept-1',
-        department: 'HR',
-        totalSalary: 185000,
-        avgTenure: 4.2,
+        name: 'HR',
+        salary: 185000,
+        tenure: 4.2,
         employeeCount: 3
     },
     {
         id: 'dept-2',
-        department: 'Engineering',
-        totalSalary: 420000,
-        avgTenure: 3.8,
+        name: 'Engineering',
+        salary: 420000,
+        tenure: 3.8,
         employeeCount: 5
     },
     {
         id: 'dept-3',
-        department: 'Sales',
-        totalSalary: 250000,
-        avgTenure: 3.1,
+        name: 'Sales',
+        salary: 250000,
+        tenure: 3.1,
         employeeCount: 4
     },
     {
         id: 'dept-4',
-        department: 'Marketing',
-        totalSalary: 210000,
-        avgTenure: 4.5,
+        name: 'Marketing',
+        salary: 210000,
+        tenure: 4.5,
         employeeCount: 3
     },
     {
         id: 'dept-5',
-        department: 'Finance',
-        totalSalary: 230000,
-        avgTenure: 5.2,
+        name: 'Finance',
+        salary: 230000,
+        tenure: 5.2,
         employeeCount: 3
     },
     {
         id: 'dept-6',
-        department: 'Customer Support',
-        totalSalary: 160000,
-        avgTenure: 2.8,
+        name: 'Customer Support',
+        salary: 160000,
+        tenure: 2.8,
         employeeCount: 4
     },
     {
         id: 'dept-7',
-        department: 'IT Support',
-        totalSalary: 175000,
-        avgTenure: 3.5,
+        name: 'IT Support',
+        salary: 175000,
+        tenure: 3.5,
         employeeCount: 3
     },
     {
         id: 'dept-8',
-        department: 'Legal',
-        totalSalary: 195000,
-        avgTenure: 6.0,
+        name: 'Legal',
+        salary: 195000,
+        tenure: 6.0,
         employeeCount: 2
     },
     {
         id: 'dept-9',
-        department: 'Operations',
-        totalSalary: 260000,
-        avgTenure: 4.0,
+        name: 'Operations',
+        salary: 260000,
+        tenure: 4.0,
         employeeCount: 4
     },
     {
         id: 'dept-10',
-        department: 'R&D',
-        totalSalary: 310000,
-        avgTenure: 3.9,
+        name: 'R&D',
+        salary: 310000,
+        tenure: 3.9,
         employeeCount: 4
     }
 ]
@@ -141,20 +141,20 @@ export const drilldownFields = [
         tdClassList: 'text-left px-2'
     },
     {
-        key: 'department',
+        key: 'name',
         label: 'Name',
         thClassList: 'table-col-left px-2',
         tdClassList: 'text-left px-2'
     },
     {
-        key: 'totalSalary',
+        key: 'salary',
         label: 'Total Salary / Salary',
         thClassList: 'table-col-right px-2',
         tdClassList: 'text-right px-2',
         formatter: value => (value ? `$${value.toLocaleString()}` : '')
     },
     {
-        key: 'avgTenure',
+        key: 'tenure',
         label: 'Avg Tenure / Tenure',
         thClassList: 'table-col-right px-2',
         tdClassList: 'text-right px-2',

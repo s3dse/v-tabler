@@ -111,6 +111,7 @@ const fieldDefinitions = ref([
 | `sortNullsFirst`          | `Boolean` | `null`                                        | Whether to sort null values first (null = auto-detect based on sort direction) |
 | `enableColumnFilters`     | `Boolean` | `true`                                        | Whether to show column filter buttons in table headers                         |
 | `expandable`              | `Boolean` | `false`                                       | Enables expandable rows with a chevron toggle in the first column              |
+| `expanded`                | `Array`   | `undefined`                                   | Bidirectional (`v-model:expanded`) array of currently expanded item references |
 
 ## Events
 
@@ -777,6 +778,29 @@ Key behaviors:
 - **Nested tables get independent sorting/filtering** — a `<TableComponent>` placed inside the `row-expand` slot is a fully independent instance with its own sort, filter, and pagination state.
 - **No ID field required** — row identity uses object references internally, so it works with any data shape.
 - **Expand state persists across pages** — expanding a row on page 1, navigating to page 2, and returning to page 1 keeps the row expanded.
+- **`v-model:expanded`** — bind a reactive array to track and control which rows are expanded. Useful for programmatic expand/collapse ("expand all") or data export (e.g. CSV including expanded detail rows).
+
+```vue
+<script setup>
+const expandedItems = ref([])
+
+const expandAll = () => { expandedItems.value = [...items.value] }
+const collapseAll = () => { expandedItems.value = [] }
+</script>
+
+<template>
+    <TableComponent
+        :items="items"
+        :fields="fields"
+        expandable
+        v-model:expanded="expandedItems"
+    >
+        <template #row-expand="{ item }">
+            <!-- detail content -->
+        </template>
+    </TableComponent>
+</template>
+```
 
 ### Custom Controls
 
