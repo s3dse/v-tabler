@@ -110,6 +110,7 @@ const fieldDefinitions = ref([
 | `filterMaxWait`           | `Number`  | `2000`                                        | Maximum wait time in milliseconds for filter debouncing                        |
 | `sortNullsFirst`          | `Boolean` | `null`                                        | Whether to sort null values first (null = auto-detect based on sort direction) |
 | `enableColumnFilters`     | `Boolean` | `true`                                        | Whether to show column filter buttons in table headers                         |
+| `expandable`              | `Boolean` | `false`                                       | Enables expandable rows with a chevron toggle in the first column              |
 
 ## Events
 
@@ -138,6 +139,7 @@ export interface TableState {
 | `filter-change-debounced`        | `TableState` | Emitted after debounced filter change                              |
 | `column-filter-change`           | `TableState` | Emitted when a column filter changes. Payload: `{ field, filter }` |
 | `column-filter-change-debounced` | `TableState` | Emitted when a column filter changes. Payload: `{ field, filter }` |
+| `row-expand-toggle`              | `{ item, index, expanded }` | Emitted when a row's expand state is toggled                |
 
 ## Slots
 
@@ -152,6 +154,7 @@ export interface TableState {
 | `pagination-label`      | Custom pagination label                 | `{ perPage, currentPage, totalEntries }`     |
 | `th(${fieldKey})`       | Custom header cell content              | `{ field, column }`                          |
 | `cell(${fieldKey})`     | Custom cell content                     | `{ value, unformatted, item, field, index }` |
+| `row-expand`            | Content shown when a row is expanded    | `{ item }`                                   |
 | `filter-content`        | Custom column filter content            | `{ field, data, filterProps }`               |
 
 ### Dynamic Slots
@@ -701,7 +704,79 @@ const salesFields = [
 </script>
 ```
 
+### Expandable Rows (Drilldown)
+
+Use expandable rows to show detail data inline. In this example, clicking a department row reveals its employees in a nested table with independent sorting.
+
+```vue
+<template>
+    <TableComponent
+        :items="departments"
+        :fields="departmentFields"
+        title="Departments"
+        expandable
+    >
+        <template #row-expand="{ item }">
+            <TableComponent
+                :items="getEmployees(item.id)"
+                :fields="employeeFields"
+                :paginate="false"
+                :enable-search="false"
+                :enable-column-filters="false"
+                :configurable-page-size="false"
+                class="w-full text-sm"
+            />
+        </template>
+    </TableComponent>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { TableComponent } from '@/components/table'
+
+const departments = ref([
+    { id: 'dept-1', department: 'Engineering', totalSalary: 420000, employeeCount: 5 },
+    { id: 'dept-2', department: 'Sales', totalSalary: 250000, employeeCount: 4 }
+])
+
+const departmentFields = [
+    { key: 'department', label: 'Department' },
+    { key: 'totalSalary', label: 'Total Salary', formatter: v => `$${v.toLocaleString()}` },
+    { key: 'employeeCount', label: 'Employees' }
+]
+
+const employeeFields = [
+    { key: 'name', label: 'Name' },
+    { key: 'salary', label: 'Salary', formatter: v => `$${v.toLocaleString()}` },
+    { key: 'tenure', label: 'Tenure', formatter: v => `${v} years` }
+]
+
+const employeeData = {
+    'dept-1': [
+        { name: 'Jonas Meyer', salary: 90000, tenure: 4 },
+        { name: 'Lea Wagner', salary: 85000, tenure: 3 }
+    ],
+    'dept-2': [
+        { name: 'Felix Braun', salary: 65000, tenure: 2 },
+        { name: 'Laura Krüger', salary: 70000, tenure: 4 }
+    ]
+}
+
+const getEmployees = deptId => employeeData[deptId] || []
+</script>
+```
+
 ## Advanced Features
+
+### Expandable Rows
+
+The `expandable` prop adds a chevron toggle to each row. When clicked, the `row-expand` slot content is revealed below the row.
+
+Key behaviors:
+- **Pagination is unaffected** — expanded rows are purely visual. A limit of 5 rows per page stays at 5 data rows, regardless of how many are expanded.
+- **Nested tables get independent sorting/filtering** — a `<TableComponent>` placed inside the `row-expand` slot is a fully independent instance with its own sort, filter, and pagination state.
+- **No ID field required** — row identity uses object references internally, so it works with any data shape.
+- **Expand state persists across pages** — expanding a row on page 1, navigating to page 2, and returning to page 1 keeps the row expanded.
 
 ### Custom Controls
 

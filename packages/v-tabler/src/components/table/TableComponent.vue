@@ -54,6 +54,7 @@
                     :column-filters="columnFilters"
                     @sort-table="handleSortInternal"
                     @column-filter="handleColumnFilterInternal"
+                    :expandable="expandable"
                 >
                     <template
                         v-for="field in visibleFields"
@@ -90,6 +91,9 @@
                     :get-value="getValue"
                     :get-unformatted-value="getUnformattedValue"
                     :get-cell-class-list="getClassList"
+                    :expandable="expandable"
+                    :is-expanded="isExpanded"
+                    @toggle-expand="handleExpandToggle"
                 >
                     <template
                         v-for="field in visibleFields"
@@ -97,6 +101,9 @@
                         #[`cell(${field.key})`]="slotProps"
                     >
                         <slot :name="`cell(${field.key})`" v-bind="slotProps"></slot>
+                    </template>
+                    <template #row-expand="slotProps">
+                        <slot name="row-expand" v-bind="slotProps"></slot>
                     </template>
                 </table-body>
 
@@ -163,7 +170,8 @@ import {
     useTableDataUtils,
     useTableEvents,
     useTableValidation,
-    useTableStyles
+    useTableStyles,
+    useTableExpand
 } from './composables/index.js'
 
 import { TableTitle, TableHeader, TableHead, TableBody, TableFooter } from './components/index.js'
@@ -265,6 +273,10 @@ const props = defineProps({
     },
     clearAllFiltersButtonText: {
         type: String
+    },
+    expandable: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -275,7 +287,8 @@ const emit = defineEmits([
     'filter-change',
     'filter-change-debounced',
     'column-filter-change',
-    'column-filter-change-debounced'
+    'column-filter-change-debounced',
+    'row-expand-toggle'
 ])
 
 const id = useId()
@@ -296,6 +309,8 @@ const {
     leftPadFirstCol,
     rightPadLastCol
 } = useTableStyles()
+
+const { toggleRowExpanded, isExpanded } = useTableExpand()
 
 const filterInputId = computed(() => `filter_input_${id}`)
 
@@ -359,6 +374,11 @@ const clearAllColumnFiltersInternal = () => {
     tableState.clearAllColumnFilters()
     emit('column-filter-change', createEventPayload('column-filter-change'))
     debouncedEmitColumnFilterChange()
+}
+
+const handleExpandToggle = (item, index) => {
+    toggleRowExpanded(item)
+    emit('row-expand-toggle', { item, index, expanded: isExpanded(item) })
 }
 
 const topRowsForDisplay = computed(() => {

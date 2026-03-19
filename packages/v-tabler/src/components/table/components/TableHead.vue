@@ -1,5 +1,6 @@
 <template>
     <thead class="bg-thead-background font-semibold text-[0.625rem] text-thead-text">
+        <th v-if="expandable" class="p-2 w-2"></th>
         <th
             v-for="(col, index) in visibleFields || []"
             :key="index"
@@ -85,6 +86,10 @@ defineProps({
     columnFilters: {
         type: Object,
         default: () => ({})
+    },
+    expandable: {
+        type: Boolean,
+        default: false
     }
 })
 
