@@ -110,12 +110,14 @@
         </card-component>
         <RemoteTableDemo />
         <ExpandableTableDemo />
+        <ExpandableTableDemoSansIds />
     </div>
 </template>
 <script setup>
 import { ref } from 'vue'
 import RemoteTableDemo from '../components/RemoteTableDemo.vue'
 import ExpandableTableDemo from '../components/ExpandableTableDemo.vue'
+import ExpandableTableDemoSansIds from '../components/ExpandableTableDemoSansIds.vue'
 
 import data from '../assets/MOCK_DATA-2.json'
 

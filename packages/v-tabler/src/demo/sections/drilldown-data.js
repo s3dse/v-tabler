@@ -1,3 +1,5 @@
+import delay from '@/utils/delay'
+
 export const baseDrilldownItems = [
     {
         id: 'dept-1',
@@ -167,3 +169,8 @@ export const drilldownFields = [
         tdClassList: 'text-right px-2'
     }
 ]
+
+export const fetchDepartmentDetails = async departmentId => {
+    await delay(1500)
+    return getDetailsForDepartment(departmentId)
+}

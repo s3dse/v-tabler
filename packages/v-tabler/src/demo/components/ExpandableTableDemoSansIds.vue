@@ -4,7 +4,7 @@
             <table-component
                 :items="items"
                 :fields="fields"
-                title="Test With Expand (Drilldown)"
+                title="Test With Expand (Drilldown, No IDs)"
                 class="w-[100%] bg-surface text-inverted"
                 expandable
                 v-model:expanded="expandedItems"
@@ -27,8 +27,8 @@
                 </template>
                 <template #row-expand="{ item }">
                     <table-component
-                        v-busy="fetchingIds.has(item.id)"
-                        :items="detailCache.get(item.id) ?? []"
+                        v-busy="fetchingItems.has(item)"
+                        :items="detailCache.get(item) ?? []"
                         :fields="detailFields"
                         :paginate="false"
                         :enable-search="false"
@@ -50,7 +50,7 @@ import {
     baseDrilldownItems as baseItems,
     drilldownFields,
     fetchDepartmentDetails as fetchDetails
-} from '../sections/drilldown-data'
+} from '../sections/drilldown-data-no-id'
 
 const items = ref(baseItems)
 const fields = ref(drilldownFields)
@@ -80,17 +80,17 @@ const detailFields = [
 
 const expandedItems = ref([])
 const detailCache = reactive(new Map())
-const fetchingIds = reactive(new Set())
+const fetchingItems = reactive(new Set())
 
 const onExpandToggle = async ({ item, expanded }) => {
-    if (!expanded || detailCache.has(item.id)) return
+    if (!expanded || detailCache.has(item)) return
 
-    fetchingIds.add(item.id)
+    fetchingItems.add(item)
     try {
-        const details = await fetchDetails(item.id)
-        detailCache.set(item.id, details)
+        const details = await fetchDetails(item)
+        detailCache.set(item, details)
     } finally {
-        fetchingIds.delete(item.id)
+        fetchingItems.delete(item)
     }
 }
 
@@ -99,7 +99,7 @@ const handleDownload = () => {
     for (const item of items.value) {
         rows.push(item)
         if (expandedItems.value.includes(item)) {
-            rows.push(...(detailCache.get(item.id) || []))
+            rows.push(...(detailCache.get(item) || []))
         }
     }
     downloadCSVWithSchema({ filename: 'departments', data: rows, schema: drilldownFields })
