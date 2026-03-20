@@ -707,19 +707,21 @@ const salesFields = [
 
 ### Expandable Rows (Drilldown)
 
-Use expandable rows to show detail data inline. In this example, clicking a department row reveals its employees in a nested table with independent sorting.
+The `useExpandFetch` composable handles expand state, async fetching, caching, and loading status out of the box. Pair it with the `expandable` prop and the `#row-expand` slot to build drilldown tables with minimal boilerplate.
 
 ```vue
 <template>
     <TableComponent
         :items="departments"
         :fields="departmentFields"
-        title="Departments"
         expandable
+        v-model:expanded="expandedItems"
+        @row-expand-toggle="onExpandToggle"
     >
         <template #row-expand="{ item }">
             <TableComponent
-                :items="getEmployees(item.id)"
+                v-busy="rowState(item).fetching"
+                :items="rowState(item).details"
                 :fields="employeeFields"
                 :paginate="false"
                 :enable-search="false"
@@ -734,6 +736,7 @@ Use expandable rows to show detail data inline. In this example, clicking a depa
 <script setup>
 import { ref } from 'vue'
 import { TableComponent } from '@/components/table'
+import { useExpandFetch } from '@/components/table/composables'
 
 const departments = ref([
     { id: 'dept-1', department: 'Engineering', totalSalary: 420000, employeeCount: 5 },
@@ -752,24 +755,42 @@ const employeeFields = [
     { key: 'tenure', label: 'Tenure', formatter: v => `${v} years` }
 ]
 
-const employeeData = {
-    'dept-1': [
-        { name: 'Jonas Meyer', salary: 90000, tenure: 4 },
-        { name: 'Lea Wagner', salary: 85000, tenure: 3 }
-    ],
-    'dept-2': [
-        { name: 'Felix Braun', salary: 65000, tenure: 2 },
-        { name: 'Laura Krüger', salary: 70000, tenure: 4 }
-    ]
-}
+const { expandedItems, onExpandToggle, rowState } = useExpandFetch({
+    fetchFn: item => fetchEmployees(item.id),
+    key: item => item.id
+})
 
-const getEmployees = deptId => employeeData[deptId] || []
+async function fetchEmployees(deptId) {
+    const res = await fetch(`/api/departments/${deptId}/employees`)
+    return res.json()
+}
 </script>
 ```
 
+#### `useExpandFetch` options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `fetchFn` | `(item) => Promise<Array>` | `() => []` | Called with the row item when expanded. Returns the detail records. |
+| `key` | `(item) => any` | `item => item` | Extracts a cache key from the row item. Use when rows have a unique ID. Defaults to object identity. |
+| `cache` | `boolean` | `true` | When `true`, details are fetched once and served from cache on subsequent expands. Set to `false` to always re-fetch. |
+
+#### Return values
+
+| Name | Type | Description |
+|---|---|---|
+| `expandedItems` | `Ref<Array>` | Bind to `v-model:expanded`. |
+| `onExpandToggle` | `Function` | Bind to `@row-expand-toggle`. Fetches details on expand, no-op on collapse. |
+| `rowState(item)` | `Function` | Returns `{ fetching: boolean, details: Array }` for a given row. |
+| `fetchDetailsForRow(item)` | `Function` | Manually trigger a fetch (useful outside the toggle flow). |
+| `detailCache` | `reactive(Map)` | Direct access to cached details (e.g. for CSV export). |
+| `fetchingIds` | `reactive(Set)` | Direct access to in-flight row keys. |
+
 ## Advanced Features
 
-### Expandable Rows
+### Expandable Rows (primitives)
+
+If `useExpandFetch` doesn't fit your use case, you can wire expansion manually using the underlying props, events, and slots.
 
 The `expandable` prop adds a chevron toggle to each row. When clicked, the `row-expand` slot content is revealed below the row.
 

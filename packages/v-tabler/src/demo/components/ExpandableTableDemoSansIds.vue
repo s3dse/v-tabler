@@ -27,8 +27,8 @@
                 </template>
                 <template #row-expand="{ item }">
                     <table-component
-                        v-busy="fetchingItems.has(item)"
-                        :items="detailCache.get(item) ?? []"
+                        v-busy="rowState(item).fetching"
+                        :items="rowState(item).details"
                         :fields="detailFields"
                         :paginate="false"
                         :enable-search="false"
@@ -44,13 +44,14 @@
     </card-component>
 </template>
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { downloadCSVWithSchema } from '@/utils/downloadCSV'
 import {
     baseDrilldownItems as baseItems,
     drilldownFields,
     fetchDepartmentDetails as fetchDetails
 } from '../sections/drilldown-data-no-id'
+import { useExpandFetch } from '@/components/table/composables'
 
 const items = ref(baseItems)
 const fields = ref(drilldownFields)
@@ -78,21 +79,11 @@ const detailFields = [
     }
 ]
 
-const expandedItems = ref([])
-const detailCache = reactive(new Map())
-const fetchingItems = reactive(new Set())
-
-const onExpandToggle = async ({ item, expanded }) => {
-    if (!expanded || detailCache.has(item)) return
-
-    fetchingItems.add(item)
-    try {
-        const details = await fetchDetails(item)
-        detailCache.set(item, details)
-    } finally {
-        fetchingItems.delete(item)
-    }
-}
+const { onExpandToggle, expandedItems, detailCache, rowState } = useExpandFetch({
+    fetchFn: fetchDetails, // your async data retrieval function
+    key: item => item, // default
+    cache: true // default
+})
 
 const handleDownload = () => {
     const rows = []
