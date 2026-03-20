@@ -735,8 +735,7 @@ The `useExpandFetch` composable handles expand state, async fetching, caching, a
 
 <script setup>
 import { ref } from 'vue'
-import { TableComponent } from '@/components/table'
-import { useExpandFetch } from '@/components/table/composables'
+import { TableComponent, useExpandFetch } from '@s3_dse/v-tabler'
 
 const departments = ref([
     { id: 'dept-1', department: 'Engineering', totalSalary: 420000, employeeCount: 5 },

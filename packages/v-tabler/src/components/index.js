@@ -1,4 +1,4 @@
-import { TableComponent } from './table'
+import { TableComponent, useExpandFetch } from './table'
 import { PaginationComponent } from './pagination'
 import { DropdownComponent, ActionDropdownComponent } from './dropdown'
 import { TabsComponent } from './tabs'
@@ -17,6 +17,7 @@ import { ChatComponent } from './chat'
 
 export {
     TableComponent,
+    useExpandFetch,
     PaginationComponent,
     DropdownComponent,
     ActionDropdownComponent,
