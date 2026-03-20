@@ -109,11 +109,14 @@
             </loading-overlay>
         </card-component>
         <RemoteTableDemo />
+        <ExpandableTableDemo />
     </div>
 </template>
 <script setup>
 import { ref } from 'vue'
 import RemoteTableDemo from '../components/RemoteTableDemo.vue'
+import ExpandableTableDemo from '../components/ExpandableTableDemo.vue'
+
 import data from '../assets/MOCK_DATA-2.json'
 
 const nullRecord = {
