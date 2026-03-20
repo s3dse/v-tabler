@@ -35,7 +35,11 @@
             </template>
         </table-header>
 
-        <div class="mt-2 pb-2 border-t border-border overflow-x-auto with-scrollbar">
+        <div
+            class="mt-2 pb-2 border-t border-border with-scrollbar overflow-x-auto"
+            :class="{ 'overflow-y-auto': maxBodyHeight }"
+            :style="maxBodyHeight ? { maxHeight: maxBodyHeight } : {}"
+        >
             <table
                 class="w-full text-default"
                 :class="{ 'table-fixed whitespace-normal break-words': fixed }"
@@ -55,6 +59,7 @@
                     @sort-table="handleSortInternal"
                     @column-filter="handleColumnFilterInternal"
                     :expandable="expandable"
+                    :sticky-header="stickyHeader"
                 >
                     <template
                         v-for="field in visibleFields"
@@ -277,6 +282,14 @@ const props = defineProps({
     expandable: {
         type: Boolean,
         default: false
+    },
+    stickyHeader: {
+        type: Boolean,
+        default: false
+    },
+    maxBodyHeight: {
+        type: String,
+        default: undefined
     }
 })
 

@@ -31,13 +31,11 @@
                         :paginate="false"
                         :enable-search="false"
                         :enable-column-filters="false"
-                        :configurable-page-size="true"
+                        :configurable-page-size="false"
+                        sticky-header
+                        max-body-height="10rem"
                         class="w-full text-sm"
-                    >
-                        <template #page-size-label="{ pageSize }">
-                            Einträge pro Seite: {{ pageSize }}
-                        </template>
-                    </table-component>
+                    />
                 </template>
             </table-component>
         </loading-overlay>
