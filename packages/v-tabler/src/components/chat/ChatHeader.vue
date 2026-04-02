@@ -4,7 +4,9 @@
     >
         <div class="flex items-center gap-2">
             <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <h3 class="font-semibold">{{ chatTitle }}</h3>
+            <slot name="title">
+                <h3 class="font-semibold">{{ chatTitle }}</h3>
+            </slot>
         </div>
         <button
             type="button"

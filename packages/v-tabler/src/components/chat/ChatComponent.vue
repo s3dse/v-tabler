@@ -17,7 +17,11 @@
                 v-if="isOpen"
                 :class="['fixed bottom-24 right-6 card flex flex-col z-40', sizeClasses]"
             >
-                <ChatHeader @clear-chat="handleClearChat" :chatTitle="chatTitle" />
+                <ChatHeader @clear-chat="handleClearChat" :chatTitle="chatTitle">
+                    <template v-if="$slots.title" #title>
+                        <slot name="title" />
+                    </template>
+                </ChatHeader>
 
                 <div
                     ref="messagesContainer"
