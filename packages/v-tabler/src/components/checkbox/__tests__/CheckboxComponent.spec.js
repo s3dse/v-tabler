@@ -52,6 +52,40 @@ describe('CheckboxComponent', () => {
         expect(input.attributes('disabled')).toBeDefined()
     })
 
+    it('sets aria-disabled when disabled', async () => {
+        await wrapper.setProps({ disabled: true })
+        const input = wrapper.find('input')
+        expect(input.attributes('aria-disabled')).toBe('true')
+    })
+
+    it('label for attribute matches input id', () => {
+        const input = wrapper.find('input')
+        const label = wrapper.find('label')
+        expect(label.attributes('for')).toBe(input.attributes('id'))
+    })
+
+    it('falls back to generated id and name when props are omitted', () => {
+        const w = mount(CheckboxComponent, { props: { modelValue: false } })
+        const input = w.find('input')
+        const label = w.find('label')
+        expect(input.attributes('id')).toBeTruthy()
+        expect(input.attributes('name')).toBeTruthy()
+        expect(label.attributes('for')).toBe(input.attributes('id'))
+    })
+
+    it('works as a group checkbox with array modelValue', async () => {
+        const w = mount(CheckboxComponent, {
+            props: {
+                label: 'Option A',
+                name: 'group',
+                modelValue: []
+            }
+        })
+        const input = w.find('input')
+        await input.setValue(true)
+        expect(w.emitted('update:modelValue')).toBeTruthy()
+    })
+
     it('sets the correct aria-checked attribute', async () => {
         const input = wrapper.find('input')
         expect(input.attributes('aria-checked')).toBe('false')
