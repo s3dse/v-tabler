@@ -1,9 +1,9 @@
 <template>
-    <thead class="bg-thead-background font-semibold text-[0.625rem] text-thead-text" :class="{ 'sticky top-0 z-10': stickyHeader }">
-        <th
-            v-if="expandable"
-            class="p-2 w-2 bg-inherit"
-        ></th>
+    <thead
+        class="bg-thead-background font-semibold text-[0.625rem] text-thead-text"
+        :class="{ 'sticky top-0 z-10': stickyHeader }"
+    >
+        <th v-if="expandable" class="p-2 w-10 bg-inherit"></th>
         <th
             v-for="(col, index) in visibleFields || []"
             :key="index"
@@ -126,5 +126,4 @@ const getHeaderFlexClasses = col => {
 
     return baseClasses
 }
-
 </script>

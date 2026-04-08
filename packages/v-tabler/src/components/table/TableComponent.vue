@@ -78,6 +78,8 @@
                     :get-value="getValue"
                     :get-unformatted-value="getUnformattedValue"
                     :get-cell-class-list="getTopRowClassList"
+                    :expandable="expandable"
+                    :is-expanded="isExpanded"
                 >
                     <template
                         v-for="field in visibleFields"
@@ -121,6 +123,8 @@
                     :get-value="getValue"
                     :get-unformatted-value="getUnformattedValue"
                     :get-cell-class-list="getBottomRowClassList"
+                    :expandable="expandable"
+                    :is-expanded="isExpanded"
                 >
                     <template
                         v-for="field in visibleFields"

@@ -9,6 +9,8 @@
                 expandable
                 v-model:expanded="expandedItems"
                 @row-expand-toggle="onExpandToggle"
+                :bottom-rows="items.slice(0, 1)"
+                :top-rows="items.slice(1, 2)"
             >
                 <template #table-top-controls>
                     <button

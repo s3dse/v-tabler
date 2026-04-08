@@ -5,21 +5,21 @@ export function useTableStyles() {
 
     function extractTopRowCellClasses(columnDefinition) {
         const hasSpecialTopRowStyling = columnDefinition.tdTopRowClassList
-        return hasSpecialTopRowStyling 
-            ? columnDefinition.tdTopRowClassList 
+        return hasSpecialTopRowStyling
+            ? columnDefinition.tdTopRowClassList
             : extractStandardCellClasses(columnDefinition)
     }
 
     function extractBottomRowCellClasses(columnDefinition) {
         const hasSpecialBottomRowStyling = columnDefinition.tdBottomRowClassList
-        return hasSpecialBottomRowStyling 
-            ? columnDefinition.tdBottomRowClassList 
+        return hasSpecialBottomRowStyling
+            ? columnDefinition.tdBottomRowClassList
             : extractStandardCellClasses(columnDefinition)
     }
 
     function addLeftPaddingToFirstColumn(columnIndex) {
         const isFirstColumn = columnIndex === 0
-        return isFirstColumn ? 'pe-6' : ''
+        return isFirstColumn ? 'ps-6' : ''
     }
 
     function addRightPaddingToLastColumn(columnIndex, totalNumberOfColumns) {

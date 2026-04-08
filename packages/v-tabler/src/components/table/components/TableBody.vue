@@ -4,6 +4,7 @@
             <tr :class="rowClass" :data-top-row="rowType === 'top' ? rowIndex : undefined">
                 <td v-if="expandable" class="p-2 ps-6 w-10">
                     <div
+                        v-if="rowType === 'regular'"
                         role="button"
                         class="inline-block w-4 h-4 cursor-pointer transition-transform"
                         :class="[
@@ -11,6 +12,7 @@
                         ]"
                         @click="$emit('toggle-expand', item)"
                     ></div>
+                    <div v-else class="w-4 h-4"></div>
                 </td>
                 <td
                     v-for="(column, fieldIndex) in visibleFields || []"
