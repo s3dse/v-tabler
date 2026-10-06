@@ -1,7 +1,7 @@
 <template>
     <div>
-        <!-- Floating Chat Button -->
         <button
+            v-if="floating"
             type="button"
             @click="isOpen = !isOpen"
             class="fixed bottom-6 right-6 w-14 h-14 btn-primary-md rounded-full shadow-lg flex items-center justify-center z-50"
@@ -11,11 +11,14 @@
             <div v-else class="i-tabler-x w-6 h-6" />
         </button>
 
-        <!-- Chat Modal -->
-        <Transition name="modal">
+        <Transition name="modal" :css="floating">
             <div
-                v-if="isOpen"
-                :class="['fixed bottom-24 right-6 card flex flex-col z-40', sizeClasses]"
+                v-if="!floating || isOpen"
+                :class="[
+                    'card flex flex-col',
+                    floating ? 'fixed bottom-24 right-6 z-40' : 'relative',
+                    sizeClasses
+                ]"
             >
                 <ChatHeader @clear-chat="handleClearChat" :chatTitle="chatTitle">
                     <template v-if="$slots.title" #title>
@@ -52,10 +55,9 @@
             </div>
         </Transition>
 
-        <!-- Backdrop -->
         <Transition name="fade">
             <div
-                v-if="isOpen"
+                v-if="floating && isOpen"
                 @click="isOpen = false"
                 class="fixed inset-0 bg-background/20 z-30"
             ></div>
@@ -92,6 +94,10 @@ const props = defineProps({
         type: String,
         default: 'default',
         validator: value => ['auto', 'compact', 'default', 'wide'].includes(value)
+    },
+    floating: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -107,7 +113,7 @@ const sizeClasses = computed(() => {
     return sizeMap[props.size]
 })
 
-const isOpen = ref(false)
+const isOpen = ref(!props.floating)
 const inputMessage = ref('')
 const messagesContainer = ref(null)
 const chatInputRef = ref(null)
@@ -145,7 +151,7 @@ watch(isOpen, newVal => {
     if (newVal) {
         scrollToBottom().then(() => focusInput())
     }
-})
+}, { immediate: true })
 </script>
 
 <style scoped>
