@@ -13,7 +13,7 @@ import { CheckboxComponent } from '@/components/checkbox'
 import { Heading, PageTitle } from '@/components/typography'
 import { TableSkeleton } from '@/components/skeleton'
 import { RadioGroup } from '@/components/radio-group'
-import { ChatComponent } from '@/components/chat'
+import { ChatComponent, ChatInput, ChatHeader } from '@/components/chat'
 
 // Import i18n utilities
 import { getDefaultTranslationKeys, setVTablerI18n } from '@/composables/useI18n.js'
@@ -48,6 +48,8 @@ export {
     TableSkeleton,
     RadioGroup,
     ChatComponent,
+    ChatInput,
+    ChatHeader,
     getDefaultTranslationKeys,
     setVTablerI18n
 }

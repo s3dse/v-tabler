@@ -13,7 +13,7 @@ import { CheckboxComponent } from './checkbox'
 import { Heading, PageTitle } from './typography'
 import { TableSkeleton } from './skeleton'
 import { RadioGroup } from './radio-group'
-import { ChatComponent } from './chat'
+import { ChatComponent, ChatInput, ChatHeader } from './chat'
 
 export {
     TableComponent,
@@ -39,5 +39,7 @@ export {
     PageTitle,
     TableSkeleton,
     RadioGroup,
-    ChatComponent
+    ChatComponent,
+    ChatInput,
+    ChatHeader
 }
