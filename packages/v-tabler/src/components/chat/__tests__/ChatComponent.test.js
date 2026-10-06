@@ -1,17 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mount as vueMount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import ChatComponent from '../ChatComponent.vue'
 import { useChatLogic } from '../useChatLogic.js'
-
-const mount = (component, options = {}) =>
-    vueMount(component, {
-        ...options,
-        props: {
-            floating: true,
-            ...options.props
-        }
-    })
 
 // Mock the composable
 vi.mock('../useChatLogic.js', () => ({
@@ -91,14 +82,6 @@ describe('ChatComponent', () => {
     })
 
     describe('rendering', () => {
-        it('should render inline chat by default', () => {
-            wrapper = vueMount(ChatComponent)
-
-            expect(wrapper.find('button').exists()).toBe(false)
-            expect(wrapper.find('[data-testid="chat-header"]').exists()).toBe(true)
-            expect(wrapper.find('.card').classes()).not.toContain('fixed')
-        })
-
         it('should render chat button when closed', () => {
             wrapper = mount(ChatComponent)
 

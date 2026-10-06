@@ -111,9 +111,8 @@
             </div>
 
             <p class="text-sm text-muted mb-4">
-                These examples use the same mock AI service. The inline chat is the default mode;
-                set <code>floating</code> to render the launcher in the bottom-right corner.
-                Test that:
+                The chat component appears as a floating button in the bottom-right corner. This
+                demo shows integration with a mock AI service. Test that:
             </p>
             <ul class="list-disc list-inside text-sm text-muted space-y-1 mb-4">
                 <li>Pressing Enter in the chat sends a message (doesn't submit the form above)</li>
@@ -159,27 +158,14 @@
                     </div>
                 </div>
             </div>
-
-            <div class="mb-8">
-                <h4 class="text-base text-default font-semibold mb-2">Inline Chat (Default)</h4>
-                <p class="text-sm text-muted mb-4">
-                    The chat is rendered directly in the page flow without a launcher or backdrop.
-                </p>
-                <ChatComponent
-                    :size="chatSize"
-                    initial-message="Hello! I'm the inline chat demo. Ask me anything about the component."
-                    :ai-handler="handleAiRequest"
-                    placeholder="Ask the inline chat anything..."
-                />
-            </div>
         </div>
 
         <!-- Instructions -->
         <div class="p-4 bg-info/10 border border-info/20 rounded">
             <h4 class="font-semibold text-default mb-2">Testing Instructions:</h4>
             <ol class="list-decimal list-inside text-default text-sm space-y-1">
-                <li>Use the inline chat rendered above, then open the floating chat below</li>
-                <li>Type a message in either chat and press Enter - it should send a chat message only</li>
+                <li>Open the chat by clicking the floating button in bottom-right</li>
+                <li>Type a message in the chat and press Enter - should send chat message only</li>
                 <li>
                     Type something in the form input above and press Enter - should submit form only
                 </li>
@@ -194,9 +180,8 @@
             </ol>
         </div>
 
-        <!-- Floating Chat Component -->
+        <!-- Chat Component -->
         <ChatComponent
-            floating
             :size="chatSize"
             initial-message="Hello! I'm a demo AI assistant. Try asking me about programming, help, or just say hello! You can cancel my responses by clicking the X button during processing."
             :ai-handler="handleAiRequest"
