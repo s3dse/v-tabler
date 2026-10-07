@@ -106,14 +106,17 @@
                     simple text conversations. <strong>Default:</strong> Balanced for most content.
                     <strong>Wide:</strong> Ideal for rich content like charts and visualizations.
                     <br />
-                    <em>All sizes are responsive: full-width on mobile, fixed width on desktop.</em>
+                    <em>
+                        Card sizes are responsive: full-width on mobile, fixed width on desktop.
+                        Embedded chat fills its parent instead.
+                    </em>
                 </p>
             </div>
 
             <p class="text-sm text-muted mb-4">
-                These examples use the same mock AI service. The inline chat is the default mode;
-                set <code>floating</code> to render the launcher in the bottom-right corner.
-                Test that:
+                These examples use the same mock AI service. The inline card is the default; use
+                <code>variant="embedded"</code> for a page-owned workspace pane, or set
+                <code>floating</code> to render the launcher in the bottom-right corner. Test that:
             </p>
             <ul class="list-disc list-inside text-sm text-muted space-y-1 mb-4">
                 <li>Pressing Enter in the chat sends a message (doesn't submit the form above)</li>
@@ -161,7 +164,9 @@
             </div>
 
             <div class="mb-8">
-                <h4 class="text-base text-default font-semibold mb-2">Inline Chat (Default)</h4>
+                <h4 class="text-base text-default font-semibold mb-2">
+                    Inline Card Chat (Default)
+                </h4>
                 <p class="text-sm text-muted mb-4">
                     The chat is rendered directly in the page flow without a launcher or backdrop.
                 </p>
@@ -172,14 +177,46 @@
                     placeholder="Ask the inline chat anything..."
                 />
             </div>
+
+            <div class="mb-8">
+                <h4 class="text-base text-default font-semibold mb-2">Embedded Chat</h4>
+                <p class="text-sm text-muted mb-4">
+                    Embedded chat removes widget chrome and fills a height-constrained parent. The
+                    neighboring pane illustrates how it fits into a larger workspace.
+                </p>
+                <div
+                    class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)] h-[600px] min-h-0 border-y border-border"
+                >
+                    <ChatComponent
+                        variant="embedded"
+                        initial-message="Hello! I'm embedded in this workspace. The surrounding page owns my dimensions."
+                        :ai-handler="handleAiRequest"
+                        placeholder="Ask the embedded chat anything..."
+                    />
+                    <aside
+                        class="hidden lg:flex min-h-0 flex-col border-l border-border bg-surface"
+                    >
+                        <h5 class="border-b border-border p-4 font-semibold text-default">
+                            Workspace content
+                        </h5>
+                        <p class="p-4 text-sm text-muted">
+                            Related content can live beside the chat without the chat looking like a
+                            floating modal.
+                        </p>
+                    </aside>
+                </div>
+            </div>
         </div>
 
         <!-- Instructions -->
         <div class="p-4 bg-info/10 border border-info/20 rounded">
             <h4 class="font-semibold text-default mb-2">Testing Instructions:</h4>
             <ol class="list-decimal list-inside text-default text-sm space-y-1">
-                <li>Use the inline chat rendered above, then open the floating chat below</li>
-                <li>Type a message in either chat and press Enter - it should send a chat message only</li>
+                <li>Compare the inline card, embedded workspace, and floating chat variants</li>
+                <li>
+                    Type a message in either chat and press Enter - it should send a chat message
+                    only
+                </li>
                 <li>
                     Type something in the form input above and press Enter - should submit form only
                 </li>
