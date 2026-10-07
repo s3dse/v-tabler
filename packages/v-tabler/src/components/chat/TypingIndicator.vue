@@ -1,6 +1,6 @@
 <template>
     <div v-if="isTyping" class="flex justify-start">
-        <div class="bg-surface text-default rounded px-4 py-2 border border-solid border-border">
+        <div :class="indicatorClasses">
             <div class="flex gap-1">
                 <div
                     class="w-2 h-2 bg-txt-muted rounded-full animate-bounce"
@@ -19,10 +19,24 @@
     </div>
 </template>
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { ChatVariant, DEFAULT_CHAT_VARIANT, isChatVariant } from './chatVariants.js'
+
+const props = defineProps({
     isTyping: {
         type: Boolean,
         default: true
+    },
+    variant: {
+        type: String,
+        default: DEFAULT_CHAT_VARIANT,
+        validator: isChatVariant
     }
+})
+
+const indicatorClasses = computed(() => {
+    return props.variant === ChatVariant.EMBEDDED
+        ? 'py-2 text-default'
+        : 'bg-surface text-default rounded px-4 py-2 border border-solid border-border'
 })
 </script>

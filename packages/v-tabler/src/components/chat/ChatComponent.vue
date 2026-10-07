@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="rootClasses">
         <button
             v-if="floating"
             type="button"
@@ -12,15 +12,12 @@
         </button>
 
         <Transition name="modal" :css="floating">
-            <div
-                v-if="!floating || isOpen"
-                :class="[
-                    'card flex flex-col',
-                    floating ? 'fixed bottom-24 right-6 z-40' : 'relative',
-                    sizeClasses
-                ]"
-            >
-                <ChatHeader @clear-chat="handleClearChat" :chatTitle="chatTitle">
+            <div v-if="!floating || isOpen" :class="chatContainerClasses">
+                <ChatHeader
+                    :variant="variant"
+                    :chat-title="chatTitle"
+                    @clear-chat="handleClearChat"
+                >
                     <template v-if="$slots.title" #title>
                         <slot name="title" />
                     </template>
@@ -28,17 +25,19 @@
 
                 <div
                     ref="messagesContainer"
-                    class="flex-1 overflow-y-auto p-4 space-y-4 bg-background with-scrollbar"
+                    class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 with-scrollbar"
+                    :class="isEmbedded ? 'bg-transparent' : 'bg-background'"
                 >
-                    <slot name="messages" v-bind="{ messages }">
+                    <slot name="messages" v-bind="{ messages, variant }">
                         <ChatMessage
                             v-for="(message, index) in messages"
                             :key="index"
                             :message="message"
+                            :variant="variant"
                         />
                     </slot>
 
-                    <TypingIndicator v-if="isTyping" />
+                    <TypingIndicator v-if="isTyping" :variant="variant" />
                 </div>
 
                 <ChatInput
@@ -49,6 +48,7 @@
                     :show-hint="true"
                     :placeholder="placeholder"
                     :recall-last-message="recallLastMessage"
+                    :variant="variant"
                     @submit="handleSubmit"
                     @cancel="handleCancel"
                 />
@@ -66,12 +66,18 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, watchEffect, computed } from 'vue'
 import ChatInput from './ChatInput.vue'
 import ChatMessage from './ChatMessage.vue'
 import ChatHeader from './ChatHeader.vue'
 import TypingIndicator from './TypingIndicator.vue'
 import { useChatLogic } from './useChatLogic.js'
+import {
+    assertValidChatLayout,
+    ChatVariant,
+    DEFAULT_CHAT_VARIANT,
+    isChatVariant
+} from './chatVariants.js'
 
 const props = defineProps({
     initialMessage: {
@@ -98,10 +104,28 @@ const props = defineProps({
     floating: {
         type: Boolean,
         default: false
+    },
+    variant: {
+        type: String,
+        default: DEFAULT_CHAT_VARIANT,
+        validator: isChatVariant
     }
 })
 
+watchEffect(() => {
+    assertValidChatLayout({
+        floating: props.floating,
+        variant: props.variant
+    })
+})
+
 const emit = defineEmits(['clear-chat'])
+
+const isEmbedded = computed(() => props.variant === ChatVariant.EMBEDDED)
+
+const rootClasses = computed(() => {
+    return isEmbedded.value ? 'w-full h-full min-h-0 min-w-0' : undefined
+})
 
 const sizeClasses = computed(() => {
     const sizeMap = {
@@ -111,6 +135,18 @@ const sizeClasses = computed(() => {
         wide: 'w-full md:w-[700px] lg:w-[800px] h-[600px]'
     }
     return sizeMap[props.size]
+})
+
+const chatContainerClasses = computed(() => {
+    if (isEmbedded.value) {
+        return 'relative flex flex-col w-full h-full min-h-0 min-w-0 bg-transparent'
+    }
+
+    return [
+        'card flex flex-col',
+        props.floating ? 'fixed bottom-24 right-6 z-40' : 'relative',
+        sizeClasses.value
+    ]
 })
 
 const isOpen = ref(!props.floating)
@@ -147,11 +183,15 @@ const handleClearChat = () => {
     emit('clear-chat')
 }
 
-watch(isOpen, newVal => {
-    if (newVal) {
-        scrollToBottom().then(() => focusInput())
-    }
-}, { immediate: true })
+watch(
+    isOpen,
+    newVal => {
+        if (newVal) {
+            scrollToBottom().then(() => focusInput())
+        }
+    },
+    { immediate: true }
+)
 </script>
 
 <style scoped>

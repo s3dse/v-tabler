@@ -1,5 +1,8 @@
 <template>
-    <div class="p-4 border-t border-solid border-border bg-surface">
+    <div
+        class="p-4 border-t border-solid border-border"
+        :class="variant === ChatVariant.EMBEDDED ? 'bg-transparent' : 'bg-surface'"
+    >
         <div class="flex gap-2 items-end">
             <textarea
                 ref="textareaRef"
@@ -10,7 +13,7 @@
                 :disabled="disabled"
                 :style="autoHeightStyle"
                 rows="1"
-                class="flex-1 form-inputfield resize-none overflow-y-auto with-scrollbar"
+                class="flex-1 form-inputfield text-default resize-none overflow-y-auto with-scrollbar"
             />
             <button
                 type="button"
@@ -52,6 +55,7 @@ import { ref, watch, nextTick, computed } from 'vue'
 import { useAutoHeight } from './useAutoHeight.js'
 import { useNavigatorLanguage } from '@vueuse/core'
 import { useI18n } from '@/composables/useI18n.js'
+import { ChatVariant, DEFAULT_CHAT_VARIANT, isChatVariant } from './chatVariants.js'
 
 const { t } = useI18n()
 
@@ -91,6 +95,11 @@ const props = defineProps({
     recallLastMessage: {
         type: Function,
         default: null
+    },
+    variant: {
+        type: String,
+        default: DEFAULT_CHAT_VARIANT,
+        validator: isChatVariant
     }
 })
 

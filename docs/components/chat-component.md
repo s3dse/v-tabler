@@ -5,6 +5,7 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 ## Features
 
 - **Floating Chat Button** - Fixed position chat toggle button with smooth animations
+- **Embedded Workspace Mode** - Parent-sized, neutral chat presentation for page layouts
 - **Modal Chat Interface** - Slide-up chat window with backdrop
 - **Message History** - Scrollable message container with auto-scroll to bottom
 - **Typing Indicator** - Visual feedback when AI/assistant is responding
@@ -12,19 +13,22 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 
 ## Props
 
-| Prop Name        | Type     | Default                              | Description                                                                                             |
-| ---------------- | -------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `initialMessage` | String   | `'Hello! How can I help you today?'` | The first message displayed when the chat is opened                                                     |
-| `placeholder`    | String   | `'Type your message...'`             | Placeholder text for the message input field                                                            |
-| `aiHandler`      | Function | `null`                               | Async function to handle AI responses. Receives user message, returns AI response                       |
-| `chatTitle`      | String   | `'AI Assistant'`                     | Title displayed in the chat header                                                                      |
-| `size`           | String   | `'default'`                          | Chat window size: `'auto'` (responsive), `'compact'` (384px), `'default'` (600px), `'wide'` (700-800px) |
+| Prop Name        | Type     | Default                              | Description                                                                                                |
+| ---------------- | -------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `initialMessage` | String   | `'Hello! How can I help you today?'` | The first message displayed when the chat is opened                                                        |
+| `placeholder`    | String   | `'Type your message...'`             | Placeholder text for the message input field                                                               |
+| `aiHandler`      | Function | `null`                               | Async function to handle AI responses. Receives user message and abort signal, then returns an AI response |
+| `chatTitle`      | String   | `'AI Assistant'`                     | Title displayed in the chat header                                                                         |
+| `size`           | String   | `'default'`                          | Card size: `'auto'`, `'compact'`, `'default'`, or `'wide'`; ignored by the embedded variant                |
+| `floating`       | Boolean  | `false`                              | Renders a fixed launcher, overlay, and card chat when enabled                                              |
+| `variant`        | String   | `'card'`                             | Visual presentation: `'card'` or `'embedded'`; embedded cannot be combined with `floating`                 |
 
 ## Slots
 
-| Slot name  | Slot-Props                      | Description                   |
-| ---------- | ------------------------------- | ----------------------------- |
-| `messages` | `{ messages }` list of messages | Provide a custom message view |
+| Slot name  | Slot props              | Description                                                                |
+| ---------- | ----------------------- | -------------------------------------------------------------------------- |
+| `title`    | none                    | Replaces the default chat title                                            |
+| `messages` | `{ messages, variant }` | Provides a custom message view and exposes the active presentation variant |
 
 ## Usage
 
@@ -39,6 +43,52 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 import { ChatComponent } from '@s3_dse/v-tabler'
 </script>
 ```
+
+## Visual Variants
+
+The default `card` variant preserves the bordered chat window and supports all `size` values. It
+can render inline or as a floating launcher:
+
+```vue
+<ChatComponent />
+<ChatComponent floating size="wide" />
+```
+
+Use `variant="embedded"` when the chat is one pane of a larger page. Embedded chat removes card
+chrome, uses neutral surfaces, and fills its parent. The parent must provide a constrained height
+when the message history should scroll internally:
+
+```vue
+<template>
+    <div class="h-[600px] min-h-0">
+        <ChatComponent variant="embedded" />
+    </div>
+</template>
+
+<script setup>
+import { ChatComponent } from '@s3_dse/v-tabler'
+</script>
+```
+
+`variant="embedded"` cannot be combined with `floating`. Custom message renderers receive the
+active `variant` through the `messages` slot and are responsible for adapting their own visual
+presentation:
+
+```vue
+<ChatComponent variant="embedded">
+    <template #messages="{ messages, variant }">
+        <CustomMessage
+            v-for="message in messages"
+            :key="message.id"
+            :message="message"
+            :variant="variant"
+        />
+    </template>
+</ChatComponent>
+```
+
+`ChatHeader`, `ChatInput`, and `TypingIndicator` also accept the same `variant` values when they are
+used independently.
 
 ### Customized Chat
 
@@ -56,9 +106,10 @@ import { ChatComponent } from '@s3_dse/v-tabler'
 </script>
 ```
 
-### Different Sizes
+### Different Card Sizes
 
-The `size` prop allows you to adjust the chat window width to suit your content needs. All sizes are responsive (full-width on mobile, fixed on desktop).
+The `size` prop adjusts card width to suit its content. All card sizes are responsive (full-width
+on mobile, fixed on desktop). Embedded chat ignores this prop and fills its parent.
 
 ```vue
 <template>
@@ -188,7 +239,8 @@ The component uses UnoCSS/Tailwind classes and includes:
 - **Modal Transitions** - Smooth slide-up animation for chat window
 - **Fade Transitions** - Backdrop fade in/out
 - **Button Animation** - Rotate animation on open/close
-- **Responsive Design** - Fixed positioning and mobile-friendly sizing
+- **Responsive Card Design** - Fixed positioning and mobile-friendly sizing
+- **Embedded Layout** - Full-width and full-height layout controlled by the parent
 
 ### Custom Styling
 
