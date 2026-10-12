@@ -185,7 +185,7 @@
                     neighboring pane illustrates how it fits into a larger workspace.
                 </p>
                 <div
-                    class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)] h-[600px] min-h-0 border-y border-border"
+                    class="grid gap-x-4 grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)] h-[600px] min-h-0 border-y border-border"
                 >
                     <ChatComponent
                         variant="embedded"
@@ -193,16 +193,16 @@
                         :ai-handler="handleAiRequest"
                         placeholder="Ask the embedded chat anything..."
                     />
-                    <aside
-                        class="hidden lg:flex min-h-0 flex-col border-l border-border bg-surface"
-                    >
+                    <aside class="hidden lg:flex min-h-0 flex-col border border-border bg-surface">
                         <h5 class="border-b border-border p-4 font-semibold text-default">
                             Workspace content
                         </h5>
-                        <p class="p-4 text-sm text-muted">
-                            Related content can live beside the chat without the chat looking like a
-                            floating modal.
-                        </p>
+                        <div class="p-4">
+                            <p class="card p-4 text-sm text-muted">
+                                Related content can live beside the chat without the chat looking
+                                like a floating modal.
+                            </p>
+                        </div>
                     </aside>
                 </div>
             </div>
