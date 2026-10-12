@@ -42,6 +42,7 @@
 
                 <ChatInput
                     ref="chatInputRef"
+                    class="p-2"
                     v-model="inputMessage"
                     :disabled="isTyping"
                     :is-typing="isTyping"

@@ -185,7 +185,7 @@
                     neighboring pane illustrates how it fits into a larger workspace.
                 </p>
                 <div
-                    class="grid gap-x-4 grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)] h-[600px] min-h-0 border-y border-border"
+                    class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)] h-[600px] min-h-0 border-y border-border"
                 >
                     <ChatComponent
                         variant="embedded"
