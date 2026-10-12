@@ -1,5 +1,11 @@
 <template>
-    <div :class="isEmbedded ? 'w-full py-4' : 'p-4 border-t border-solid border-border bg-surface'">
+    <div
+        :class="
+            isEmbedded
+                ? 'w-full py-4 bg-transparent'
+                : 'p-4 border-t border-solid border-border bg-surface'
+        "
+    >
         <div
             class="chat-input-wrapper flex items-end gap-2"
             :class="

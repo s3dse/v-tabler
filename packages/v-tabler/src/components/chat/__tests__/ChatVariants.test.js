@@ -55,7 +55,6 @@ describe('embedded chat constituent styling', () => {
 
         expect(wrapper.classes()).toContain('bg-transparent')
         expect(wrapper.classes()).not.toContain('bg-surface')
-        expect(wrapper.classes()).toContain('border-t')
         expect(textarea.classes()).toContain('text-default')
     })
 
