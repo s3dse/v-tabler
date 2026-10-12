@@ -1,9 +1,19 @@
 <template>
     <div
-        class="p-4 border-t border-solid border-border"
-        :class="variant === ChatVariant.EMBEDDED ? 'bg-transparent' : 'bg-surface'"
+        :class="
+            isEmbedded
+                ? 'w-full py-4 bg-transparent'
+                : 'p-4 border-t border-solid border-border bg-surface'
+        "
     >
-        <div class="flex gap-2 items-end">
+        <div
+            class="chat-input-wrapper flex items-end gap-2"
+            :class="
+                isEmbedded
+                    ? 'w-full rounded border border-solid border-border bg-surface p-3 focus-within:ring-2 focus-within:ring-primary-lt'
+                    : ''
+            "
+        >
             <textarea
                 ref="textareaRef"
                 v-model="localMessage"
@@ -12,9 +22,15 @@
                 :placeholder="_placeholder"
                 :disabled="disabled"
                 :style="autoHeightStyle"
-                rows="1"
-                class="flex-1 form-inputfield text-default resize-none overflow-y-auto with-scrollbar"
+                :rows="isEmbedded ? 2 : 1"
+                class="flex-1 min-w-0 text-default resize-none overflow-y-auto with-scrollbar"
+                :class="
+                    isEmbedded
+                        ? 'border-0 bg-transparent px-2 py-1 outline-none shadow-none focus:ring-0'
+                        : 'form-inputfield'
+                "
             />
+
             <button
                 type="button"
                 @click="handleButtonClick"
@@ -104,6 +120,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
+
+const isEmbedded = computed(() => props.variant === ChatVariant.EMBEDDED)
 
 const localMessage = ref(props.modelValue)
 const textareaRef = ref(null)
