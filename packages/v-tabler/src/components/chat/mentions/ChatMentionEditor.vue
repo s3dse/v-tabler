@@ -228,13 +228,19 @@ const handleAtomicDelete = (event) => {
   return true
 }
 
+const isCompositionEvent = (event) =>
+  isComposing.value || event.isComposing || event.keyCode === IME_PROCESS_KEY_CODE
+
 const handleKeydown = (event) => {
-  if (isComposing.value || event.isComposing || event.keyCode === IME_PROCESS_KEY_CODE) return
+  if (isCompositionEvent(event)) return
   if (handleAtomicDelete(event)) return
   emit('keydown', event)
 }
 
-const emitCaretChange = () => emit('caret-change', getSelectionRange().end)
+const emitCaretChange = (event) => {
+  if (isCompositionEvent(event)) return
+  emit('caret-change', getSelectionRange().end)
+}
 
 const handlePaste = (event) => {
   event.preventDefault()

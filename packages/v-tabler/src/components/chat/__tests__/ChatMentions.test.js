@@ -3,6 +3,9 @@ import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, ref } from 'vue'
 import ChatInput from '../ChatInput.vue'
 import { createMentionDraft } from '../mentions/mentionDraft.js'
+import { defaultMentionTriggerProvider } from '../mentions/mentionTriggerProvider.js'
+
+const IME_PROCESS_KEY_CODE = 229
 
 const options = {
   brand: [
@@ -842,7 +845,76 @@ describe('ChatInput mentions', () => {
     expect(setData).toHaveBeenCalledWith('text/plain', '@Marke[ADIDAS]')
   })
 
-  it('does not submit while an IME composition is active', async () => {
+  it('waits for IME composition to commit before detecting mention triggers', async () => {
+    const errorHandler = vi.fn()
+    const triggerProvider = vi.fn(defaultMentionTriggerProvider)
+    const optionProvider = vi.fn().mockResolvedValue([])
+    const wrapper = mount(ChatInput, {
+      props: {
+        modelValue: '@brand ',
+        mentionTriggerProvider: triggerProvider,
+        mentionOptionProvider: optionProvider
+      },
+      global: { config: { errorHandler } },
+      attachTo: document.body
+    })
+    wrappers.push(wrapper)
+    await nextTick()
+    const initialDraft = wrapper.emitted('update:modelValue').at(-1)[0]
+    const editor = wrapper.get('[role="combobox"]')
+    const mentionEditor = wrapper.findComponent({ name: 'ChatMentionEditor' })
+    await editor.trigger('compositionstart')
+    const temporaryText = '@brand に'
+    editor.element.textContent = temporaryText
+    placeCaretAtEnd(editor.element)
+
+    await editor.trigger('input', { isComposing: true })
+    await editor.trigger('keyup', { key: 'Process' })
+    await editor.trigger('click')
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(triggerProvider).not.toHaveBeenCalled()
+    expect(wrapper.emitted('update:modelValue').at(-1)[0]).toEqual(initialDraft)
+    expect(editor.element.textContent).toBe(temporaryText)
+
+    const committedText = '@brand 日本'
+    editor.element.textContent = committedText
+    placeCaretAtEnd(editor.element)
+    await editor.trigger('compositionend')
+    await editor.trigger('input', { isComposing: false })
+    await editor.trigger('keyup', { key: 'ArrowRight' })
+    await waitForOptions()
+
+    expect(wrapper.emitted('update:modelValue').at(-1)[0].content).toBe(committedText)
+    expect(editor.element.textContent).toBe(committedText)
+    expect(mentionEditor.emitted('caret-change').at(-1)).toEqual([committedText.length])
+    expect(triggerProvider).toHaveBeenLastCalledWith({
+      text: committedText,
+      cursorIndex: committedText.length
+    })
+    expect(optionProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'brand', query: '日本' })
+    )
+    expect(errorHandler).not.toHaveBeenCalled()
+  })
+
+  it.each([{ isComposing: true }, { keyCode: IME_PROCESS_KEY_CODE }])(
+    'suppresses IME keyup events outside the local composition session (%j)',
+    async (eventProperties) => {
+      const wrapper = mountInput({ modelValue: '入力中', mentionOptionProvider: vi.fn() })
+      await nextTick()
+      const editor = wrapper.get('[role="combobox"]')
+      placeCaretAtEnd(editor.element)
+
+      await editor.trigger('keyup', { key: 'Process', ...eventProperties })
+
+      expect(
+        wrapper.findComponent({ name: 'ChatMentionEditor' }).emitted('caret-change')
+      ).toBeUndefined()
+    }
+  )
+
+  it('allows Enter to submit committed text after confirming an IME composition', async () => {
     const wrapper = mountInput({
       modelValue: '入力中',
       mentionOptionProvider: vi.fn()
@@ -851,8 +923,18 @@ describe('ChatInput mentions', () => {
     const editor = wrapper.get('[contenteditable="true"]')
 
     await editor.trigger('compositionstart')
+    const committedText = '日本'
+    editor.element.textContent = committedText
+    placeCaretAtEnd(editor.element)
     await editor.trigger('keydown', { key: 'Enter', isComposing: true })
 
     expect(wrapper.emitted('submit')).toBeUndefined()
+
+    await editor.trigger('compositionend')
+    await editor.trigger('keyup', { key: 'Enter', keyCode: IME_PROCESS_KEY_CODE })
+    expect(wrapper.emitted('submit')).toBeUndefined()
+
+    await editor.trigger('keydown', { key: 'Enter' })
+    expect(wrapper.emitted('submit')).toEqual([[expect.objectContaining({ content: committedText })]])
   })
 })
