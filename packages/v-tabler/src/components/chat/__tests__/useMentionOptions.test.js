@@ -39,6 +39,42 @@ describe('useMentionOptions', () => {
         wrapper.unmount()
     })
 
+    it.each(['search', 'searchImmediately'])(
+        '%s clears previous suggestions and highlighting before loading new results',
+        async (searchMethod) => {
+            const brandOptions = [
+                { id: 'brand-adidas', label: 'ADIDAS' },
+                { id: 'brand-dyson', label: 'DYSON' }
+            ]
+            const partnerOptions = [{ id: 'partner-otto', label: 'OTTO' }]
+            const pendingRequests = []
+            const provider = vi.fn()
+                .mockResolvedValueOnce(brandOptions)
+                .mockImplementationOnce(
+                    () => new Promise((resolve) => pendingRequests.push({ resolve }))
+                )
+            const { optionsApi, wrapper } = mountOptions(provider)
+
+            await optionsApi.searchImmediately({ type: 'brand', query: '' })
+            optionsApi.highlight(brandOptions.length - 1)
+
+            optionsApi[searchMethod]({ type: 'partner', query: 'otto' })
+
+            expect(optionsApi.options.value).toEqual([])
+            expect(optionsApi.highlightedIndex.value).toBe(0)
+            expect(optionsApi.open.value).toBe(true)
+            expect(optionsApi.loading.value).toBe(true)
+
+            await vi.advanceTimersByTimeAsync(MENTION_SEARCH_DEBOUNCE_MS)
+            pendingRequests[0].resolve(partnerOptions)
+            await vi.advanceTimersByTimeAsync(0)
+
+            expect(optionsApi.options.value).toEqual(partnerOptions)
+            expect(optionsApi.loading.value).toBe(false)
+            wrapper.unmount()
+        }
+    )
+
     it('aborts stale requests and ignores their results', async () => {
         const requests = []
         const provider = vi.fn(

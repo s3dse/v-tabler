@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { DOMWrapper, mount } from '@vue/test-utils'
-import { nextTick } from 'vue'
+import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import ChatInput from '../ChatInput.vue'
 
 const options = {
@@ -46,6 +46,25 @@ describe('ChatInput mentions', () => {
     })
     wrappers.push(wrapper)
     return wrapper
+  }
+
+  const mountControlledInput = (props) => {
+    const model = ref(props.modelValue ?? '')
+    const parent = mount(
+      defineComponent({
+        setup: () => () =>
+          h(ChatInput, {
+            ...props,
+            modelValue: model.value,
+            'onUpdate:modelValue': (value) => {
+              model.value = value
+            }
+          })
+      }),
+      { attachTo: document.body }
+    )
+    wrappers.push(parent)
+    return { model, wrapper: parent.getComponent(ChatInput) }
   }
 
   it('preserves the textarea path and string model without an option provider', async () => {
@@ -287,7 +306,9 @@ describe('ChatInput mentions', () => {
   })
 
   it('applies external structured draft updates', async () => {
-    const wrapper = mountInput({ modelValue: '', mentionOptionProvider: vi.fn() })
+    const { model, wrapper } = mountControlledInput({ mentionOptionProvider: vi.fn() })
+    await nextTick()
+    const updateCount = wrapper.emitted('update:modelValue').length
     const externalDraft = {
       content: 'DYSON',
       serializedContent: '@partner[DYSON]',
@@ -303,10 +324,123 @@ describe('ChatInput mentions', () => {
       ]
     }
 
-    await wrapper.setProps({ modelValue: externalDraft })
+    model.value = externalDraft
     await nextTick()
 
     expect(wrapper.get('[data-mention-index]').text()).toContain('DYSON')
+    expect(model.value).toEqual(externalDraft)
+    expect(wrapper.emitted('update:modelValue')).toHaveLength(updateCount)
+  })
+
+  it('normalizes external portable text and blocks unresolved submissions', async () => {
+    const { model, wrapper } = mountControlledInput({
+      mentionOptionProvider: vi.fn().mockResolvedValue([])
+    })
+    await nextTick()
+
+    model.value = 'Sales for @brand[ADIDAS]'
+    await nextTick()
+    const sendButton = wrapper.get('button.btn-primary-md')
+    await sendButton.trigger('click')
+
+    expect(wrapper.emitted('submit')).toBeUndefined()
+    expect(sendButton.attributes('disabled')).toBeDefined()
+    expect(model.value).toMatchObject({
+      content: 'Sales for ADIDAS',
+      serializedContent: 'Sales for @brand[ADIDAS]',
+      parts: [
+        { kind: 'text', text: 'Sales for ' },
+        { kind: 'mention', type: 'brand', id: null, label: 'ADIDAS', resolved: false }
+      ]
+    })
+
+    await wrapper.get('[role="combobox"]').trigger('keydown', { key: 'Enter' })
+    await flushPromises()
+
+    expect(wrapper.emitted('submit')).toBeUndefined()
+    expect(sendButton.attributes('disabled')).toBeDefined()
+  })
+
+  it.each(['Sales for @brand[ADIDAS]', ''])(
+    'normalizes an equivalent external string exactly once: %j',
+    async (portableText) => {
+      const { model, wrapper } = mountControlledInput({
+        modelValue: portableText,
+        mentionOptionProvider: vi.fn().mockResolvedValue([])
+      })
+      await nextTick()
+      const normalizedDraft = model.value
+      const updateCount = wrapper.emitted('update:modelValue').length
+
+      model.value = portableText
+      await nextTick()
+
+      expect(model.value).toEqual(normalizedDraft)
+      expect(wrapper.emitted('update:modelValue')).toHaveLength(updateCount + 1)
+    }
+  )
+
+  it.each([
+    ['missing content', ({ parts, serializedContent }) => ({ parts, serializedContent })],
+    ['stale serialized content', (draft) => ({ ...draft, serializedContent: 'Outdated content' })],
+    [
+      'fragmented text parts',
+      (draft) => ({
+        ...draft,
+        parts: [
+          { kind: 'text', text: 'Sales ' },
+          { kind: 'text', text: 'for ' },
+          ...draft.parts.slice(1)
+        ]
+      })
+    ]
+  ])('corrects external structured drafts with %s', async (_description, buildIncomingDraft) => {
+    const normalizedDraft = {
+      content: 'Sales for DYSON',
+      serializedContent: 'Sales for @partner[DYSON]',
+      parts: [
+        { kind: 'text', text: 'Sales for ' },
+        { kind: 'mention', type: 'partner', trigger: 'partner', ...options.partner[0], resolved: true }
+      ]
+    }
+    const { model, wrapper } = mountControlledInput({
+      modelValue: normalizedDraft,
+      mentionOptionProvider: vi.fn()
+    })
+    await nextTick()
+    const updateCount = wrapper.emitted('update:modelValue').length
+
+    model.value = buildIncomingDraft(normalizedDraft)
+    await nextTick()
+
+    expect(model.value).toEqual(normalizedDraft)
+    expect(wrapper.emitted('update:modelValue')).toHaveLength(updateCount + 1)
+
+    await wrapper.get('button.btn-primary-md').trigger('click')
+    expect(wrapper.emitted('submit')).toEqual([[normalizedDraft]])
+  })
+
+  it('preserves the caret and open menu when normalizing equivalent editor content', async () => {
+    const { model, wrapper } = mountControlledInput({
+      mentionOptionProvider: vi.fn().mockResolvedValue(options.brand)
+    })
+    await nextTick()
+    const text = '@brand adi'
+    const editor = await enterEditorText(wrapper, text)
+    const normalizedDraft = model.value
+    const updateCount = wrapper.emitted('update:modelValue').length
+    const { anchorNode, anchorOffset } = window.getSelection()
+    expect(editor.attributes('aria-expanded')).toBe('true')
+
+    model.value = text
+    await nextTick()
+
+    expect(model.value).toEqual(normalizedDraft)
+    expect(wrapper.emitted('update:modelValue')).toHaveLength(updateCount + 1)
+    expect(editor.attributes('aria-expanded')).toBe('true')
+    expect(document.activeElement).toBe(editor.element)
+    expect(window.getSelection().anchorNode).toBe(anchorNode)
+    expect(window.getSelection().anchorOffset).toBe(anchorOffset)
   })
 
   it('loads options and inserts a resolved chip', async () => {
@@ -417,6 +551,66 @@ describe('ChatInput mentions', () => {
       ]
     })
     expect(wrapper.get('button.btn-primary-md').attributes('disabled')).toBeUndefined()
+  })
+
+  it('rejects stale suggestions while another mention lookup is loading', async () => {
+    const pendingPartnerRequests = []
+    const optionProvider = vi.fn(({ type }) =>
+      type === 'brand'
+        ? Promise.resolve(options.brand)
+        : new Promise((resolve) => pendingPartnerRequests.push({ resolve }))
+    )
+    const wrapper = mountInput({
+      modelValue: '@brand[Unknown brand] @partner[Unknown partner]',
+      mentionOptionProvider: optionProvider
+    })
+    await nextTick()
+    const initialDraft = wrapper.emitted('update:modelValue').at(-1)[0]
+    const [brandChip, partnerChip] = wrapper.findAll('[data-mention-index]')
+    const editor = wrapper.get('[role="combobox"]')
+
+    await brandChip.trigger('click')
+    await flushPromises()
+    expect(getMenu().findAll('[role="option"]')).toHaveLength(options.brand.length)
+    await editor.trigger('keydown', { key: 'ArrowDown' })
+    const menu = wrapper.findComponent({ name: 'ChatMentionMenu' })
+
+    await partnerChip.trigger('click')
+    const activeDescendantWhileLoading = editor.attributes('aria-activedescendant')
+    const enterEvent = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      bubbles: true,
+      cancelable: true
+    })
+    editor.element.dispatchEvent(enterEvent)
+    await nextTick()
+
+    expect(enterEvent.defaultPrevented).toBe(true)
+    expect(wrapper.emitted('update:modelValue').at(-1)[0]).toEqual(initialDraft)
+    expect(wrapper.emitted('submit')).toBeUndefined()
+    expect(activeDescendantWhileLoading).toBeUndefined()
+    expect(getMenu().findAll('[role="option"]')).toHaveLength(0)
+
+    menu.vm.$emit('select', options.brand.at(-1))
+    await nextTick()
+
+    expect(wrapper.emitted('update:modelValue').at(-1)[0]).toEqual(initialDraft)
+    expect(wrapper.emitted('submit')).toBeUndefined()
+
+    pendingPartnerRequests[0].resolve(options.partner)
+    await flushPromises()
+    await editor.trigger('keydown', { key: 'Enter' })
+
+    const mentions = wrapper.emitted('update:modelValue').at(-1)[0].parts.filter(
+      (part) => part.kind === 'mention'
+    )
+    expect(mentions[0]).toEqual(initialDraft.parts[0])
+    expect(mentions[1]).toMatchObject({
+      type: 'partner',
+      ...options.partner[0],
+      resolved: true
+    })
+    expect(wrapper.emitted('submit')).toBeUndefined()
   })
 
   it('submits structured content after resolution', async () => {

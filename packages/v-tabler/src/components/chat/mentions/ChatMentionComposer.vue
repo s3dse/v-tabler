@@ -224,7 +224,7 @@ const insertMentionOption = (context, option) => {
 
 const selectOption = (option) => {
     const context = activeMentionContext.value
-    if (!context) return
+    if (!context || mentionOptions.loading.value) return
 
     if (context.mode === 'resolve') {
         resolveMentionWithOption(context, option)
@@ -369,10 +369,19 @@ const clear = () => {
 
 watch(draftModel, (value) => {
     const nextDraft = normalizeMentionDraft(value, activeTriggerProvider.value)
-    if (mentionPartsAreEqual(nextDraft.parts, draft.value.parts)) return
-    draft.value = nextDraft
-    closeMentionMenu()
-    editorRef.value?.adjustHeightNextTick()
+    const editorContentChanged = !mentionPartsAreEqual(nextDraft.parts, draft.value.parts)
+    const modelNeedsCorrection =
+        typeof value === 'string' ||
+        value.content !== nextDraft.content ||
+        value.serializedContent !== nextDraft.serializedContent ||
+        !mentionPartsAreEqual(value.parts, nextDraft.parts)
+
+    if (editorContentChanged) {
+        draft.value = nextDraft
+        closeMentionMenu()
+        editorRef.value?.adjustHeightNextTick()
+    }
+    if (modelNeedsCorrection) draftModel.value = nextDraft
 })
 
 onMounted(() => setDraft(draft.value))

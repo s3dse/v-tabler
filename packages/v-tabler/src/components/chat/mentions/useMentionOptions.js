@@ -33,6 +33,8 @@ export const useMentionOptions = (optionProvider) => {
         open.value = true
         loading.value = true
         error.value = null
+        options.value = []
+        highlightedIndex.value = 0
     }
 
     const cancelPendingRequest = () => {
@@ -84,7 +86,6 @@ export const useMentionOptions = (optionProvider) => {
     const search = (context) => {
         cancelPendingRequest()
         showLoadingState()
-        options.value = []
         debounceTimer = setTimeout(() => {
             debounceTimer = null
             executeSearch(context)
