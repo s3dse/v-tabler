@@ -75,6 +75,8 @@ describe('useChatLogic', () => {
             )
             expect(messages.value).toHaveLength(initialLength + 1)
             expect(messages.value[messages.value.length - 1]).toEqual(userMessage)
+            expect(userMessage).not.toHaveProperty('serializedContent')
+            expect(userMessage).not.toHaveProperty('parts')
         })
 
         it('should add AI message', () => {

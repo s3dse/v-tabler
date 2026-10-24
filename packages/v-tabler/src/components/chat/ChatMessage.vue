@@ -2,17 +2,38 @@
     <div class="flex" :class="alignmentClass">
         <div :class="messageClasses">
             <p class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
-            <span class="text-xs mt-1 block opacity-70" :title="message.timestamp.toLocaleString()">
-                {{
-                    message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }}
-            </span>
+            <div class="mt-1 flex items-center justify-between gap-2">
+                <span class="text-xs opacity-70" :title="message.timestamp.toLocaleString()">
+                    {{
+                        message.timestamp.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })
+                    }}
+                </span>
+                <button
+                    v-if="message.role === 'user' && isSupported"
+                    type="button"
+                    :title="copyLabel"
+                    :aria-label="copyLabel"
+                    class="rounded bg-primary p-1 text-onprimary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 hover:bg-primary-hover"
+                    @click="copy(copyContent)"
+                >
+                    <span
+                        aria-hidden="true"
+                        class="block h-4 w-4"
+                        :class="copied ? 'i-tabler-check' : 'i-tabler-copy'"
+                    />
+                </button>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useClipboard } from '@vueuse/core'
+import { useI18n } from '@/composables/useI18n.js'
 import { ChatVariant, DEFAULT_CHAT_VARIANT, isChatVariant } from './chatVariants.js'
 
 const props = defineProps({
@@ -34,6 +55,13 @@ const props = defineProps({
         validator: isChatVariant
     }
 })
+
+const { t } = useI18n()
+const { copy, copied, isSupported } = useClipboard()
+const copyContent = computed(() => props.message.serializedContent ?? props.message.content)
+const copyLabel = computed(() =>
+    copied.value ? t('vTabler.chat.message.copiedLabel') : t('vTabler.chat.message.copyLabel')
+)
 
 const alignmentClass = computed(() => {
     return props.message.role === 'user' ? 'justify-end' : 'justify-start'

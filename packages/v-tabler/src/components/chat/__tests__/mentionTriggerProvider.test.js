@@ -1,12 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import {
     createMentionTriggerProvider,
-    defaultMentionTriggerProvider
+    defaultMentionTriggerProvider,
+    DEFAULT_CHAT_MENTION_TRIGGERS
 } from '../mentions/mentionTriggerProvider.js'
+import * as packageEntry from '../../../install.js'
 
 const matchAtEnd = (text) => defaultMentionTriggerProvider({ text, cursorIndex: text.length })
 
 describe('mention trigger providers', () => {
+    it('exports the mention trigger API from the package entry', () => {
+        expect(packageEntry).toMatchObject({
+            createMentionTriggerProvider,
+            defaultMentionTriggerProvider,
+            DEFAULT_CHAT_MENTION_TRIGGERS
+        })
+    })
+
     it.each([
         ['Wieviele Klicks hatte die @Marke adi', 'brand', 'Marke', 'adi'],
         ['Wieviele Klicks hatte die @brand adi', 'brand', 'brand', 'adi'],

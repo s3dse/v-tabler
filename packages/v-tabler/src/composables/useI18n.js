@@ -26,6 +26,10 @@ const DEFAULT_TRANSLATIONS = {
             input: {
                 placeholder: 'Type a message...'
             },
+            message: {
+                copyLabel: 'Copy message',
+                copiedLabel: 'Message copied'
+            },
             mentions: {
                 loading: 'Loading suggestions...',
                 empty: 'No matching options.',
@@ -64,6 +68,10 @@ const TRANSLATIONS_DE = {
         chat: {
             input: {
                 placeholder: 'Nachricht eingeben...'
+            },
+            message: {
+                copyLabel: 'Nachricht kopieren',
+                copiedLabel: 'Nachricht kopiert'
             },
             mentions: {
                 loading: 'Vorschläge werden geladen...',

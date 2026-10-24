@@ -23,6 +23,8 @@ vi.mock('../useChatLogic.js', () => ({
         },
         isTyping: { value: false },
         sendMessage: vi.fn(),
+        cancelCurrentRequest: vi.fn(),
+        recallLastMessage: vi.fn(),
         clearChat: vi.fn(),
         scrollToBottom: vi.fn().mockResolvedValue(),
         focusInput: vi.fn()
@@ -35,8 +37,18 @@ vi.mock('../ChatInput.vue', () => ({
         name: 'ChatInput',
         template:
             '<div data-testid="chat-input" :disabled="disabled" :placeholder="placeholder" @submit="$emit(\'submit\', $event)" @update:modelValue="$emit(\'update:modelValue\', $event)"></div>',
-        props: ['modelValue', 'disabled', 'showHint', 'placeholder', 'variant'],
-        emits: ['submit', 'update:modelValue']
+        props: [
+            'modelValue',
+            'disabled',
+            'isTyping',
+            'showHint',
+            'placeholder',
+            'recallLastMessage',
+            'variant',
+            'mentionOptionProvider',
+            'mentionTriggerProvider'
+        ],
+        emits: ['submit', 'cancel', 'update:modelValue']
     }
 }))
 
@@ -80,6 +92,8 @@ describe('ChatComponent', () => {
             },
             isTyping: { value: false },
             sendMessage: vi.fn(),
+            cancelCurrentRequest: vi.fn(),
+            recallLastMessage: vi.fn(),
             clearChat: vi.fn(),
             scrollToBottom: vi.fn().mockResolvedValue(),
             focusInput: vi.fn()
@@ -195,46 +209,77 @@ describe('ChatComponent', () => {
             )
         })
 
-        it('should pass placeholder to ChatInput', async () => {
-            wrapper = mountFloatingChat({
+        it('should pass mention providers to ChatInput', () => {
+            const optionProvider = vi.fn()
+            const triggerProvider = vi.fn()
+            wrapper = mountInlineChat({
                 props: {
-                    placeholder: 'Type your message here...'
+                    mentionOptionProvider: optionProvider,
+                    mentionTriggerProvider: triggerProvider
                 }
             })
 
-            await wrapper.find('button').trigger('click')
-
-            // Since we mocked ChatInput, let's check if the component was rendered with props
-            expect(wrapper.find('[data-testid="chat-input"]').exists()).toBe(true)
+            expect(wrapper.findComponent({ name: 'ChatInput' }).props()).toMatchObject({
+                mentionOptionProvider: optionProvider,
+                mentionTriggerProvider: triggerProvider
+            })
         })
 
         it('should expose the input contract through the input slot', async () => {
             const optionProvider = vi.fn()
+            const triggerProvider = vi.fn()
             const customInput = { focus: vi.fn(), clear: vi.fn() }
+            let currentInputProps
+            let currentInputEvents
+            let registerInput
             wrapper = mountInlineChat({
-                props: { mentionOptionProvider: optionProvider },
+                props: {
+                    placeholder: 'Ask a question',
+                    variant: 'embedded',
+                    mentionOptionProvider: optionProvider,
+                    mentionTriggerProvider: triggerProvider
+                },
                 slots: {
-                    input: ({ inputProps, inputEvents, setInputRef }) =>
-                        h(
-                            'button',
-                            {
-                                'data-testid': 'custom-input',
-                                'data-has-option-provider':
-                                    inputProps.mentionOptionProvider === optionProvider,
-                                onClick: () => {
-                                    setInputRef(customInput)
-                                    inputEvents.submit('Custom message')
-                                }
-                            },
-                            'Custom input'
-                        )
+                    input: ({ inputProps, inputEvents, setInputRef }) => {
+                        currentInputProps = inputProps
+                        currentInputEvents = inputEvents
+                        registerInput = setInputRef
+                        return h('div', { 'data-testid': 'custom-input' })
+                    }
                 }
             })
 
-            const input = wrapper.get('[data-testid="custom-input"]')
-            expect(input.attributes('data-has-option-provider')).toBe('true')
-            await input.trigger('click')
+            expect(currentInputProps).toMatchObject({
+                modelValue: '',
+                disabled: false,
+                isTyping: false,
+                showHint: true,
+                placeholder: 'Ask a question',
+                recallLastMessage: mockComposable.recallLastMessage,
+                variant: 'embedded',
+                mentionOptionProvider: optionProvider,
+                mentionTriggerProvider: triggerProvider
+            })
+
+            registerInput(customInput)
+            const { chatInputRef } = mockUseChatLogic.mock.calls.at(-1)[0]
+            expect(chatInputRef.value).toMatchObject({
+                focus: customInput.focus,
+                clear: customInput.clear
+            })
+            chatInputRef.value.focus()
+            chatInputRef.value.clear()
+            expect(customInput.focus).toHaveBeenCalledOnce()
+            expect(customInput.clear).toHaveBeenCalledOnce()
+
+            currentInputEvents['update:modelValue']('Draft message')
+            await nextTick()
+            expect(currentInputProps.modelValue).toBe('Draft message')
+
+            await currentInputEvents.submit('Custom message')
             expect(mockComposable.sendMessage).toHaveBeenCalledWith('Custom message')
+            currentInputEvents.cancel()
+            expect(mockComposable.cancelCurrentRequest).toHaveBeenCalledOnce()
         })
     })
 

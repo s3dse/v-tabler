@@ -48,11 +48,22 @@ describe('ChatInput mentions', () => {
     return wrapper
   }
 
-  it('preserves the textarea path without an option provider', () => {
+  it('preserves the textarea path and string model without an option provider', async () => {
     const wrapper = mountInput({ modelValue: '' })
+    const textarea = wrapper.get('textarea')
 
-    expect(wrapper.find('textarea').exists()).toBe(true)
+    expect(textarea.exists()).toBe(true)
     expect(wrapper.find('[contenteditable="true"]').exists()).toBe(false)
+
+    await textarea.setValue('Plain message')
+    expect(wrapper.emitted('update:modelValue').at(-1)).toEqual(['Plain message'])
+
+    wrapper.vm.focus()
+    expect(document.activeElement).toBe(textarea.element)
+
+    wrapper.vm.clear()
+    await nextTick()
+    expect(wrapper.emitted('update:modelValue').at(-1)).toEqual([''])
   })
 
   it('gives the mention editor an accessible name', async () => {
@@ -78,6 +89,15 @@ describe('ChatInput mentions', () => {
     await nextTick()
 
     expect(document.activeElement).toBe(wrapper.get('[contenteditable="true"]').element)
+
+    const updateCount = wrapper.emitted('update:modelValue')?.length ?? 0
+    wrapper.vm.clear()
+    await nextTick()
+
+    expect(wrapper.emitted('update:modelValue')).toHaveLength(updateCount + 1)
+    expect(wrapper.emitted('update:modelValue').at(-1)).toEqual([
+      { content: '', serializedContent: '', parts: [] }
+    ])
   })
 
   it('keeps the editor element and focus stable while typing', async () => {
