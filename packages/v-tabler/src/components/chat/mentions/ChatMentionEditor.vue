@@ -30,6 +30,7 @@
         v-else
         :data-mention-index="index"
         :mention="part"
+        :disabled="disabled"
         @activate="emit('resolve', index)"
       />
     </template>

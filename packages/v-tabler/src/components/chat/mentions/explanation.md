@@ -161,7 +161,7 @@ Backspace and Delete treat mentions atomically. IME composition events are ignor
 
 The chip is `contenteditable="false"`, so the browser treats it as an atomic object. It renders only the label, while type and resolution information are exposed through styling, title, and accessible text.
 
-Unresolved chips additionally become keyboard-accessible buttons. Activating one asks the composer to resolve it. Their warning colors use the theme's `warning` status family, which clients can override.
+Unresolved chips additionally become keyboard-accessible buttons. Activating one asks the composer to resolve it. When the input is disabled, they remain exposed as disabled buttons but leave the Tab sequence and cannot start resolution. Disabling the input also closes the menu and cancels pending lookups. Their warning colors use the theme's `warning` status family, which clients can override.
 
 ## 7. Remote option lookup
 

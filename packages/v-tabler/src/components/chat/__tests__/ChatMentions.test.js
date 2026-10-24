@@ -805,6 +805,83 @@ describe('ChatInput mentions', () => {
     expect(wrapper.emitted('submit')).toEqual([[initialDraft]])
   })
 
+  it.each(['click', 'Enter', ' '])('keeps disabled unresolved chips inert on %j', async (event) => {
+    const optionProvider = vi.fn()
+    const wrapper = mountInput({
+      modelValue: '@brand[UNKNOWN]',
+      mentionOptionProvider: optionProvider,
+      disabled: true
+    })
+    await nextTick()
+    const editor = wrapper.get('[role="combobox"]')
+    const chip = wrapper.get('[data-mention-index]')
+    const updateCount = wrapper.emitted('update:modelValue').length
+
+    expect(editor.attributes()).toMatchObject({
+      'aria-disabled': 'true',
+      contenteditable: 'false',
+      'aria-expanded': 'false'
+    })
+    expect(chip.attributes()).toMatchObject({ role: 'button', 'aria-disabled': 'true' })
+    expect(chip.attributes('tabindex')).toBeUndefined()
+    expect(chip.classes()).not.toContain('cursor-pointer')
+
+    if (event === 'click') await chip.trigger('click')
+    else await chip.trigger('keydown', { key: event })
+    await flushPromises()
+
+    expect(optionProvider).not.toHaveBeenCalled()
+    expect(editor.attributes('aria-expanded')).toBe('false')
+    expect(getMenu().exists()).toBe(false)
+    expect(wrapper.emitted('update:modelValue')).toHaveLength(updateCount)
+    expect(wrapper.emitted('submit')).toBeUndefined()
+  })
+
+  it('cancels resolution when disabled and restores chip activation when re-enabled', async () => {
+    const requests = []
+    const optionProvider = vi.fn(
+      ({ signal }) => new Promise((resolve) => requests.push({ resolve, signal }))
+    )
+    const wrapper = mountInput({
+      modelValue: '@brand[UNKNOWN]',
+      mentionOptionProvider: optionProvider
+    })
+    await nextTick()
+    const initialDraft = wrapper.emitted('update:modelValue').at(-1)[0]
+    const editor = wrapper.get('[role="combobox"]')
+    const chip = wrapper.get('[data-mention-index]')
+
+    await chip.trigger('click')
+    await editor.trigger('keydown', { key: 'ArrowDown' })
+    expect(editor.attributes('aria-expanded')).toBe('true')
+    expect(editor.attributes('aria-activedescendant')).toBeTruthy()
+
+    await wrapper.setProps({ disabled: true })
+    await nextTick()
+
+    expect(requests[0].signal.aborted).toBe(true)
+    expect(editor.attributes('aria-expanded')).toBe('false')
+    expect(editor.attributes('aria-activedescendant')).toBeUndefined()
+    expect(document.body.querySelector('.mention-menu[data-state="open"]')).toBeNull()
+    expect(chip.attributes('aria-disabled')).toBe('true')
+    requests[0].resolve([{ id: 'late', label: 'UNKNOWN' }])
+    await flushPromises()
+    expect(wrapper.emitted('update:modelValue').at(-1)[0]).toEqual(initialDraft)
+
+    await wrapper.setProps({ disabled: false })
+    expect(chip.attributes('aria-disabled')).toBeUndefined()
+    expect(chip.attributes('tabindex')).toBe('0')
+    await chip.trigger('click')
+    requests[1].resolve([{ id: 'resolved', label: 'UNKNOWN' }])
+    await flushPromises()
+
+    expect(wrapper.emitted('update:modelValue').at(-1)[0].parts[0]).toMatchObject({
+      id: 'resolved',
+      label: 'UNKNOWN',
+      resolved: true
+    })
+  })
+
   it.each(['Enter', ' '])('opens chip resolution with %j and moves focus and the caret to the editor', async (key) => {
     const { model, wrapper } = mountControlledInput({
       modelValue: 'Before @brand[UNKNOWN] after',

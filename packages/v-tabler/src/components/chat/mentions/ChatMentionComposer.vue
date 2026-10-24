@@ -162,6 +162,7 @@ const handleMenuInteractOutside = (event) => {
 }
 
 const updateActiveTrigger = (caretIndex) => {
+    if (props.disabled) return
     if (activeMentionContext.value?.mode === 'resolve') return
 
     const match = activeTriggerProvider.value({
@@ -196,6 +197,7 @@ const setDraftParts = (parts, caretIndex, detectTrigger = true) => {
 }
 
 const replaceDraftRange = (range, parts) => {
+    if (props.disabled) return
     closeMentionMenu()
     setDraftParts(
         replaceMentionRange(draft.value.parts, range, parts),
@@ -204,7 +206,10 @@ const replaceDraftRange = (range, parts) => {
     )
 }
 
-const handleInputParts = ({ parts, caretIndex }) => setDraftParts(parts, caretIndex)
+const handleInputParts = ({ parts, caretIndex }) => {
+    if (props.disabled) return
+    setDraftParts(parts, caretIndex)
+}
 
 const getHighlightedOption = () =>
     mentionOptions.options.value[mentionOptions.highlightedIndex.value]
@@ -330,6 +335,7 @@ const submitDraftOrResolveMention = () => {
 }
 
 const handleKeydown = (event) => {
+    if (props.disabled) return
     if (handleMentionMenuKeydown(event)) return
 
     if (event.key === 'Enter' && event.shiftKey) {
@@ -377,7 +383,7 @@ const findSingleExactOption = (options, label) => {
 
 const resolveMention = async (partIndex) => {
     const mention = draft.value.parts[partIndex]
-    if (mention?.kind !== 'mention' || mention.resolved) return
+    if (props.disabled || mention?.kind !== 'mention' || mention.resolved) return
 
     activeMentionContext.value = { mode: 'resolve', partIndex }
     plainTextHighlighted.value = false
@@ -409,6 +415,13 @@ const clear = () => {
     setDraft(createMentionDraft([]))
     restoreCaret(0)
 }
+
+watch(
+    () => props.disabled,
+    (isDisabled) => {
+        if (isDisabled) closeMentionMenu()
+    }
+)
 
 watch(draftModel, (value) => {
     const nextDraft = normalizeMentionDraft(value, activeTriggerProvider.value)
