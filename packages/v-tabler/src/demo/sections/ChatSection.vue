@@ -294,7 +294,7 @@ const mentionOptions = {
 const mentionOptionProvider = ({ type, query, signal }) => {
     if (signal.aborted) throw new DOMException('Mention search was cancelled', 'AbortError')
     const normalizedQuery = query.trim().toLocaleLowerCase()
-    return (mentionOptions[type] ?? []).filter((option) =>
+    return (mentionOptions[type] ?? []).filter(option =>
         option.label.toLocaleLowerCase().includes(normalizedQuery)
     )
 }

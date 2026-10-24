@@ -8,7 +8,7 @@
     <p v-if="loading" role="status" class="px-3 py-2 text-sm text-muted">
       {{ t('vTabler.chat.mentions.loading') }}
     </p>
-    <p v-else-if="error" role="alert" class="px-3 py-2 text-sm text-danger">
+    <p v-else-if="error" role="alert" class="px-3 py-2 text-sm text-error">
       {{ t('vTabler.chat.mentions.error') }}
     </p>
     <p v-else-if="options.length === 0" role="status" class="px-3 py-2 text-sm text-muted">

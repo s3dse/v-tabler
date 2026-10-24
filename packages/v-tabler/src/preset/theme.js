@@ -261,6 +261,18 @@ const theme = {
                 border: '#f44336',
                 hover: '#f9d7d5'
             },
+            warning: {
+                DEFAULT: '#92400e',
+                bg: '#fffbeb',
+                border: '#f59e0b',
+                hover: '#fef3c7'
+            },
+            success: {
+                DEFAULT: '#166534',
+                bg: '#f0fdf4',
+                border: '#22c55e',
+                hover: '#dcfce7'
+            },
             gray: allColors.gray,
             txt: {
                 DEFAULT: '#2b3c53', // main readable text
@@ -304,6 +316,18 @@ const theme = {
                 bg: '#7f1d1d',
                 border: '#ef5350',
                 hover: '#b71c1c'
+            },
+            warning: {
+                DEFAULT: '#fcd34d',
+                bg: '#451a03',
+                border: '#f59e0b',
+                hover: '#78350f'
+            },
+            success: {
+                DEFAULT: '#86efac',
+                bg: '#052e16',
+                border: '#22c55e',
+                hover: '#14532d'
             },
             gray: allColors.gray,
             txt: {

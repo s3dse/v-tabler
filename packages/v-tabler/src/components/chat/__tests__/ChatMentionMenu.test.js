@@ -40,7 +40,7 @@ describe('ChatMentionMenu', () => {
 
   it.each([
     [{ loading: true }, 'status', 'Loading suggestions...', 'text-muted'],
-    [{ error: new Error('failed') }, 'alert', 'Suggestions could not be loaded.', 'text-danger'],
+    [{ error: new Error('failed') }, 'alert', 'Suggestions could not be loaded.', 'text-error'],
     [{}, 'status', 'No matching options.', 'text-muted']
   ])('styles the loading, error, and empty states', (props, role, text, colorClass) => {
     const wrapper = mountMenu(props)

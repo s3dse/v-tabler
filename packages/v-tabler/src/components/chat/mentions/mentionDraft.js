@@ -1,18 +1,21 @@
 const PORTABLE_MENTION_PATTERN = /@([^\s@[\]]+)\[((?:\\.|[^\]\\])*)\]/gu
 
-const mentionLength = (part) => (part.kind === 'text' ? part.text.length : part.label.length)
+const mentionPartLength = (part) => (part.kind === 'text' ? part.text.length : part.label.length)
+
+export const contentLength = (parts) =>
+    parts.reduce((length, part) => length + mentionPartLength(part), 0)
 
 export const mentionPartSpans = (parts) => {
     let start = 0
     return parts.map((part) => {
-        const end = start + mentionLength(part)
+        const end = start + mentionPartLength(part)
         const span = { part, start, end }
         start = end
         return span
     })
 }
 
-const appendPart = (parts, part) => {
+const appendMergedPart = (parts, part) => {
     if (part.kind === 'text' && !part.text) return parts
 
     const previousPart = parts.at(-1)
@@ -22,7 +25,7 @@ const appendPart = (parts, part) => {
     return [...parts, part]
 }
 
-export const mergeMentionParts = (parts) => parts.reduce(appendPart, [])
+export const mergeMentionParts = (parts) => parts.reduce(appendMergedPart, [])
 
 const escapeMentionLabel = (label) =>
     label.replace(/\\/g, '\\\\').replace(/\[/g, '\\[').replace(/\]/g, '\\]')
@@ -122,7 +125,7 @@ export const normalizeMentionDraft = (value, triggerProvider) => {
 export const hasUnresolvedMentions = (draft) =>
     draft.parts.some((part) => part.kind === 'mention' && !part.resolved)
 
-const sliceMentionParts = (parts, { start, end }, includePartialMentions = false) =>
+const sliceMentionRange = (parts, { start, end }, includePartialMentions = false) =>
     mentionPartSpans(parts).flatMap(({ part, start: partStart, end: partEnd }) => {
         const sliceStart = Math.max(start, partStart)
         const sliceEnd = Math.min(end, partEnd)
@@ -142,20 +145,17 @@ const sliceMentionParts = (parts, { start, end }, includePartialMentions = false
     })
 
 export const replaceMentionRange = (parts, { start, end }, insertedParts) => {
-    const length = mentionPartsToContent(parts).length
+    const length = contentLength(parts)
     if (start < 0 || end < start || end > length) {
         throw new RangeError('Mention replacement range is outside the draft content.')
     }
 
     return mergeMentionParts([
-        ...sliceMentionParts(parts, { start: 0, end: start }),
+        ...sliceMentionRange(parts, { start: 0, end: start }),
         ...insertedParts,
-        ...sliceMentionParts(parts, { start: end, end: length })
+        ...sliceMentionRange(parts, { start: end, end: length })
     ])
 }
 
 export const serializeMentionRange = (parts, range) =>
-    serializeMentionParts(sliceMentionParts(parts, range, true))
-
-export const contentLength = (parts) =>
-    parts.reduce((length, part) => length + mentionLength(part), 0)
+    serializeMentionParts(sliceMentionRange(parts, range, true))

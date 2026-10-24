@@ -5,7 +5,7 @@
         :class="
             mention.resolved
                 ? 'border-primary/30 bg-primary/10 text-default'
-                : 'cursor-pointer border-warning/50 bg-warning/10 text-default'
+                : 'cursor-pointer border-warning-border bg-warning-bg text-default'
         "
         :tabindex="mention.resolved ? undefined : 0"
         :role="mention.resolved ? undefined : 'button'"
@@ -19,7 +19,7 @@
         <span
             v-if="!mention.resolved"
             aria-hidden="true"
-            class="i-tabler-alert-circle ml-1 size-4"
+            class="i-tabler-alert-circle ml-1 size-4 text-warning"
         />
     </span>
 </template>

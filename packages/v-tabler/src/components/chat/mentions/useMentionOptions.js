@@ -2,22 +2,21 @@ import { onBeforeUnmount, ref } from 'vue'
 
 const MENTION_SEARCH_DEBOUNCE_MS = 200
 
+const isValidMentionOption = (option) =>
+    option !== null &&
+    typeof option === 'object' &&
+    ['string', 'number'].includes(typeof option.id) &&
+    Boolean(String(option.id).trim()) &&
+    typeof option.label === 'string' &&
+    Boolean(option.label.trim())
+
 const validateOptions = (options) => {
     if (!Array.isArray(options)) {
         throw new TypeError('mentionOptionProvider must return an array.')
     }
-    options.forEach((option) => {
-        if (
-            option === null ||
-            typeof option !== 'object' ||
-            !['string', 'number'].includes(typeof option.id) ||
-            !String(option.id).trim() ||
-            typeof option.label !== 'string' ||
-            !option.label.trim()
-        ) {
-            throw new TypeError('Mention options require a non-empty id and label.')
-        }
-    })
+    if (!options.every(isValidMentionOption)) {
+        throw new TypeError('Mention options require a non-empty id and label.')
+    }
     return options
 }
 
@@ -29,6 +28,12 @@ export const useMentionOptions = (optionProvider) => {
     const open = ref(false)
     let activeRequest = null
     let debounceTimer = null
+
+    const showLoadingState = () => {
+        open.value = true
+        loading.value = true
+        error.value = null
+    }
 
     const cancelPendingRequest = () => {
         if (debounceTimer) clearTimeout(debounceTimer)
@@ -50,9 +55,7 @@ export const useMentionOptions = (optionProvider) => {
         activeRequest?.abort()
         const request = new AbortController()
         activeRequest = request
-        loading.value = true
-        error.value = null
-        open.value = true
+        showLoadingState()
 
         try {
             const result = await optionProvider({
@@ -80,9 +83,7 @@ export const useMentionOptions = (optionProvider) => {
 
     const search = (context) => {
         cancelPendingRequest()
-        open.value = true
-        loading.value = true
-        error.value = null
+        showLoadingState()
         options.value = []
         debounceTimer = setTimeout(() => {
             debounceTimer = null

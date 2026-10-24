@@ -5,10 +5,7 @@ import {
     isMentionDraft
 } from './mentions/mentionDraft.js'
 
-/**
- * Composable for chat logic and message management
- * Handles messages, AI integration, typing states, and scrolling
- */
+/** Manage chat messages, mention drafts, AI requests, recall, focus, and scrolling. */
 export function useChatLogic(options = {}) {
     const {
         initialMessage = 'Hello! How can I help you today?',
@@ -28,9 +25,7 @@ export function useChatLogic(options = {}) {
     ])
     const isTyping = ref(false)
 
-    const createTimestamp = () => {
-        return new Date()
-    }
+    const createTimestamp = () => new Date()
 
     const createMessage = (role, { content, ...extraData }) => ({
         role,
@@ -43,9 +38,7 @@ export function useChatLogic(options = {}) {
         messages.value.push(message)
     }
 
-    const isFirstUserMessage = () => {
-        return messages.value.some((msg) => msg.role === 'user') === false
-    }
+    const isFirstUserMessage = () => !messages.value.some((message) => message.role === 'user')
 
     const addUserMessage = (input) => {
         const messageData = typeof input === 'string' ? { content: input } : input
@@ -76,7 +69,6 @@ export function useChatLogic(options = {}) {
             if (messagesContainer?.value) {
                 messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
             }
-            // Allow parent to hook into scroll behavior
             onScrollToBottom?.()
         })
     }
@@ -84,22 +76,29 @@ export function useChatLogic(options = {}) {
     const focusInput = () => {
         nextTick(() => {
             chatInputRef?.value?.focus()
-            // Allow parent to hook into focus behavior
             onFocusInput?.()
         })
     }
 
-    // Track current request for cancellation
     const currentAbortController = ref(null)
 
-    const trimMentionDraft = (draft) => {
-        const parts = draft.parts.map((part) => ({ ...part }))
-        if (parts[0]?.kind === 'text') parts[0].text = parts[0].text.trimStart()
-        if (parts.at(-1)?.kind === 'text') parts.at(-1).text = parts.at(-1).text.trimEnd()
-        return createMentionDraft(parts)
+    const trimDraftPart = (part, index, lastIndex) => {
+        if (part.kind !== 'text') return { ...part }
+
+        const withoutLeadingWhitespace = index === 0 ? part.text.trimStart() : part.text
+        return {
+            ...part,
+            text:
+                index === lastIndex ? withoutLeadingWhitespace.trimEnd() : withoutLeadingWhitespace
+        }
     }
 
-    const validateInput = (input) => {
+    const trimMentionDraft = (draft) =>
+        createMentionDraft(
+            draft.parts.map((part, index) => trimDraftPart(part, index, draft.parts.length - 1))
+        )
+
+    const prepareMessageInput = (input) => {
         if (isTyping.value) return null
         if (isMentionDraft(input)) {
             const trimmedDraft = trimMentionDraft(input)
@@ -112,27 +111,27 @@ export function useChatLogic(options = {}) {
         return trimmedContent || null
     }
 
-    const updateUIForUserMessage = async () => {
+    const clearInputAndScroll = async () => {
         chatInputRef?.value?.clear()
         await scrollToBottom()
     }
 
-    const updateUIForWaiting = async () => {
+    const showTypingAndScroll = async () => {
         isTyping.value = true
         await scrollToBottom()
     }
 
-    const updateUIForAIResponse = async () => {
+    const scrollAndFocusInput = async () => {
         await scrollToBottom()
         focusInput()
     }
 
-    const setupAIRequest = () => {
+    const startAIRequest = () => {
         currentAbortController.value = new AbortController()
         return currentAbortController.value.signal
     }
 
-    const cleanupAIRequest = () => {
+    const clearAIRequest = () => {
         currentAbortController.value = null
     }
 
@@ -146,8 +145,6 @@ export function useChatLogic(options = {}) {
         }
     }
 
-    const handleAbortError = () => ({ aborted: true })
-
     const handleRequestError = async (error) => {
         const errorMessage = addErrorMessage()
         await scrollToBottom()
@@ -156,44 +153,40 @@ export function useChatLogic(options = {}) {
 
     const handleAIError = async (error) => {
         logError(error)
-        return isAbortError(error) ? handleAbortError() : await handleRequestError(error)
+        return isAbortError(error) ? { aborted: true } : await handleRequestError(error)
     }
 
-    // Main message sending function
     const sendMessage = async (input) => {
-        const validInput = validateInput(input)
+        const validInput = prepareMessageInput(input)
         if (!validInput) return
 
         const userMessage = addUserMessage(validInput)
-        await updateUIForUserMessage()
+        await clearInputAndScroll()
 
         if (!aiHandler) {
             return userMessage
         }
 
-        await updateUIForWaiting()
-        const signal = setupAIRequest()
+        await showTypingAndScroll()
+        const signal = startAIRequest()
 
         try {
             const aiResponse = await aiHandler(userMessage, signal)
             const aiMessage = addAiMessage(aiResponse)
-            await updateUIForAIResponse()
+            await scrollAndFocusInput()
             return { userMessage, aiMessage }
         } catch (error) {
             const errorResult = await handleAIError(error)
             return { userMessage, ...errorResult }
         } finally {
             isTyping.value = false
-            cleanupAIRequest()
+            clearAIRequest()
         }
     }
 
-    // Cancel current request
     const cancelCurrentRequest = () => {
-        if (currentAbortController.value) {
-            currentAbortController.value.abort()
-            currentAbortController.value = null
-        }
+        currentAbortController.value?.abort()
+        currentAbortController.value = null
     }
 
     const recallLastMessage = () => {
@@ -219,30 +212,24 @@ export function useChatLogic(options = {}) {
         ]
     }
 
-    // Reset messages completely
     const resetMessages = () => {
         messages.value = []
     }
 
     return {
-        // State
         messages,
         isTyping,
-
-        // Message management
         addMessage,
         addUserMessage,
         addAiMessage,
         addErrorMessage,
 
-        // Core functionality
         sendMessage,
         cancelCurrentRequest,
         recallLastMessage,
         clearChat,
         resetMessages,
 
-        // Utilities
         scrollToBottom,
         focusInput,
         createTimestamp,

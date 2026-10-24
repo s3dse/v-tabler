@@ -17,7 +17,7 @@
                         @caret-change="updateActiveTrigger"
                         @keydown="handleKeydown"
                         @paste="handlePaste"
-                        @copy="handleCopy"
+                        @copy="copyRangeToClipboard"
                         @cut="handleCut"
                         @delete-range="deleteRange"
                         @resolve="resolveMention"
@@ -30,8 +30,8 @@
                     as-child
                     side="bottom"
                     align="start"
-                    :side-offset="4"
-                    :collision-padding="8"
+                    :side-offset="MENTION_MENU_SIDE_OFFSET"
+                    :collision-padding="MENTION_MENU_COLLISION_PADDING"
                     :avoid-collisions="true"
                     :side-flip="true"
                     position-strategy="fixed"
@@ -46,7 +46,7 @@
                         :options="mentionOptions.options.value"
                         :highlighted-index="mentionOptions.highlightedIndex.value"
                         :menu-id="menuId"
-                        :allow-plain-text="activeContext?.mode === 'resolve'"
+                        :allow-plain-text="activeMentionContext?.mode === 'resolve'"
                         @highlight="mentionOptions.highlight"
                         @select="selectOption"
                         @use-plain-text="convertActiveMentionToText"
@@ -55,7 +55,7 @@
             </PopoverPortal>
         </PopoverRoot>
 
-        <p v-if="hasUnresolved" role="alert" class="mt-1 text-xs text-amber">
+        <p v-if="containsUnresolvedMentions" role="alert" class="mt-1 text-xs text-warning">
             {{ t('vTabler.chat.mentions.blocked') }}
         </p>
     </div>
@@ -80,6 +80,9 @@ import {
 import { defaultMentionTriggerProvider } from './mentionTriggerProvider.js'
 import { useMentionOptions } from './useMentionOptions.js'
 
+const MENTION_MENU_SIDE_OFFSET = 4
+const MENTION_MENU_COLLISION_PADDING = 8
+
 const props = defineProps({
     optionProvider: { type: Function, required: true },
     triggerProvider: { type: Function, default: null },
@@ -90,141 +93,147 @@ const props = defineProps({
     variant: { type: String, required: true }
 })
 
-const model = defineModel({ type: [String, Object], default: '' })
+const draftModel = defineModel({ type: [String, Object], default: '' })
 const emit = defineEmits(['submit'])
 const { t } = useI18n()
-const triggerProvider = computed(() => props.triggerProvider ?? defaultMentionTriggerProvider)
-const draft = ref(normalizeMentionDraft(model.value, triggerProvider.value))
+const activeTriggerProvider = computed(() => props.triggerProvider ?? defaultMentionTriggerProvider)
+const draft = ref(normalizeMentionDraft(draftModel.value, activeTriggerProvider.value))
 const editorRef = ref(null)
 const menuId = `chat-mention-menu-${useId()}`
-const activeContext = ref(null)
-const dismissedTriggerMatch = ref(null)
-const mentionOptions = useMentionOptions(context => props.optionProvider(context))
+const activeMentionContext = ref(null)
+const dismissedTrigger = ref(null)
+const mentionOptions = useMentionOptions((context) => props.optionProvider(context))
 
-const hasUnresolved = computed(() => hasUnresolvedMentions(draft.value))
+const containsUnresolvedMentions = computed(() => hasUnresolvedMentions(draft.value))
 const activeDescendant = computed(() =>
     mentionOptions.open.value && mentionOptions.options.value.length
         ? `${menuId}-option-${mentionOptions.highlightedIndex.value}`
         : undefined
 )
 
-const sameTriggerMatch = (left, right) =>
+const triggerMatchesAreEqual = (left, right) =>
     left?.type === right?.type &&
     left?.query === right?.query &&
     left?.replaceRange.start === right?.replaceRange.start &&
     left?.replaceRange.end === right?.replaceRange.end
 
-const emitDraft = nextDraft => {
+const setDraft = (nextDraft) => {
     draft.value = nextDraft
-    model.value = nextDraft
+    draftModel.value = nextDraft
 }
 
-const partsAreEqual = (leftParts, rightParts) =>
+const mentionPartsAreEqual = (leftParts, rightParts) =>
     leftParts.length === rightParts.length &&
     leftParts.every((leftPart, index) => {
         const rightPart = rightParts[index]
         return (
-            Object.keys(leftPart).every(key => leftPart[key] === rightPart?.[key]) &&
-            Object.keys(rightPart ?? {}).every(key => rightPart[key] === leftPart[key])
+            Object.keys(leftPart).every((key) => leftPart[key] === rightPart?.[key]) &&
+            Object.keys(rightPart ?? {}).every((key) => rightPart[key] === leftPart[key])
         )
     })
 
-const restoreEditor = caretIndex => editorRef.value?.restoreCaret(caretIndex)
+const restoreCaret = (caretIndex) => editorRef.value?.restoreCaret(caretIndex)
 
-const closeOptions = () => {
-    activeContext.value = null
+const closeMentionMenu = () => {
+    activeMentionContext.value = null
     mentionOptions.close()
 }
 
-const dismissOptions = () => {
-    if (activeContext.value?.mode === 'insert') {
-        dismissedTriggerMatch.value = activeContext.value.match
+const dismissMentionMenu = () => {
+    if (activeMentionContext.value?.mode === 'insert') {
+        dismissedTrigger.value = activeMentionContext.value.match
     }
-    closeOptions()
+    closeMentionMenu()
 }
 
-const handlePopoverOpenChange = open => {
-    if (!open) dismissOptions()
+const handlePopoverOpenChange = (open) => {
+    if (!open) dismissMentionMenu()
 }
 
-const handleMenuInteractOutside = event => {
+const handleMenuInteractOutside = (event) => {
     if (editorRef.value?.containsTarget(event.target)) event.preventDefault()
 }
 
-const updateActiveTrigger = caretIndex => {
-    if (activeContext.value?.mode === 'resolve') return
+const updateActiveTrigger = (caretIndex) => {
+    if (activeMentionContext.value?.mode === 'resolve') return
 
-    const match = triggerProvider.value({ text: draft.value.content, cursorIndex: caretIndex })
+    const match = activeTriggerProvider.value({
+        text: draft.value.content,
+        cursorIndex: caretIndex
+    })
     if (!match) {
-        dismissedTriggerMatch.value = null
-        closeOptions()
+        dismissedTrigger.value = null
+        closeMentionMenu()
         return
     }
-    if (sameTriggerMatch(dismissedTriggerMatch.value, match)) return
-    dismissedTriggerMatch.value = null
-    if (sameTriggerMatch(activeContext.value?.match, match)) return
+    if (triggerMatchesAreEqual(dismissedTrigger.value, match)) return
+    dismissedTrigger.value = null
+    if (triggerMatchesAreEqual(activeMentionContext.value?.match, match)) return
 
-    activeContext.value = { mode: 'insert', match }
+    activeMentionContext.value = { mode: 'insert', match }
     mentionOptions.search(match)
 }
 
-const applyParts = (parts, caretIndex, detectTrigger = true) => {
-    emitDraft(createMentionDraft(parts))
-    restoreEditor(caretIndex)
+const setDraftParts = (parts, caretIndex, detectTrigger = true) => {
+    setDraft(createMentionDraft(parts))
+    restoreCaret(caretIndex)
     if (detectTrigger) updateActiveTrigger(caretIndex)
 }
 
 const replaceDraftRange = (range, parts) => {
-    closeOptions()
-    applyParts(
+    closeMentionMenu()
+    setDraftParts(
         replaceMentionRange(draft.value.parts, range, parts),
         range.start + contentLength(parts),
         false
     )
 }
 
-const handleInputParts = ({ parts, caretIndex }) => applyParts(parts, caretIndex)
+const handleInputParts = ({ parts, caretIndex }) => setDraftParts(parts, caretIndex)
 
-const selectedOption = () => mentionOptions.options.value[mentionOptions.highlightedIndex.value]
+const getHighlightedOption = () =>
+    mentionOptions.options.value[mentionOptions.highlightedIndex.value]
 
-const partStart = partIndex =>
-    mentionPartSpans(draft.value.parts)[Math.max(0, partIndex)]?.start ??
-    contentLength(draft.value.parts)
+const getPartRange = (partIndex) => {
+    const span = mentionPartSpans(draft.value.parts)[partIndex]
+    return span ? { start: span.start, end: span.end } : null
+}
 
-const selectOption = option => {
-    const context = activeContext.value
+const createResolvedMention = (match, option) => ({
+    kind: 'mention',
+    type: match.type,
+    trigger: match.trigger,
+    id: option.id,
+    label: option.label,
+    resolved: true
+})
+
+const resolveMentionWithOption = (context, option) => {
+    const currentMention = draft.value.parts[context.partIndex]
+    const range = getPartRange(context.partIndex)
+    if (currentMention?.kind !== 'mention' || !range) return
+
+    replaceDraftRange(range, [
+        { ...currentMention, id: option.id, label: option.label, resolved: true }
+    ])
+}
+
+const insertMentionOption = (context, option) => {
+    replaceDraftRange(context.match.replaceRange, [createResolvedMention(context.match, option)])
+}
+
+const selectOption = (option) => {
+    const context = activeMentionContext.value
     if (!context) return
 
     if (context.mode === 'resolve') {
-        const currentMention = draft.value.parts[context.partIndex]
-        if (currentMention?.kind !== 'mention') return
-
-        const nextParts = draft.value.parts.map((part, index) =>
-            index === context.partIndex
-                ? { ...currentMention, id: option.id, label: option.label, resolved: true }
-                : part
-        )
-        const caretIndex = partStart(context.partIndex) + option.label.length
-        closeOptions()
-        applyParts(nextParts, caretIndex, false)
+        resolveMentionWithOption(context, option)
         return
     }
-
-    const mention = {
-        kind: 'mention',
-        type: context.match.type,
-        trigger: context.match.trigger,
-        id: option.id,
-        label: option.label,
-        resolved: true
-    }
-    const nextParts = replaceMentionRange(draft.value.parts, context.match.replaceRange, [mention])
-    const caretIndex = context.match.replaceRange.start + option.label.length
-    closeOptions()
-    applyParts(nextParts, caretIndex, false)
+    insertMentionOption(context, option)
 }
 
-const insertText = text => {
+const insertText = (text) => {
     const range = editorRef.value?.getSelectionRange() ?? {
         start: draft.value.content.length,
         end: draft.value.content.length
@@ -232,7 +241,7 @@ const insertText = text => {
     replaceDraftRange(range, [{ kind: 'text', text }])
 }
 
-const handleRecall = () => {
+const tryRecallLastMessage = () => {
     if (!props.recallLastMessage) return false
     const range = editorRef.value?.getSelectionRange()
     if (draft.value.content.trim() && range?.start !== 0) return false
@@ -240,31 +249,47 @@ const handleRecall = () => {
     const recalledValue = props.recallLastMessage()
     if (!recalledValue) return false
 
-    const recalledDraft = normalizeMentionDraft(recalledValue, triggerProvider.value)
-    closeOptions()
-    emitDraft(recalledDraft)
-    restoreEditor(recalledDraft.content.length)
+    const recalledDraft = normalizeMentionDraft(recalledValue, activeTriggerProvider.value)
+    closeMentionMenu()
+    setDraft(recalledDraft)
+    restoreCaret(recalledDraft.content.length)
     return true
 }
 
-const handleKeydown = event => {
-    if (mentionOptions.open.value) {
-        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-            event.preventDefault()
-            mentionOptions.moveHighlight(event.key === 'ArrowDown' ? 1 : -1)
-            return
-        }
-        if (event.key === 'Escape') {
-            event.preventDefault()
-            dismissOptions()
-            return
-        }
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault()
-            if (selectedOption()) selectOption(selectedOption())
-            return
-        }
+const handleMentionMenuKeydown = (event) => {
+    if (!mentionOptions.open.value) return false
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault()
+        mentionOptions.moveHighlight(event.key === 'ArrowDown' ? 1 : -1)
+        return true
     }
+    if (event.key === 'Escape') {
+        event.preventDefault()
+        dismissMentionMenu()
+        return true
+    }
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault()
+        const option = getHighlightedOption()
+        if (option) selectOption(option)
+        return true
+    }
+    return false
+}
+
+const submitDraftOrResolveMention = () => {
+    const unresolvedIndex = draft.value.parts.findIndex(
+        (part) => part.kind === 'mention' && !part.resolved
+    )
+    if (unresolvedIndex >= 0) {
+        resolveMention(unresolvedIndex)
+        return
+    }
+    emit('submit', draft.value)
+}
+
+const handleKeydown = (event) => {
+    if (handleMentionMenuKeydown(event)) return
 
     if (event.key === 'Enter' && event.shiftKey) {
         event.preventDefault()
@@ -273,92 +298,84 @@ const handleKeydown = event => {
     }
     if (event.key === 'Enter') {
         event.preventDefault()
-        if (hasUnresolved.value) {
-            const unresolvedIndex = draft.value.parts.findIndex(
-                part => part.kind === 'mention' && !part.resolved
-            )
-            resolveMention(unresolvedIndex)
-            return
-        }
-        emit('submit', draft.value)
+        submitDraftOrResolveMention()
         return
     }
-    if (event.key === 'ArrowUp' && !mentionOptions.open.value && handleRecall()) {
+    if (event.key === 'ArrowUp' && tryRecallLastMessage()) {
         event.preventDefault()
     }
 }
 
 const handlePaste = ({ text, range }) => {
-    const pastedParts = parseSerializedMentions(text, triggerProvider.value)
+    const pastedParts = parseSerializedMentions(text, activeTriggerProvider.value)
     replaceDraftRange(range, pastedParts)
 }
 
-const copyRange = ({ event, range }) => {
+const copyRangeToClipboard = ({ event, range }) => {
     if (range.start === range.end) return false
     event.preventDefault()
     event.clipboardData?.setData('text/plain', serializeMentionRange(draft.value.parts, range))
     return true
 }
 
-const handleCopy = payload => copyRange(payload)
-
-const handleCut = payload => {
-    if (!copyRange(payload)) return
+const handleCut = (payload) => {
+    if (!copyRangeToClipboard(payload)) return
     deleteRange(payload.range)
 }
 
-const deleteRange = range => {
+const deleteRange = (range) => {
     replaceDraftRange(range, [])
 }
 
-const resolveMention = async partIndex => {
+const findSingleExactOption = (options, label) => {
+    const exactMatches = options.filter(
+        (option) => option.label.toLowerCase() === label.toLowerCase()
+    )
+    return exactMatches.length === 1 ? exactMatches[0] : null
+}
+
+const resolveMention = async (partIndex) => {
     const mention = draft.value.parts[partIndex]
     if (mention?.kind !== 'mention' || mention.resolved) return
 
-    activeContext.value = { mode: 'resolve', partIndex }
+    activeMentionContext.value = { mode: 'resolve', partIndex }
     const candidates = await mentionOptions.searchImmediately({
         type: mention.type,
         query: mention.label
     })
     if (!candidates) return
 
-    const exactMatches = candidates.filter(
-        option => option.label.toLowerCase() === mention.label.toLowerCase()
-    )
-    if (exactMatches.length === 1) selectOption(exactMatches[0])
+    const exactMatch = findSingleExactOption(candidates, mention.label)
+    if (exactMatch) selectOption(exactMatch)
 }
 
 const convertActiveMentionToText = () => {
-    const context = activeContext.value
+    const context = activeMentionContext.value
     if (context?.mode !== 'resolve') return
     const mention = draft.value.parts[context.partIndex]
-    if (mention?.kind !== 'mention') return
+    const range = getPartRange(context.partIndex)
+    if (mention?.kind !== 'mention' || !range) return
 
-    const start = partStart(context.partIndex)
-    const nextParts = draft.value.parts.flatMap((part, index) =>
-        index === context.partIndex ? [{ kind: 'text', text: mention.label }] : [part]
-    )
-    closeOptions()
-    applyParts(nextParts, start + mention.label.length, false)
+    replaceDraftRange(range, [{ kind: 'text', text: mention.label }])
 }
 
 const focus = () => editorRef.value?.focus()
 
 const clear = () => {
-    closeOptions()
-    emitDraft(createMentionDraft([]))
-    restoreEditor(0)
+    closeMentionMenu()
+    setDraft(createMentionDraft([]))
+    restoreCaret(0)
 }
 
-watch(model, value => {
-    const nextDraft = normalizeMentionDraft(value, triggerProvider.value)
-    if (partsAreEqual(nextDraft.parts, draft.value.parts)) return
+watch(draftModel, (value) => {
+    const nextDraft = normalizeMentionDraft(value, activeTriggerProvider.value)
+    if (mentionPartsAreEqual(nextDraft.parts, draft.value.parts)) return
     draft.value = nextDraft
-    closeOptions()
+    closeMentionMenu()
     editorRef.value?.adjustHeightNextTick()
 })
 
-onMounted(() => emitDraft(draft.value))
+onMounted(() => setDraft(draft.value))
 
 defineExpose({ focus, clear })
 </script>

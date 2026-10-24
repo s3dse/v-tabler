@@ -41,8 +41,10 @@
 import { computed, nextTick, onMounted, onUpdated, ref, shallowRef } from 'vue'
 import { useAutoHeight } from '../useAutoHeight.js'
 import { ChatVariant } from '../chatVariants.js'
-import { mentionPartSpans } from './mentionDraft.js'
+import { mentionPartSpans, mergeMentionParts } from './mentionDraft.js'
 import ChatMentionChip from './ChatMentionChip.vue'
+
+const IME_PROCESS_KEY_CODE = 229
 
 const props = defineProps({
   draft: { type: Object, required: true },
@@ -155,40 +157,23 @@ const setCaretOffset = (offset) => {
   selection.addRange(range)
 }
 
-const appendText = (parts, text) => {
-  if (!text) return
-  const previousPart = parts.at(-1)
-  if (previousPart?.kind === 'text') previousPart.text += text
-  else parts.push({ kind: 'text', text })
-}
+const createTextParts = (text) => (text ? [{ kind: 'text', text }] : [])
 
-const readDomParts = () => {
-  const parts = []
+const readDomNodeParts = (node) => {
+  if (node.nodeType === Node.TEXT_NODE) return createTextParts(node.textContent)
+  if (!(node instanceof HTMLElement) || node.hasAttribute('data-trailing-break')) return []
 
-  const visit = (node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      appendText(parts, node.textContent)
-      return
-    }
-    if (!(node instanceof HTMLElement)) return
-
-    const mentionIndex = node.getAttribute('data-mention-index')
-    if (mentionIndex !== null) {
-      const mention = props.draft.parts[Number(mentionIndex)]
-      if (mention?.kind === 'mention') parts.push({ ...mention })
-      return
-    }
-    if (node.hasAttribute('data-trailing-break')) return
-    if (node.tagName === 'BR') {
-      appendText(parts, '\n')
-      return
-    }
-    Array.from(node.childNodes).forEach(visit)
+  const mentionIndex = node.getAttribute('data-mention-index')
+  if (mentionIndex !== null) {
+    const mention = props.draft.parts[Number(mentionIndex)]
+    return mention?.kind === 'mention' ? [{ ...mention }] : []
   }
-
-  Array.from(editorRef.value.childNodes).forEach(visit)
-  return parts
+  if (node.tagName === 'BR') return createTextParts('\n')
+  return Array.from(node.childNodes).flatMap(readDomNodeParts)
 }
+
+const readDomParts = () =>
+  mergeMentionParts(Array.from(editorRef.value.childNodes).flatMap(readDomNodeParts))
 
 const rememberRenderedChildren = () => {
   renderedChildren.value = Array.from(editorRef.value?.childNodes ?? [])
@@ -221,7 +206,7 @@ const handleCompositionEnd = () => {
   handleInput()
 }
 
-const mentionRanges = () =>
+const getMentionRanges = () =>
   mentionPartSpans(props.draft.parts).flatMap(({ part, start, end }) =>
     part.kind === 'mention' ? [{ start, end }] : []
   )
@@ -231,7 +216,7 @@ const handleAtomicDelete = (event) => {
   const selectionRange = getSelectionRange()
   if (selectionRange.start !== selectionRange.end) return false
 
-  const mentionRange = mentionRanges().find((range) =>
+  const mentionRange = getMentionRanges().find((range) =>
     event.key === 'Backspace'
       ? selectionRange.start === range.end
       : selectionRange.start === range.start
@@ -244,7 +229,7 @@ const handleAtomicDelete = (event) => {
 }
 
 const handleKeydown = (event) => {
-  if (isComposing.value || event.isComposing || event.keyCode === 229) return
+  if (isComposing.value || event.isComposing || event.keyCode === IME_PROCESS_KEY_CODE) return
   if (handleAtomicDelete(event)) return
   emit('keydown', event)
 }

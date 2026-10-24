@@ -4,15 +4,15 @@ One important caveat: the current public draft still uses `kind` / `type` / `res
 
 ## 1. Public entry points
 
-[ChatComponent.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/ChatComponent.vue:44) exposes:
+[ChatComponent.vue](../ChatComponent.vue) exposes:
 
 - `mentionOptionProvider`
 - `mentionTriggerProvider`
 - The full `input` slot with `inputProps`, `inputEvents`, and `setInputRef`
 
-It passes the mention providers through its computed input props at [ChatComponent.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/ChatComponent.vue:189).
+It passes both mention providers through its computed input props.
 
-[ChatInput.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/ChatInput.vue:17) contains the compatibility switch:
+[ChatInput.vue](../ChatInput.vue) contains the compatibility switch:
 
 ```text
 mentionOptionProvider installed?
@@ -20,11 +20,11 @@ mentionOptionProvider installed?
 └── yes → ChatMentionComposer and structured ChatDraft
 ```
 
-The switch is deliberately based only on the option provider at [ChatInput.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/ChatInput.vue:155). A trigger provider alone does not enable mentions because v-tabler would have no entity data to show.
+The switch is deliberately based only on the option provider. A trigger provider alone does not enable mentions because v-tabler would have no entity data to show.
 
 ## 2. The draft model
 
-[mentionDraft.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/mentionDraft.js:32) is the domain layer. Components do not manually maintain three competing representations. `createMentionDraft(parts)` derives:
+[mentionDraft.js](./mentionDraft.js) is the domain layer. Components do not manually maintain three competing representations. `createMentionDraft(parts)` derives:
 
 - `content`: readable text containing labels
 - `serializedContent`: portable clipboard representation
@@ -52,9 +52,9 @@ For example:
 
 The same module owns:
 
-- Parsing copied mentions into unresolved parts at [mentionDraft.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/mentionDraft.js:49)
+- Parsing copied mentions into unresolved parts
 - Runtime validation of incoming drafts
-- Immutable range replacement at [mentionDraft.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/mentionDraft.js:115)
+- Immutable range replacement
 - Escaping `\`, `[` and `]`
 - Atomic clipboard serialization
 - Merging adjacent text parts
@@ -63,7 +63,7 @@ That keeps string-index calculations out of the Vue components.
 
 ## 3. Trigger detection
 
-[mentionTriggerProvider.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/mentionTriggerProvider.js:48) creates trigger providers from definitions such as:
+[mentionTriggerProvider.js](./mentionTriggerProvider.js) creates trigger providers from definitions such as:
 
 ```js
 createMentionTriggerProvider({
@@ -92,11 +92,11 @@ Notable behavior:
 - Email-like text is excluded through the trigger boundary.
 - Duplicate aliases across entity types fail immediately.
 
-The exported default provider is created at [mentionTriggerProvider.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/mentionTriggerProvider.js:94).
+The module also exports a default provider for the built-in triggers.
 
 ## 4. Composer orchestration
 
-[ChatMentionComposer.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionComposer.vue:122) is the coordinator. It owns:
+[ChatMentionComposer.vue](./ChatMentionComposer.vue) is the coordinator. It owns:
 
 - The current structured draft
 - The active insertion or resolution context
@@ -110,9 +110,9 @@ The exported default provider is created at [mentionTriggerProvider.js](/Users/s
 
 When the editor reports a caret position, `updateActiveTrigger()` runs the trigger provider. If it finds a new match, the composer stores an insertion context and starts a search.
 
-The Escape fix lives around [ChatMentionComposer.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionComposer.vue:127). The composer remembers the dismissed match, so the keyup/caret event following Escape cannot immediately reopen it. A genuinely changed query clears that suppression.
+The composer remembers a dismissed match, so the keyup/caret event following Escape cannot immediately reopen it. A genuinely changed query clears that suppression.
 
-Selecting an option at [ChatMentionComposer.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionComposer.vue:209):
+Selecting an option:
 
 1. Creates a resolved mention part.
 2. Replaces the entire `@Marke adi` range atomically.
@@ -120,7 +120,7 @@ Selecting an option at [ChatMentionComposer.vue](/Users/sebastian/git/v-tabler/p
 4. Places the caret after the chip.
 5. Closes the menu without retriggering lookup.
 
-Keyboard behavior is centralized at [ChatMentionComposer.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionComposer.vue:267):
+Keyboard behavior is centralized in the composer:
 
 - Up/down navigates candidates.
 - Enter selects while the menu is open.
@@ -131,7 +131,7 @@ Keyboard behavior is centralized at [ChatMentionComposer.vue](/Users/sebastian/g
 
 ## 5. The contenteditable editor
 
-[ChatMentionEditor.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionEditor.vue:1) owns browser-specific editing mechanics.
+[ChatMentionEditor.vue](./ChatMentionEditor.vue) owns browser-specific editing mechanics.
 
 It renders:
 
@@ -139,13 +139,13 @@ It renders:
 - Mentions as `ChatMentionChip`
 - A render-only trailing `<br>` for a visible final blank line
 
-The trailing break at [ChatMentionEditor.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionEditor.vue:38) is why one Shift+Enter now immediately produces a visible newline. `readDomParts()` explicitly ignores this sentinel so it never enters the model.
+The trailing break is why one Shift+Enter immediately produces a visible newline. `readDomParts()` explicitly ignores this sentinel so it never enters the model.
 
-Selection ranges are translated between DOM positions and plain-text offsets at [ChatMentionEditor.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionEditor.vue:117). A chip occupies `label.length` characters in that logical coordinate system.
+Selection ranges are translated between DOM positions and plain-text offsets. A chip occupies `label.length` characters in that logical coordinate system.
 
-`readDomParts()` at [ChatMentionEditor.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionEditor.vue:192) walks the edited DOM back into text and mention parts. Mention DOM elements retain their structured object rather than being reduced to their label.
+`readDomParts()` walks the edited DOM back into normalized text and mention parts. Mention DOM elements retain their structured object rather than being reduced to their label.
 
-The focus-flicker safeguard is at [ChatMentionEditor.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionEditor.vue:220):
+The focus-flicker safeguard works as follows:
 
 - The editor element is never keyed by its content.
 - Its DOM identity remains stable.
@@ -153,19 +153,19 @@ The focus-flicker safeguard is at [ChatMentionEditor.vue](/Users/sebastian/git/v
 - If the browser destructively rewrites the editable DOM, the saved Vue-owned nodes are restored before Vue patches the new draft.
 - The fallback is not invoked during ordinary typing.
 
-Atomic Backspace/Delete behavior is handled at [ChatMentionEditor.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionEditor.vue:261). IME composition events are ignored until composition completes.
+Backspace and Delete treat mentions atomically. IME composition events are ignored until composition completes.
 
 ## 6. Chips
 
-[ChatMentionChip.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionChip.vue:1) is intentionally small.
+[ChatMentionChip.vue](./ChatMentionChip.vue) is intentionally small.
 
 The chip is `contenteditable="false"`, so the browser treats it as an atomic object. It renders only the label, while type and resolution information are exposed through styling, title, and accessible text.
 
-Unresolved chips additionally become keyboard-accessible buttons. Activating one asks the composer to resolve it.
+Unresolved chips additionally become keyboard-accessible buttons. Activating one asks the composer to resolve it. Their warning colors use the theme's `warning` status family, which clients can override.
 
 ## 7. Remote option lookup
 
-[useMentionOptions.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/useMentionOptions.js:51) isolates async behavior.
+[useMentionOptions.js](./useMentionOptions.js) isolates async behavior.
 
 A normal lookup:
 
@@ -183,9 +183,9 @@ This composable knows nothing about HTTP, authentication, tenants, or entity end
 
 ## 8. Menu positioning and accessibility
 
-[ChatMentionMenu.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionMenu.vue:1) is still an accessible listbox, while Reka’s Popover handles geometry.
+[ChatMentionMenu.vue](./ChatMentionMenu.vue) is an accessible listbox, while Reka’s Popover handles geometry.
 
-The Reka composition in [ChatMentionComposer.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionComposer.vue:31):
+The Reka composition:
 
 - Anchors to the full editor width
 - Prefers the bottom
@@ -207,9 +207,9 @@ Copying uses portable text such as:
 
 The ID is deliberately omitted because it may not be valid in another customer or environment.
 
-Pasting at [ChatMentionComposer.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionComposer.vue:309) recognizes configured triggers and creates an unresolved mention with `id: null`.
+Pasting recognizes configured triggers and creates an unresolved mention with `id: null`.
 
-Resolving an unresolved chip at [ChatMentionComposer.vue](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/mentions/ChatMentionComposer.vue:336):
+Resolving an unresolved chip:
 
 - Searches using its entity type and label.
 - Automatically resolves exactly one case-insensitive exact match.
@@ -220,7 +220,7 @@ Submission remains blocked while any unresolved mention exists.
 
 ## 10. Submission and OASIStant handoff
 
-[useChatLogic.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/useChatLogic.js:163) accepts either a string or structured draft.
+[useChatLogic.js](../useChatLogic.js) accepts either a string or structured draft.
 
 For a mention draft it:
 
@@ -245,16 +245,18 @@ The AI handler therefore receives something like:
 
 For OASIStant, Trendentify must forward `parts`; sending only `content` would discard the entity-resolution benefit.
 
-Recall at [useChatLogic.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/useChatLogic.js:199) clones the structured parts so resolved mentions remain resolved within the current chat.
+Recall clones the structured parts so resolved mentions remain resolved within the current chat.
 
 ## 11. Customization and exports
 
-`ChatInput`, the default/custom trigger providers, and trigger definitions are exported through [chat/index.js](/Users/sebastian/git/v-tabler/packages/v-tabler/src/components/chat/index.js:1) and the package root.
+`ChatInput`, the default/custom trigger providers, and trigger definitions are exported through [chat/index.js](../index.js) and the package root.
 
 A client can customize at two levels:
 
 - Keep the mention composer and replace only trigger detection.
 - Replace the entire input through the `ChatComponent` input slot.
+
+Unresolved states use `colors.warning.{DEFAULT,bg,border,hover}`. The base preset also provides the matching `success` family, and custom themes can override either status through the existing theme merge.
 
 ## Pending contract decision
 
@@ -268,4 +270,4 @@ The current v-tabler shape and our proposed OASIStant transport shape map as fol
 
 Because the feature is not released yet, I would align these before integrating OASIStant rather than maintain two nearly identical contracts.
 
-No code changed or tests were rerun for this read-only walkthrough. The main remaining integration risk is forwarding only readable `content` and accidentally dropping the structured entity parts.
+The main integration risk is forwarding only readable `content` and accidentally dropping the structured entity parts.

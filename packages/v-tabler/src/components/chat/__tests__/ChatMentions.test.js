@@ -69,6 +69,21 @@ describe('ChatInput mentions', () => {
     expect(textarea.element.value).toBe('External message')
   })
 
+  it('emits one model update when recalling a plain message', async () => {
+    const wrapper = mountInput({
+      modelValue: '',
+      recallLastMessage: () => 'Previous message'
+    })
+    const textarea = wrapper.get('textarea')
+
+    await textarea.trigger('keydown', { key: 'ArrowUp' })
+    await nextTick()
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([['Previous message']])
+    expect(textarea.element.selectionStart).toBe('Previous message'.length)
+    expect(textarea.element.selectionEnd).toBe('Previous message'.length)
+  })
+
   it('gives the mention editor an accessible name', async () => {
     const wrapper = mountInput({
       modelValue: '',
@@ -128,6 +143,48 @@ describe('ChatInput mentions', () => {
     expect(replaceChildren).not.toHaveBeenCalled()
     expect(wrapper.get('[contenteditable="true"]').element).toBe(editorElement)
     expect(document.activeElement).toBe(editorElement)
+  })
+
+  it('reads edited DOM into normalized parts without persisting the trailing sentinel', async () => {
+    const initialDraft = {
+      content: 'ADIDAS',
+      serializedContent: '@brand[ADIDAS]',
+      parts: [
+        {
+          kind: 'mention',
+          type: 'brand',
+          trigger: 'brand',
+          id: '1',
+          label: 'ADIDAS',
+          resolved: true
+        }
+      ]
+    }
+    const wrapper = mountInput({ modelValue: initialDraft, mentionOptionProvider: vi.fn() })
+    await nextTick()
+    const editor = wrapper.get('[contenteditable="true"]')
+    const mention = editor.get('[data-mention-index]').element
+    const lineBreak = document.createElement('br')
+    const trailingBreak = document.createElement('br')
+    trailingBreak.setAttribute('data-trailing-break', '')
+    editor.element.replaceChildren(
+      document.createTextNode('A'),
+      document.createTextNode('B'),
+      mention,
+      lineBreak,
+      document.createTextNode('C'),
+      trailingBreak
+    )
+    placeCaretAtEnd(editor.element)
+
+    await editor.trigger('input')
+    await nextTick()
+
+    expect(wrapper.emitted('update:modelValue').at(-1)[0]).toEqual({
+      content: 'ABADIDAS\nC',
+      serializedContent: 'AB@brand[ADIDAS]\nC',
+      parts: [{ kind: 'text', text: 'AB' }, initialDraft.parts[0], { kind: 'text', text: '\nC' }]
+    })
   })
 
   it('uses a controlled, collision-aware popover without dismissing editor interactions', async () => {
@@ -330,16 +387,35 @@ describe('ChatInput mentions', () => {
     await nextTick()
 
     expect(wrapper.get('button.btn-primary-md').attributes('disabled')).toBeDefined()
-    expect(wrapper.text()).toContain('Resolve mentions')
+    const warning = wrapper.get('[role="alert"]')
+    const unresolvedChip = wrapper.get('[data-mention-index]')
+    expect(warning.text()).toContain('Resolve mentions')
+    expect(warning.classes()).toContain('text-warning')
+    expect(unresolvedChip.classes()).toEqual(
+      expect.arrayContaining(['border-warning-border', 'bg-warning-bg'])
+    )
+    expect(unresolvedChip.get('.i-tabler-alert-circle').classes()).toContain('text-warning')
 
     await wrapper.get('[data-mention-index]').trigger('click')
     await nextTick()
     await nextTick()
 
     const draft = wrapper.emitted('update:modelValue').at(-1)[0]
-    expect(draft.parts.find((part) => part.kind === 'mention')).toEqual(
-      expect.objectContaining({ id: '1', resolved: true })
-    )
+    expect(draft).toEqual({
+      content: 'Klicks für ADIDAS',
+      serializedContent: 'Klicks für @Marke[ADIDAS]',
+      parts: [
+        { kind: 'text', text: 'Klicks für ' },
+        {
+          kind: 'mention',
+          type: 'brand',
+          trigger: 'Marke',
+          id: '1',
+          label: 'ADIDAS',
+          resolved: true
+        }
+      ]
+    })
     expect(wrapper.get('button.btn-primary-md').attributes('disabled')).toBeUndefined()
   })
 
@@ -385,6 +461,7 @@ describe('ChatInput mentions', () => {
 
     const draft = wrapper.emitted('update:modelValue').at(-1)[0]
     expect(draft.content).toBe('Klicks für UNKNOWN')
+    expect(draft.serializedContent).toBe('Klicks für UNKNOWN')
     expect(draft.parts).toEqual([{ kind: 'text', text: 'Klicks für UNKNOWN' }])
   })
 
