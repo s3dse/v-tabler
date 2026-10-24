@@ -1,4 +1,9 @@
 import { ref, nextTick } from 'vue'
+import {
+    createMentionDraft,
+    hasUnresolvedMentions,
+    isMentionDraft
+} from './mentions/mentionDraft.js'
 
 /**
  * Composable for chat logic and message management
@@ -34,21 +39,25 @@ export function useChatLogic(options = {}) {
         timestamp: createTimestamp()
     })
 
-    const addMessage = message => {
+    const addMessage = (message) => {
         messages.value.push(message)
     }
 
     const isFirstUserMessage = () => {
-        return messages.value.some(msg => msg.role === 'user') === false
+        return messages.value.some((msg) => msg.role === 'user') === false
     }
 
-    const addUserMessage = content => {
-        const message = createMessage('user', { content, newConversation: isFirstUserMessage() })
+    const addUserMessage = (input) => {
+        const messageData = typeof input === 'string' ? { content: input } : input
+        const message = createMessage('user', {
+            ...messageData,
+            newConversation: isFirstUserMessage()
+        })
         addMessage(message)
         return message
     }
 
-    const addAiMessage = aiResponse => {
+    const addAiMessage = (aiResponse) => {
         const message = createMessage('assistant', aiResponse)
         addMessage(message)
         return message
@@ -83,9 +92,24 @@ export function useChatLogic(options = {}) {
     // Track current request for cancellation
     const currentAbortController = ref(null)
 
-    const validateInput = content => {
-        const trimmedContent = content?.trim()
-        return !trimmedContent || isTyping.value ? null : trimmedContent
+    const trimMentionDraft = (draft) => {
+        const parts = draft.parts.map((part) => ({ ...part }))
+        if (parts[0]?.kind === 'text') parts[0].text = parts[0].text.trimStart()
+        if (parts.at(-1)?.kind === 'text') parts.at(-1).text = parts.at(-1).text.trimEnd()
+        return createMentionDraft(parts)
+    }
+
+    const validateInput = (input) => {
+        if (isTyping.value) return null
+        if (isMentionDraft(input)) {
+            const trimmedDraft = trimMentionDraft(input)
+            return !trimmedDraft.content || hasUnresolvedMentions(trimmedDraft)
+                ? null
+                : trimmedDraft
+        }
+
+        const trimmedContent = input?.trim()
+        return trimmedContent || null
     }
 
     const updateUIForUserMessage = async () => {
@@ -112,9 +136,9 @@ export function useChatLogic(options = {}) {
         currentAbortController.value = null
     }
 
-    const isAbortError = error => error.name === 'AbortError'
+    const isAbortError = (error) => error.name === 'AbortError'
 
-    const logError = error => {
+    const logError = (error) => {
         if (isAbortError(error)) {
             console.log('AI request was aborted')
         } else {
@@ -124,23 +148,23 @@ export function useChatLogic(options = {}) {
 
     const handleAbortError = () => ({ aborted: true })
 
-    const handleRequestError = async error => {
+    const handleRequestError = async (error) => {
         const errorMessage = addErrorMessage()
         await scrollToBottom()
         return { errorMessage, error }
     }
 
-    const handleAIError = async error => {
+    const handleAIError = async (error) => {
         logError(error)
         return isAbortError(error) ? handleAbortError() : await handleRequestError(error)
     }
 
     // Main message sending function
-    const sendMessage = async content => {
-        const validContent = validateInput(content)
-        if (!validContent) return
+    const sendMessage = async (input) => {
+        const validInput = validateInput(input)
+        if (!validInput) return
 
-        const userMessage = addUserMessage(validContent)
+        const userMessage = addUserMessage(validInput)
         await updateUIForUserMessage()
 
         if (!aiHandler) {
@@ -173,8 +197,16 @@ export function useChatLogic(options = {}) {
     }
 
     const recallLastMessage = () => {
-        const userMessages = messages.value.filter(msg => msg.role === 'user')
-        return userMessages.length > 0 ? userMessages[userMessages.length - 1].content : ''
+        const userMessages = messages.value.filter((msg) => msg.role === 'user')
+        const lastMessage = userMessages.at(-1)
+        if (!lastMessage) return ''
+        if (!lastMessage.parts) return lastMessage.content
+
+        return {
+            content: lastMessage.content,
+            serializedContent: lastMessage.serializedContent,
+            parts: lastMessage.parts.map((part) => ({ ...part }))
+        }
     }
 
     const clearChat = () => {

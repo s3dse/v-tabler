@@ -127,6 +127,10 @@
                 <li>Clicking the form submit button doesn't affect the chat</li>
                 <li>AI responses are generated based on your messages</li>
                 <li>Typing indicator shows while AI is "thinking"</li>
+                <li>
+                    Mention suggestions stay readable and flip above the input near the viewport
+                    bottom
+                </li>
             </ul>
 
             <!-- Chat Status Display -->
@@ -174,7 +178,8 @@
                     :size="chatSize"
                     initial-message="Hello! I'm the inline chat demo. Ask me anything about the component."
                     :ai-handler="handleAiRequest"
-                    placeholder="Ask the inline chat anything..."
+                    :mention-option-provider="mentionOptionProvider"
+                    placeholder="Try @Marke adi or @partner dys..."
                 />
             </div>
 
@@ -191,7 +196,9 @@
                         variant="embedded"
                         initial-message="Hello! I'm embedded in this workspace. The surrounding page owns my dimensions."
                         :ai-handler="handleAiRequest"
-                        placeholder="Ask the embedded chat anything..."
+                        :mention-option-provider="mentionOptionProvider"
+                        :mention-trigger-provider="customMentionTriggerProvider"
+                        placeholder="This input also accepts @label..."
                     />
                     <aside class="hidden lg:flex min-h-0 flex-col border border-border bg-surface">
                         <h5 class="border-b border-border p-4 font-semibold text-default">
@@ -237,14 +244,15 @@
             :size="chatSize"
             initial-message="Hello! I'm a demo AI assistant. Try asking me about programming, help, or just say hello! You can cancel my responses by clicking the X button during processing."
             :ai-handler="handleAiRequest"
-            placeholder="Ask me anything... (cancel with X button during processing)"
+            :mention-option-provider="mentionOptionProvider"
+            placeholder="Try @brand adi... (cancel with X button during processing)"
         />
     </section>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { ChatComponent } from '@/components/chat'
+import { ChatComponent, createMentionTriggerProvider } from '@/components/chat'
 
 const formData = ref({
     testInput: '',
@@ -270,6 +278,31 @@ const chatStats = ref({
 })
 const lastMessageTime = ref('')
 const isAiThinking = ref(false)
+
+const mentionOptions = {
+    brand: [
+        { id: 'brand-adidas', label: 'ADIDAS' },
+        { id: 'brand-adidas-originals', label: 'ADIDAS ORIGINALS' },
+        { id: 'brand-dyson', label: 'DYSON' }
+    ],
+    partner: [
+        { id: 'partner-dyson', label: 'DYSON STORE' },
+        { id: 'partner-otto', label: 'OTTO' }
+    ]
+}
+
+const mentionOptionProvider = ({ type, query, signal }) => {
+    if (signal.aborted) throw new DOMException('Mention search was cancelled', 'AbortError')
+    const normalizedQuery = query.trim().toLocaleLowerCase()
+    return (mentionOptions[type] ?? []).filter((option) =>
+        option.label.toLocaleLowerCase().includes(normalizedQuery)
+    )
+}
+
+const customMentionTriggerProvider = createMentionTriggerProvider({
+    brand: ['brand', 'Marke', 'label'],
+    partner: ['partner']
+})
 
 const handleFormSubmit = () => {
     submissionResult.value = { ...formData.value, timestamp: new Date().toISOString() }

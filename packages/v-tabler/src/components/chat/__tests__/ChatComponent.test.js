@@ -207,6 +207,35 @@ describe('ChatComponent', () => {
             // Since we mocked ChatInput, let's check if the component was rendered with props
             expect(wrapper.find('[data-testid="chat-input"]').exists()).toBe(true)
         })
+
+        it('should expose the input contract through the input slot', async () => {
+            const optionProvider = vi.fn()
+            const customInput = { focus: vi.fn(), clear: vi.fn() }
+            wrapper = mountInlineChat({
+                props: { mentionOptionProvider: optionProvider },
+                slots: {
+                    input: ({ inputProps, inputEvents, setInputRef }) =>
+                        h(
+                            'button',
+                            {
+                                'data-testid': 'custom-input',
+                                'data-has-option-provider':
+                                    inputProps.mentionOptionProvider === optionProvider,
+                                onClick: () => {
+                                    setInputRef(customInput)
+                                    inputEvents.submit('Custom message')
+                                }
+                            },
+                            'Custom input'
+                        )
+                }
+            })
+
+            const input = wrapper.get('[data-testid="custom-input"]')
+            expect(input.attributes('data-has-option-provider')).toBe('true')
+            await input.trigger('click')
+            expect(mockComposable.sendMessage).toHaveBeenCalledWith('Custom message')
+        })
     })
 
     describe('interactions', () => {

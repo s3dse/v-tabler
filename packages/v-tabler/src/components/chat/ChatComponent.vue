@@ -40,19 +40,14 @@
                     <TypingIndicator v-if="isTyping" :variant="variant" />
                 </div>
 
-                <ChatInput
-                    ref="chatInputRef"
-                    class="p-2"
-                    v-model="inputMessage"
-                    :disabled="isTyping"
-                    :is-typing="isTyping"
-                    :show-hint="true"
-                    :placeholder="placeholder"
-                    :recall-last-message="recallLastMessage"
-                    :variant="variant"
-                    @submit="handleSubmit"
-                    @cancel="handleCancel"
-                />
+                <slot
+                    name="input"
+                    :input-props="inputProps"
+                    :input-events="inputEvents"
+                    :set-input-ref="setInputRef"
+                >
+                    <ChatInput ref="chatInputRef" v-bind="inputProps" v-on="inputEvents" />
+                </slot>
             </div>
         </Transition>
 
@@ -93,6 +88,14 @@ const props = defineProps({
         type: Function,
         default: null
     },
+    mentionOptionProvider: {
+        type: Function,
+        default: null
+    },
+    mentionTriggerProvider: {
+        type: Function,
+        default: null
+    },
     chatTitle: {
         type: String,
         default: 'AI Assistant'
@@ -100,7 +103,7 @@ const props = defineProps({
     size: {
         type: String,
         default: 'default',
-        validator: value => ['auto', 'compact', 'default', 'wide'].includes(value)
+        validator: (value) => ['auto', 'compact', 'default', 'wide'].includes(value)
     },
     floating: {
         type: Boolean,
@@ -171,12 +174,37 @@ const {
     chatInputRef
 })
 
-const handleSubmit = async message => {
+const handleSubmit = async (message) => {
     await sendMessage(message)
 }
 
 const handleCancel = () => {
     cancelCurrentRequest()
+}
+
+const setInputRef = (input) => {
+    chatInputRef.value = input
+}
+
+const inputProps = computed(() => ({
+    class: 'p-2',
+    modelValue: inputMessage.value,
+    disabled: isTyping.value,
+    isTyping: isTyping.value,
+    showHint: true,
+    placeholder: props.placeholder,
+    recallLastMessage,
+    variant: props.variant,
+    mentionOptionProvider: props.mentionOptionProvider,
+    mentionTriggerProvider: props.mentionTriggerProvider
+}))
+
+const inputEvents = {
+    'update:modelValue': (value) => {
+        inputMessage.value = value
+    },
+    submit: handleSubmit,
+    cancel: handleCancel
 }
 
 const handleClearChat = () => {
@@ -186,7 +214,7 @@ const handleClearChat = () => {
 
 watch(
     isOpen,
-    newVal => {
+    (newVal) => {
         if (newVal) {
             scrollToBottom().then(() => focusInput())
         }

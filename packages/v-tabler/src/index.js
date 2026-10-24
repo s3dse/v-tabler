@@ -19,7 +19,10 @@ import {
     ChatHeader,
     useChatLogic,
     useAutoHeight,
-    TypingIndicator
+    TypingIndicator,
+    createMentionTriggerProvider,
+    defaultMentionTriggerProvider,
+    DEFAULT_CHAT_MENTION_TRIGGERS
 } from '@/components/chat'
 
 // Import i18n utilities
@@ -60,6 +63,9 @@ export {
     useChatLogic,
     useAutoHeight,
     TypingIndicator,
+    createMentionTriggerProvider,
+    defaultMentionTriggerProvider,
+    DEFAULT_CHAT_MENTION_TRIGGERS,
     getDefaultTranslationKeys,
     setVTablerI18n
 }
