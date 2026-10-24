@@ -42,7 +42,7 @@
 import { computed, nextTick, onMounted, onUpdated, ref, shallowRef } from 'vue'
 import { useAutoHeight } from '../useAutoHeight.js'
 import { ChatVariant } from '../chatVariants.js'
-import { mentionPartSpans, mergeMentionParts } from './mentionDraft.js'
+import { contentLength, mentionPartSpans, mergeMentionParts } from './mentionDraft.js'
 import ChatMentionChip from './ChatMentionChip.vue'
 
 const IME_PROCESS_KEY_CODE = 229
@@ -83,11 +83,29 @@ const selectionBelongsToEditor = (selection) =>
   selection?.rangeCount &&
   editorRef.value?.contains(selection.getRangeAt(0).commonAncestorContainer)
 
+const createTextParts = (text) => (text ? [{ kind: 'text', text }] : [])
+
+const readDomNodeParts = (node) => {
+  if (node.nodeType === Node.TEXT_NODE) return createTextParts(node.textContent)
+  if (!(node instanceof HTMLElement) || node.hasAttribute('data-trailing-break')) return []
+
+  const mentionIndex = node.getAttribute('data-mention-index')
+  if (mentionIndex !== null) {
+    const mention = props.draft.parts[Number(mentionIndex)]
+    return mention?.kind === 'mention' ? [{ ...mention }] : []
+  }
+  if (node.tagName === 'BR') return createTextParts('\n')
+  return readDomNodesParts(node.childNodes)
+}
+
+const readDomNodesParts = (nodes) => Array.from(nodes).flatMap(readDomNodeParts)
+const getDomNodesContentLength = (nodes) => contentLength(readDomNodesParts(nodes))
+
 const offsetWithinEditor = (container, offset) => {
   const range = document.createRange()
   range.selectNodeContents(editorRef.value)
   range.setEnd(container, offset)
-  return range.toString().length
+  return getDomNodesContentLength(range.cloneContents().childNodes)
 }
 
 const getSelectionRange = () => {
@@ -116,9 +134,9 @@ const findCaretPoint = (root, targetOffset) => {
       return null
     }
 
-    if (!(node instanceof HTMLElement)) return null
-    if (node.hasAttribute('data-mention-index')) {
-      const length = node.textContent.length
+    if (!(node instanceof HTMLElement) || node.hasAttribute('data-trailing-break')) return null
+    if (node.hasAttribute('data-mention-index') || node.tagName === 'BR') {
+      const length = getDomNodesContentLength([node])
       if (targetOffset <= consumed) {
         return {
           node: node.parentNode,
@@ -158,23 +176,7 @@ const setCaretOffset = (offset) => {
   selection.addRange(range)
 }
 
-const createTextParts = (text) => (text ? [{ kind: 'text', text }] : [])
-
-const readDomNodeParts = (node) => {
-  if (node.nodeType === Node.TEXT_NODE) return createTextParts(node.textContent)
-  if (!(node instanceof HTMLElement) || node.hasAttribute('data-trailing-break')) return []
-
-  const mentionIndex = node.getAttribute('data-mention-index')
-  if (mentionIndex !== null) {
-    const mention = props.draft.parts[Number(mentionIndex)]
-    return mention?.kind === 'mention' ? [{ ...mention }] : []
-  }
-  if (node.tagName === 'BR') return createTextParts('\n')
-  return Array.from(node.childNodes).flatMap(readDomNodeParts)
-}
-
-const readDomParts = () =>
-  mergeMentionParts(Array.from(editorRef.value.childNodes).flatMap(readDomNodeParts))
+const readDomParts = () => mergeMentionParts(readDomNodesParts(editorRef.value.childNodes))
 
 const rememberRenderedChildren = () => {
   renderedChildren.value = Array.from(editorRef.value?.childNodes ?? [])

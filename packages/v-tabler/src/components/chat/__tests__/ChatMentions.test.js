@@ -204,6 +204,7 @@ describe('ChatInput mentions', () => {
     const wrapper = mountInput({ modelValue: initialDraft, mentionOptionProvider: vi.fn() })
     await nextTick()
     const editor = wrapper.get('[contenteditable="true"]')
+    const mentionEditor = wrapper.findComponent({ name: 'ChatMentionEditor' })
     const mention = editor.get('[data-mention-index]').element
     const lineBreak = document.createElement('br')
     const trailingBreak = document.createElement('br')
@@ -216,11 +217,18 @@ describe('ChatInput mentions', () => {
       document.createTextNode('C'),
       trailingBreak
     )
-    placeCaretAtEnd(editor.element)
+    const caretIndex = 'ABADIDAS\n'.length
+    const caretDomOffset = Array.from(editor.element.childNodes).indexOf(lineBreak) + 1
+    mentionEditor.vm.restoreCaret(caretIndex)
+    await nextTick()
+
+    expect(window.getSelection().anchorNode).toBe(editor.element)
+    expect(window.getSelection().anchorOffset).toBe(caretDomOffset)
 
     await editor.trigger('input')
     await nextTick()
 
+    expect(mentionEditor.emitted('input-parts').at(-1)[0].caretIndex).toBe(caretIndex)
     expect(wrapper.emitted('update:modelValue').at(-1)[0]).toEqual({
       content: 'ABADIDAS\nC',
       serializedContent: 'AB@brand[ADIDAS]\nC',

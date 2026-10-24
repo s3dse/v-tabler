@@ -139,7 +139,7 @@ It renders:
 - Mentions as `ChatMentionChip`
 - A render-only trailing `<br>` for a visible final blank line
 
-The trailing break is why one Shift+Enter immediately produces a visible newline. `readDomParts()` explicitly ignores this sentinel so it never enters the model.
+The trailing break is why one Shift+Enter immediately produces a visible newline. DOM parsing and caret mapping ignore this sentinel, while every other `<br>` counts as one `\n` in both the draft and logical caret offsets.
 
 Selection ranges are translated between DOM positions and plain-text offsets. A chip occupies `label.length` characters in that logical coordinate system.
 
