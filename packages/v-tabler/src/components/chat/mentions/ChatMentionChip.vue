@@ -13,7 +13,7 @@
         :aria-disabled="!mention.resolved && disabled ? 'true' : undefined"
         :title="accessibleLabel"
         :aria-label="accessibleLabel"
-        @click.stop="activate"
+        @click="activate"
         @keydown.enter.stop.prevent="activate"
         @keydown.space.stop.prevent="activate"
     >

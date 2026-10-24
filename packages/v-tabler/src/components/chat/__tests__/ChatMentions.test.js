@@ -633,7 +633,7 @@ describe('ChatInput mentions', () => {
     }
   )
 
-  it('cancels the active lookup when the caret moves into a match overlapping a chip', async () => {
+  it('cancels the active lookup when a resolved-chip click moves the caret', async () => {
     const pendingRequests = []
     const optionProvider = vi.fn(
       ({ signal }) => new Promise((resolve) => pendingRequests.push({ signal, resolve }))
@@ -648,16 +648,22 @@ describe('ChatInput mentions', () => {
     })
     await nextTick()
     const editor = wrapper.get('[role="combobox"]')
+    const mentionEditor = wrapper.findComponent({ name: 'ChatMentionEditor' })
+    const resolvedChip = wrapper.get('[data-mention-index]')
     placeCaretAtEnd(wrapper.get('[data-text-part]').element)
     await editor.trigger('keyup', { key: 'ArrowLeft' })
     await waitForOptions()
     const [request] = pendingRequests
+    const caretChangeCount = mentionEditor.emitted('caret-change').length
     expect(request.signal.aborted).toBe(false)
     expect(editor.attributes('aria-expanded')).toBe('true')
 
     placeCaretAtEnd(editor.element)
-    await editor.trigger('keyup', { key: 'ArrowRight' })
+    await resolvedChip.trigger('click')
 
+    expect(mentionEditor.emitted('caret-change')).toHaveLength(caretChangeCount + 1)
+    expect(mentionEditor.emitted('caret-change').at(-1)).toEqual([initialDraft.content.length])
+    expect(pendingRequests).toHaveLength(1)
     expect(request.signal.aborted).toBe(true)
     expect(editor.attributes('aria-expanded')).toBe('false')
 
