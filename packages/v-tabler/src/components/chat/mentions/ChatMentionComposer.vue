@@ -161,7 +161,15 @@ const updateActiveTrigger = (caretIndex) => {
         text: draft.value.content,
         cursorIndex: caretIndex
     })
-    if (!match) {
+    if (
+        !match ||
+        mentionPartSpans(draft.value.parts).some(
+            ({ part, start, end }) =>
+                part.kind === 'mention' &&
+                match.replaceRange.start < end &&
+                start < match.replaceRange.end
+        )
+    ) {
         dismissedTrigger.value = null
         closeMentionMenu()
         return

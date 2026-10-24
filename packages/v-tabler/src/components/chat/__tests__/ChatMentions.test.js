@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, ref } from 'vue'
 import ChatInput from '../ChatInput.vue'
+import { createMentionDraft } from '../mentions/mentionDraft.js'
 
 const options = {
   brand: [
@@ -9,6 +10,15 @@ const options = {
     { id: '2', label: 'ADIDAS ORIGINALS' }
   ],
   partner: [{ id: '3', label: 'DYSON' }]
+}
+
+const existingBrandMention = {
+  kind: 'mention',
+  type: 'brand',
+  trigger: 'brand',
+  id: 'existing-brand',
+  label: 'ADIDAS',
+  resolved: true
 }
 
 const waitForOptions = () => new Promise((resolve) => setTimeout(resolve, 230))
@@ -492,6 +502,147 @@ describe('ChatInput mentions', () => {
       expect.objectContaining({ id: '1', type: 'brand', resolved: true })
     )
     expect(wrapper.get('[data-mention-index]').text()).toContain('ADIDAS')
+  })
+
+  it.each([true, false])(
+    'ignores autocomplete ranges crossing an existing chip (resolved: %s)',
+    async (resolved) => {
+      const initialDraft = createMentionDraft([
+        { kind: 'text', text: '@brand ' },
+        { ...existingBrandMention, id: resolved ? existingBrandMention.id : null, resolved }
+      ])
+      const optionProvider = vi.fn().mockResolvedValue(options.brand)
+      const { model, wrapper } = mountControlledInput({
+        modelValue: initialDraft,
+        mentionOptionProvider: optionProvider
+      })
+      await nextTick()
+      const editor = wrapper.get('[role="combobox"]')
+      placeCaretAtEnd(editor.element)
+
+      await editor.trigger('keyup', { key: 'ArrowRight' })
+      await waitForOptions()
+
+      expect(optionProvider).not.toHaveBeenCalled()
+      expect(editor.attributes('aria-expanded')).toBe('false')
+      expect(model.value).toEqual(initialDraft)
+    }
+  )
+
+  it('protects trigger-like chip labels from custom providers', async () => {
+    const prefix = 'Compare '
+    const initialDraft = createMentionDraft([
+      { kind: 'text', text: prefix },
+      { ...existingBrandMention, label: '@brand ADIDAS' }
+    ])
+    const triggerProvider = vi.fn(({ cursorIndex }) => ({
+      type: 'brand',
+      trigger: 'brand',
+      query: 'ADIDAS',
+      replaceRange: { start: prefix.length, end: cursorIndex }
+    }))
+    const optionProvider = vi.fn().mockResolvedValue(options.brand)
+    const { model, wrapper } = mountControlledInput({
+      modelValue: initialDraft,
+      mentionTriggerProvider: triggerProvider,
+      mentionOptionProvider: optionProvider
+    })
+    await nextTick()
+    const editor = wrapper.get('[role="combobox"]')
+    placeCaretAtEnd(editor.element)
+
+    await editor.trigger('keyup', { key: 'ArrowRight' })
+    await waitForOptions()
+
+    expect(triggerProvider).toHaveBeenCalledWith({
+      text: initialDraft.content,
+      cursorIndex: initialDraft.content.length
+    })
+    expect(optionProvider).not.toHaveBeenCalled()
+    expect(editor.attributes('aria-expanded')).toBe('false')
+    expect(model.value).toEqual(initialDraft)
+  })
+
+  it.each(['before', 'after'])(
+    'inserts a mention in text immediately %s an existing chip',
+    async (position) => {
+      const existingMention = {
+        kind: 'mention',
+        type: 'partner',
+        trigger: 'partner',
+        id: 'existing-partner',
+        label: 'ACME (EU)',
+        resolved: true
+      }
+      const triggerPart = { kind: 'text', text: '@brand adi' }
+      const initialDraft = createMentionDraft(
+        position === 'before' ? [triggerPart, existingMention] : [existingMention, triggerPart]
+      )
+      const optionProvider = vi.fn().mockResolvedValue(options.brand)
+      const { model, wrapper } = mountControlledInput({
+        modelValue: initialDraft,
+        mentionOptionProvider: optionProvider
+      })
+      await nextTick()
+      const editor = wrapper.get('[role="combobox"]')
+      placeCaretAtEnd(wrapper.get('[data-text-part]').element)
+
+      await editor.trigger('keyup', { key: 'ArrowRight' })
+      await waitForOptions()
+
+      expect(optionProvider).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'brand', query: 'adi' })
+      )
+      await getMenu().get('[role="option"]').trigger('mousedown')
+
+      const insertedMention = {
+        kind: 'mention',
+        type: 'brand',
+        trigger: 'brand',
+        ...options.brand[0],
+        resolved: true
+      }
+      expect(model.value.parts).toEqual(
+        position === 'before'
+          ? [insertedMention, existingMention]
+          : [existingMention, insertedMention]
+      )
+    }
+  )
+
+  it('cancels the active lookup when the caret moves into a match overlapping a chip', async () => {
+    const pendingRequests = []
+    const optionProvider = vi.fn(
+      ({ signal }) => new Promise((resolve) => pendingRequests.push({ signal, resolve }))
+    )
+    const initialDraft = createMentionDraft([
+      { kind: 'text', text: '@brand ' },
+      existingBrandMention
+    ])
+    const { model, wrapper } = mountControlledInput({
+      modelValue: initialDraft,
+      mentionOptionProvider: optionProvider
+    })
+    await nextTick()
+    const editor = wrapper.get('[role="combobox"]')
+    placeCaretAtEnd(wrapper.get('[data-text-part]').element)
+    await editor.trigger('keyup', { key: 'ArrowLeft' })
+    await waitForOptions()
+    const [request] = pendingRequests
+    expect(request.signal.aborted).toBe(false)
+    expect(editor.attributes('aria-expanded')).toBe('true')
+
+    placeCaretAtEnd(editor.element)
+    await editor.trigger('keyup', { key: 'ArrowRight' })
+
+    expect(request.signal.aborted).toBe(true)
+    expect(editor.attributes('aria-expanded')).toBe('false')
+
+    request.resolve(options.brand)
+    await flushPromises()
+
+    expect(getMenu().exists()).toBe(false)
+    expect(model.value).toEqual(initialDraft)
   })
 
   it('uses a replacement option provider after mount', async () => {
