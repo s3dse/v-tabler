@@ -186,6 +186,27 @@ describe('ChatInput mentions', () => {
     expect(document.activeElement).toBe(editorElement)
   })
 
+  it('treats the browser placeholder break as empty after deleting the last character', async () => {
+    const optionProvider = vi.fn()
+    const { model, wrapper } = mountControlledInput({ mentionOptionProvider: optionProvider })
+    await nextTick()
+    const editor = await enterEditorText(wrapper, 'x')
+    const mentionEditor = wrapper.findComponent({ name: 'ChatMentionEditor' })
+    const placeholderBreak = document.createElement('br')
+    wrapper.get('[data-text-part]').element.replaceChildren(placeholderBreak)
+    placeCaretAtEnd(editor.element)
+
+    await editor.trigger('input')
+    await nextTick()
+
+    expect(mentionEditor.emitted('input-parts').at(-1)[0].caretIndex).toBe(0)
+    expect(model.value).toEqual(createMentionDraft([]))
+    expect(editor.find('br').exists()).toBe(false)
+    expect(editor.attributes('aria-expanded')).toBe('false')
+    expect(optionProvider).not.toHaveBeenCalled()
+    expect(getMenu().exists()).toBe(false)
+  })
+
   it('reads edited DOM into normalized parts without persisting the trailing sentinel', async () => {
     const initialDraft = {
       content: 'ADIDAS',

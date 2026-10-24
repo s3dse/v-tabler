@@ -99,7 +99,21 @@ const readDomNodeParts = (node) => {
 }
 
 const readDomNodesParts = (nodes) => Array.from(nodes).flatMap(readDomNodeParts)
-const getDomNodesContentLength = (nodes) => contentLength(readDomNodesParts(nodes))
+
+// Browsers retain one unmarked break after their final editable character is deleted.
+const editorContainsPlaceholderBreak = () => {
+  const editor = editorRef.value
+  if (!editor) return false
+
+  return (
+    !editor.textContent &&
+    !editor.querySelector('[data-trailing-break]') &&
+    editor.querySelectorAll('br:not([data-trailing-break])').length === 1
+  )
+}
+
+const getDomNodesContentLength = (nodes) =>
+  editorContainsPlaceholderBreak() ? 0 : contentLength(readDomNodesParts(nodes))
 
 const offsetWithinEditor = (container, offset) => {
   const range = document.createRange()
@@ -176,7 +190,10 @@ const setCaretOffset = (offset) => {
   selection.addRange(range)
 }
 
-const readDomParts = () => mergeMentionParts(readDomNodesParts(editorRef.value.childNodes))
+const readDomParts = () =>
+  editorContainsPlaceholderBreak()
+    ? []
+    : mergeMentionParts(readDomNodesParts(editorRef.value.childNodes))
 
 const rememberRenderedChildren = () => {
   renderedChildren.value = Array.from(editorRef.value?.childNodes ?? [])
