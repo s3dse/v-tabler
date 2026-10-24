@@ -18,6 +18,12 @@ const resolvedBrand = {
     resolved: true
 }
 
+const promptParts = [
+    { kind: 'text', text: 'A ' },
+    { ...resolvedBrand, label: 'ADIDAS' },
+    { kind: 'text', text: ' B' }
+]
+
 describe('mention drafts', () => {
     it('serializes readable content and portable mention syntax', () => {
         const draft = createMentionDraft([
@@ -72,13 +78,30 @@ describe('mention drafts', () => {
     })
 
     it('serializes any selected mention atomically', () => {
-        const parts = [
-            { kind: 'text', text: 'A ' },
-            { ...resolvedBrand, label: 'ADIDAS' },
-            { kind: 'text', text: ' B' }
-        ]
+        expect(serializeMentionRange(promptParts, { start: 3, end: 5 })).toBe('@Marke[ADIDAS]')
+    })
 
-        expect(serializeMentionRange(parts, { start: 3, end: 5 })).toBe('@Marke[ADIDAS]')
+    it.each([
+        [0, 'XA ADIDAS B'],
+        [2, 'A XADIDAS B'],
+        [8, 'A ADIDASX B'],
+        [10, 'A ADIDAS BX']
+    ])('inserts text at collapsed boundary %i', (offset, expectedContent) => {
+        const parts = replaceMentionRange(promptParts, { start: offset, end: offset }, [
+            { kind: 'text', text: 'X' }
+        ])
+
+        expect(createMentionDraft(parts).content).toBe(expectedContent)
+        expect(serializeMentionRange(promptParts, { start: offset, end: offset })).toBe('')
+    })
+
+    it('treats a mention atomically when a range crosses its boundary', () => {
+        expect(serializeMentionRange(promptParts, { start: 1, end: 4 })).toBe(
+            ' @Marke[ADIDAS]'
+        )
+        expect(
+            createMentionDraft(replaceMentionRange(promptParts, { start: 1, end: 4 }, [])).content
+        ).toBe('A B')
     })
 
     it('rejects resolved mentions without a usable id', () => {

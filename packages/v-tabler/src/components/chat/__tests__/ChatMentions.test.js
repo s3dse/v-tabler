@@ -64,6 +64,9 @@ describe('ChatInput mentions', () => {
     wrapper.vm.clear()
     await nextTick()
     expect(wrapper.emitted('update:modelValue').at(-1)).toEqual([''])
+
+    await wrapper.setProps({ modelValue: 'External message' })
+    expect(textarea.element.value).toBe('External message')
   })
 
   it('gives the mention editor an accessible name', async () => {
@@ -226,6 +229,29 @@ describe('ChatInput mentions', () => {
     expect(wrapper.emitted('update:modelValue').at(-1)[0].content).toBe('ADIDAS\n')
   })
 
+  it('applies external structured draft updates', async () => {
+    const wrapper = mountInput({ modelValue: '', mentionOptionProvider: vi.fn() })
+    const externalDraft = {
+      content: 'DYSON',
+      serializedContent: '@partner[DYSON]',
+      parts: [
+        {
+          kind: 'mention',
+          type: 'partner',
+          trigger: 'partner',
+          id: '3',
+          label: 'DYSON',
+          resolved: true
+        }
+      ]
+    }
+
+    await wrapper.setProps({ modelValue: externalDraft })
+    await nextTick()
+
+    expect(wrapper.get('[data-mention-index]').text()).toContain('DYSON')
+  })
+
   it('loads options and inserts a resolved chip', async () => {
     const optionProvider = vi.fn(({ type }) => Promise.resolve(options[type]))
     const wrapper = mountInput({ modelValue: '', mentionOptionProvider: optionProvider })
@@ -275,6 +301,24 @@ describe('ChatInput mentions', () => {
       expect.objectContaining({ id: '1', type: 'brand', resolved: true })
     )
     expect(wrapper.get('[data-mention-index]').text()).toContain('ADIDAS')
+  })
+
+  it('uses a replacement option provider after mount', async () => {
+    const initialProvider = vi.fn().mockResolvedValue([])
+    const replacementProvider = vi.fn().mockResolvedValue(options.brand)
+    const wrapper = mountInput({ modelValue: '', mentionOptionProvider: initialProvider })
+    await nextTick()
+
+    await enterEditorText(wrapper, '@brand first')
+    await waitForOptions()
+    await wrapper.setProps({ mentionOptionProvider: replacementProvider })
+    await enterEditorText(wrapper, '@brand second')
+    await waitForOptions()
+
+    expect(initialProvider).toHaveBeenCalledTimes(1)
+    expect(replacementProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'brand', query: 'second' })
+    )
   })
 
   it('blocks pasted unresolved mentions until they are resolved', async () => {

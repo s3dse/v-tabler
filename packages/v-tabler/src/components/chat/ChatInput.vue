@@ -17,7 +17,7 @@
             <ChatMentionComposer
                 v-if="mentionMode"
                 ref="mentionComposerRef"
-                :model-value="localMessage"
+                v-model="localMessage"
                 :option-provider="mentionOptionProvider"
                 :trigger-provider="mentionTriggerProvider"
                 :placeholder="_placeholder"
@@ -25,7 +25,6 @@
                 :max-height="maxHeight"
                 :recall-last-message="recallLastMessage"
                 :variant="variant"
-                @update:model-value="handleMentionUpdate"
                 @submit="handleSubmit"
             />
             <textarea
@@ -93,10 +92,6 @@ import { hasUnresolvedMentions, isMentionDraft } from './mentions/mentionDraft.j
 const { t } = useI18n()
 
 const props = defineProps({
-    modelValue: {
-        type: [String, Object],
-        default: ''
-    },
     placeholder: {
         type: String,
         default: null
@@ -144,11 +139,14 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
+const localMessage = defineModel({
+    type: [String, Object],
+    default: ''
+})
+const emit = defineEmits(['submit', 'cancel'])
 
 const isEmbedded = computed(() => props.variant === ChatVariant.EMBEDDED)
 
-const localMessage = ref(props.modelValue)
 const textareaRef = ref(null)
 const mentionComposerRef = ref(null)
 const pendingFocus = ref(false)
@@ -183,23 +181,12 @@ watch(
     }
 )
 
-// Sync with parent (only watch for external changes)
-watch(
-    () => props.modelValue,
-    (newVal) => {
-        localMessage.value = newVal
-        if (!mentionMode.value) adjustHeightNextTick()
-    }
-)
+watch(localMessage, () => {
+    if (!mentionMode.value) adjustHeightNextTick()
+})
 
 const handleInput = () => {
-    emit('update:modelValue', localMessage.value)
     adjustHeight()
-}
-
-const handleMentionUpdate = (value) => {
-    localMessage.value = value
-    emit('update:modelValue', value)
 }
 
 const recallLastMessageAllowed = computed(() => {
@@ -300,7 +287,6 @@ const clear = () => {
         return
     }
     localMessage.value = ''
-    emit('update:modelValue', '')
     adjustHeightNextTick()
 }
 

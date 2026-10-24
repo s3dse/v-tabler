@@ -29,7 +29,6 @@ export const useMentionOptions = (optionProvider) => {
     const open = ref(false)
     let activeRequest = null
     let debounceTimer = null
-    let requestSequence = 0
 
     const cancelPendingRequest = () => {
         if (debounceTimer) clearTimeout(debounceTimer)
@@ -39,7 +38,6 @@ export const useMentionOptions = (optionProvider) => {
     }
 
     const close = () => {
-        requestSequence += 1
         cancelPendingRequest()
         open.value = false
         loading.value = false
@@ -49,9 +47,9 @@ export const useMentionOptions = (optionProvider) => {
     }
 
     const executeSearch = async (context) => {
-        const sequence = ++requestSequence
         activeRequest?.abort()
-        activeRequest = new AbortController()
+        const request = new AbortController()
+        activeRequest = request
         loading.value = true
         error.value = null
         open.value = true
@@ -60,25 +58,27 @@ export const useMentionOptions = (optionProvider) => {
             const result = await optionProvider({
                 type: context.type,
                 query: context.query,
-                signal: activeRequest.signal
+                signal: request.signal
             })
-            if (sequence !== requestSequence) return null
+            if (request !== activeRequest) return null
 
             options.value = validateOptions(result)
             highlightedIndex.value = 0
             return options.value
         } catch (providerError) {
-            if (providerError?.name === 'AbortError' || sequence !== requestSequence) return null
+            if (providerError?.name === 'AbortError' || request !== activeRequest) return null
             options.value = []
             error.value = providerError
             return null
         } finally {
-            if (sequence === requestSequence) loading.value = false
+            if (request === activeRequest) {
+                activeRequest = null
+                loading.value = false
+            }
         }
     }
 
     const search = (context) => {
-        requestSequence += 1
         cancelPendingRequest()
         open.value = true
         loading.value = true
@@ -91,7 +91,6 @@ export const useMentionOptions = (optionProvider) => {
     }
 
     const searchImmediately = (context) => {
-        requestSequence += 1
         cancelPendingRequest()
         return executeSearch(context)
     }

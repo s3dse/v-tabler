@@ -2,6 +2,16 @@ const PORTABLE_MENTION_PATTERN = /@([^\s@[\]]+)\[((?:\\.|[^\]\\])*)\]/gu
 
 const mentionLength = (part) => (part.kind === 'text' ? part.text.length : part.label.length)
 
+export const mentionPartSpans = (parts) => {
+    let start = 0
+    return parts.map((part) => {
+        const end = start + mentionLength(part)
+        const span = { part, start, end }
+        start = end
+        return span
+    })
+}
+
 const appendPart = (parts, part) => {
     if (part.kind === 'text' && !part.text) return parts
 
@@ -112,69 +122,40 @@ export const normalizeMentionDraft = (value, triggerProvider) => {
 export const hasUnresolvedMentions = (draft) =>
     draft.parts.some((part) => part.kind === 'mention' && !part.resolved)
 
+const sliceMentionParts = (parts, { start, end }, includePartialMentions = false) =>
+    mentionPartSpans(parts).flatMap(({ part, start: partStart, end: partEnd }) => {
+        const sliceStart = Math.max(start, partStart)
+        const sliceEnd = Math.min(end, partEnd)
+        if (sliceStart >= sliceEnd) return []
+
+        if (part.kind === 'mention') {
+            const containsMention = start <= partStart && partEnd <= end
+            return includePartialMentions || containsMention ? [part] : []
+        }
+
+        return [
+            {
+                kind: 'text',
+                text: part.text.slice(sliceStart - partStart, sliceEnd - partStart)
+            }
+        ]
+    })
+
 export const replaceMentionRange = (parts, { start, end }, insertedParts) => {
-    if (start < 0 || end < start || end > mentionPartsToContent(parts).length) {
+    const length = mentionPartsToContent(parts).length
+    if (start < 0 || end < start || end > length) {
         throw new RangeError('Mention replacement range is outside the draft content.')
     }
 
-    const replacement = mergeMentionParts(insertedParts)
-    const updatedParts = []
-    let currentOffset = 0
-    let inserted = false
-
-    const insertReplacement = () => {
-        if (inserted) return
-        replacement.forEach((part) => updatedParts.push(part))
-        inserted = true
-    }
-
-    parts.forEach((part) => {
-        const partStart = currentOffset
-        const partEnd = partStart + mentionLength(part)
-        currentOffset = partEnd
-
-        if (partEnd <= start) {
-            updatedParts.push(part)
-            return
-        }
-        if (partStart >= end) {
-            insertReplacement()
-            updatedParts.push(part)
-            return
-        }
-        if (part.kind === 'mention') return
-
-        const prefixEnd = Math.max(0, start - partStart)
-        const suffixStart = Math.min(part.text.length, end - partStart)
-        if (prefixEnd > 0) updatedParts.push({ kind: 'text', text: part.text.slice(0, prefixEnd) })
-        insertReplacement()
-        if (suffixStart < part.text.length) {
-            updatedParts.push({ kind: 'text', text: part.text.slice(suffixStart) })
-        }
-    })
-
-    insertReplacement()
-    return mergeMentionParts(updatedParts)
+    return mergeMentionParts([
+        ...sliceMentionParts(parts, { start: 0, end: start }),
+        ...insertedParts,
+        ...sliceMentionParts(parts, { start: end, end: length })
+    ])
 }
 
-export const serializeMentionRange = (parts, { start, end }) => {
-    if (start === end) return ''
-
-    let currentOffset = 0
-    return parts
-        .map((part) => {
-            const partStart = currentOffset
-            const partEnd = partStart + mentionLength(part)
-            currentOffset = partEnd
-            if (partEnd <= start || partStart >= end) return ''
-            if (part.kind === 'mention') return serializeMentionParts([part])
-
-            const sliceStart = Math.max(0, start - partStart)
-            const sliceEnd = Math.min(part.text.length, end - partStart)
-            return part.text.slice(sliceStart, sliceEnd)
-        })
-        .join('')
-}
+export const serializeMentionRange = (parts, range) =>
+    serializeMentionParts(sliceMentionParts(parts, range, true))
 
 export const contentLength = (parts) =>
     parts.reduce((length, part) => length + mentionLength(part), 0)

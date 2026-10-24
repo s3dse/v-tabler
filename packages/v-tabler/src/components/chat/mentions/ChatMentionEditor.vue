@@ -30,8 +30,6 @@
         v-else
         :data-mention-index="index"
         :mention="part"
-        :unresolved-text="unresolvedText"
-        :resolve-text="resolveText"
         @activate="emit('resolve', index)"
       />
     </template>
@@ -43,43 +41,18 @@
 import { computed, nextTick, onMounted, onUpdated, ref, shallowRef } from 'vue'
 import { useAutoHeight } from '../useAutoHeight.js'
 import { ChatVariant } from '../chatVariants.js'
+import { mentionPartSpans } from './mentionDraft.js'
 import ChatMentionChip from './ChatMentionChip.vue'
 
 const props = defineProps({
-  draft: {
-    type: Object,
-    required: true
-  },
-  placeholder: {
-    type: String,
-    default: ''
-  },
+  draft: { type: Object, required: true },
+  placeholder: { type: String, default: '' },
   disabled: Boolean,
-  maxHeight: {
-    type: [Number, String],
-    default: 150
-  },
-  variant: {
-    type: String,
-    required: true
-  },
+  maxHeight: { type: [Number, String], default: 150 },
+  variant: { type: String, required: true },
   menuOpen: Boolean,
-  menuId: {
-    type: String,
-    required: true
-  },
-  activeDescendant: {
-    type: String,
-    default: undefined
-  },
-  unresolvedText: {
-    type: String,
-    required: true
-  },
-  resolveText: {
-    type: String,
-    required: true
-  }
+  menuId: { type: String, required: true },
+  activeDescendant: { type: String, default: undefined }
 })
 
 const emit = defineEmits([
@@ -248,15 +221,10 @@ const handleCompositionEnd = () => {
   handleInput()
 }
 
-const mentionRanges = () => {
-  let offset = 0
-  return props.draft.parts.flatMap((part) => {
-    const start = offset
-    const end = start + (part.kind === 'text' ? part.text.length : part.label.length)
-    offset = end
-    return part.kind === 'mention' ? [{ start, end }] : []
-  })
-}
+const mentionRanges = () =>
+  mentionPartSpans(props.draft.parts).flatMap(({ part, start, end }) =>
+    part.kind === 'mention' ? [{ start, end }] : []
+  )
 
 const handleAtomicDelete = (event) => {
   if (!['Backspace', 'Delete'].includes(event.key)) return false

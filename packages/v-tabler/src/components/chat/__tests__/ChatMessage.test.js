@@ -47,7 +47,7 @@ describe('ChatMessage copy action', () => {
 
         const copyButton = wrapper.get('button[aria-label="Copy message"]')
         expect(copyButton.classes()).toEqual(
-            expect.arrayContaining(['bg-primary-hover', 'text-onprimary'])
+            expect.arrayContaining(['bg-primary', 'text-onprimary', 'hover:bg-primary-hover'])
         )
         expect(copyButton.classes()).not.toContain('opacity-70')
 

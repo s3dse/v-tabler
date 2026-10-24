@@ -26,28 +26,19 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from '@/composables/useI18n.js'
 
 const props = defineProps({
-    mention: {
-        type: Object,
-        required: true
-    },
-    unresolvedText: {
-        type: String,
-        required: true
-    },
-    resolveText: {
-        type: String,
-        required: true
-    }
+    mention: { type: Object, required: true }
 })
 
 const emit = defineEmits(['activate'])
+const { t } = useI18n()
 
 const accessibleLabel = computed(() =>
     props.mention.resolved
         ? `${props.mention.label}, ${props.mention.type}`
-        : `${props.mention.label}, ${props.mention.type}, ${props.unresolvedText} ${props.resolveText}`
+        : `${props.mention.label}, ${props.mention.type}, ${t('vTabler.chat.mentions.unresolved')} ${t('vTabler.chat.mentions.resolve')}`
 )
 
 const activate = () => {

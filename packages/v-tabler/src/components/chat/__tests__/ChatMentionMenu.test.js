@@ -3,11 +3,7 @@ import { mount } from '@vue/test-utils'
 import ChatMentionMenu from '../mentions/ChatMentionMenu.vue'
 
 const requiredProps = {
-  menuId: 'mention-menu',
-  loadingText: 'Loading',
-  errorText: 'Lookup failed',
-  emptyText: 'No results',
-  usePlainText: 'Use as plain text'
+  menuId: 'mention-menu'
 }
 
 const mountMenu = (props = {}) => mount(ChatMentionMenu, { props: { ...requiredProps, ...props } })
@@ -43,9 +39,9 @@ describe('ChatMentionMenu', () => {
   })
 
   it.each([
-    [{ loading: true }, 'status', 'Loading', 'text-muted'],
-    [{ error: new Error('failed') }, 'alert', 'Lookup failed', 'text-danger'],
-    [{}, 'status', 'No results', 'text-muted']
+    [{ loading: true }, 'status', 'Loading suggestions...', 'text-muted'],
+    [{ error: new Error('failed') }, 'alert', 'Suggestions could not be loaded.', 'text-danger'],
+    [{}, 'status', 'No matching options.', 'text-muted']
   ])('styles the loading, error, and empty states', (props, role, text, colorClass) => {
     const wrapper = mountMenu(props)
     const state = wrapper.get(`[role="${role}"]`)
