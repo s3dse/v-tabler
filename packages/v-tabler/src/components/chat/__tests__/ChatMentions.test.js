@@ -779,6 +779,42 @@ describe('ChatInput mentions', () => {
     expect(wrapper.emitted('submit')).toBeUndefined()
   })
 
+  it('cancels chip resolution when editor input shifts mention indexes', async () => {
+    const pendingRequests = []
+    const optionProvider = vi.fn(
+      ({ signal }) => new Promise((resolve) => pendingRequests.push({ resolve, signal }))
+    )
+    const { model, wrapper } = mountControlledInput({
+      modelValue: '@brand[PREFIX] @brand[UNKNOWN] @partner[OTHER]',
+      mentionOptionProvider: optionProvider
+    })
+    await nextTick()
+    const initialDraft = model.value
+    const editedDraft = createMentionDraft(initialDraft.parts.slice(2))
+    const editor = wrapper.get('[role="combobox"]')
+    const [, targetChip] = wrapper.findAll('[data-mention-index]')
+
+    await targetChip.trigger('click')
+    const [request] = pendingRequests
+    expect(request.signal.aborted).toBe(false)
+    expect(editor.attributes('aria-expanded')).toBe('true')
+
+    wrapper.findAll('[data-mention-index]')[0].element.remove()
+    wrapper.findAll('[data-text-part]')[0].element.remove()
+    placeCaretAtEnd(editor.element)
+    await editor.trigger('input')
+    await nextTick()
+
+    expect(model.value).toEqual(editedDraft)
+    expect(request.signal.aborted).toBe(true)
+    expect(editor.attributes('aria-expanded')).toBe('false')
+
+    request.resolve([{ id: 'stale-brand', label: 'UNKNOWN' }])
+    await flushPromises()
+
+    expect(model.value).toEqual(editedDraft)
+  })
+
   it('submits structured content after resolution', async () => {
     const initialDraft = {
       content: 'Klicks für ADIDAS',

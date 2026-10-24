@@ -208,6 +208,7 @@ const replaceDraftRange = (range, parts) => {
 
 const handleInputParts = ({ parts, caretIndex }) => {
     if (props.disabled) return
+    if (activeMentionContext.value?.mode === 'resolve') closeMentionMenu()
     setDraftParts(parts, caretIndex)
 }
 
