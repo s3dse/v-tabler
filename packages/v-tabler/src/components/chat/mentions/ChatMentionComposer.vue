@@ -46,8 +46,10 @@
                         :options="mentionOptions.options.value"
                         :highlighted-index="mentionOptions.highlightedIndex.value"
                         :menu-id="menuId"
-                        :allow-plain-text="activeMentionContext?.mode === 'resolve'"
-                        @highlight="mentionOptions.highlight"
+                        :allow-plain-text="allowPlainText"
+                        :plain-text-highlighted="plainTextHighlighted"
+                        @highlight="highlightOption"
+                        @highlight-plain-text="plainTextHighlighted = true"
                         @select="selectOption"
                         @use-plain-text="convertActiveMentionToText"
                     />
@@ -101,15 +103,19 @@ const draft = ref(normalizeMentionDraft(draftModel.value, activeTriggerProvider.
 const editorRef = ref(null)
 const menuId = `chat-mention-menu-${useId()}`
 const activeMentionContext = ref(null)
+const plainTextHighlighted = ref(false)
 const dismissedTrigger = ref(null)
 const mentionOptions = useMentionOptions((context) => props.optionProvider(context))
 
 const containsUnresolvedMentions = computed(() => hasUnresolvedMentions(draft.value))
-const activeDescendant = computed(() =>
-    mentionOptions.open.value && mentionOptions.options.value.length
+const allowPlainText = computed(() => activeMentionContext.value?.mode === 'resolve')
+const activeDescendant = computed(() => {
+    if (!mentionOptions.open.value) return undefined
+    if (plainTextHighlighted.value) return `${menuId}-plain-text`
+    return mentionOptions.options.value.length
         ? `${menuId}-option-${mentionOptions.highlightedIndex.value}`
         : undefined
-)
+})
 
 const triggerMatchesAreEqual = (left, right) =>
     left?.type === right?.type &&
@@ -136,6 +142,7 @@ const restoreCaret = (caretIndex) => editorRef.value?.restoreCaret(caretIndex)
 
 const closeMentionMenu = () => {
     activeMentionContext.value = null
+    plainTextHighlighted.value = false
     mentionOptions.close()
 }
 
@@ -201,6 +208,24 @@ const handleInputParts = ({ parts, caretIndex }) => setDraftParts(parts, caretIn
 
 const getHighlightedOption = () =>
     mentionOptions.options.value[mentionOptions.highlightedIndex.value]
+
+const highlightOption = (index) => {
+    plainTextHighlighted.value = false
+    mentionOptions.highlight(index)
+}
+
+const moveHighlight = (direction) => {
+    if (!allowPlainText.value) {
+        mentionOptions.moveHighlight(direction)
+        return
+    }
+    const optionCount = mentionOptions.options.value.length
+    const currentIndex = plainTextHighlighted.value ? optionCount : mentionOptions.highlightedIndex.value
+    const itemCount = optionCount + 1
+    const nextIndex = (currentIndex + direction + itemCount) % itemCount
+    plainTextHighlighted.value = nextIndex === optionCount
+    if (!plainTextHighlighted.value) mentionOptions.highlight(nextIndex)
+}
 
 const getPartRange = (partIndex) => {
     const span = mentionPartSpans(draft.value.parts)[partIndex]
@@ -268,7 +293,7 @@ const handleMentionMenuKeydown = (event) => {
     if (!mentionOptions.open.value) return false
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault()
-        mentionOptions.moveHighlight(event.key === 'ArrowDown' ? 1 : -1)
+        moveHighlight(event.key === 'ArrowDown' ? 1 : -1)
         return true
     }
     if (event.key === 'Escape') {
@@ -276,10 +301,18 @@ const handleMentionMenuKeydown = (event) => {
         dismissMentionMenu()
         return true
     }
+    if (event.key === 'Tab') {
+        dismissMentionMenu()
+        return false
+    }
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()
-        const option = getHighlightedOption()
-        if (option) selectOption(option)
+        if (plainTextHighlighted.value) {
+            convertActiveMentionToText()
+        } else {
+            const option = getHighlightedOption()
+            if (option) selectOption(option)
+        }
         return true
     }
     return false
@@ -347,11 +380,13 @@ const resolveMention = async (partIndex) => {
     if (mention?.kind !== 'mention' || mention.resolved) return
 
     activeMentionContext.value = { mode: 'resolve', partIndex }
+    plainTextHighlighted.value = false
+    restoreCaret(getPartRange(partIndex).end)
     const candidates = await mentionOptions.searchImmediately({
         type: mention.type,
         query: mention.label
     })
-    if (!candidates) return
+    if (!candidates || plainTextHighlighted.value) return
 
     const exactMatch = findSingleExactOption(candidates, mention.label)
     if (exactMatch) selectOption(exactMatch)

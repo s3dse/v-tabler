@@ -196,6 +196,11 @@ The Reka composition:
 - Prevents Popover autofocus from disturbing the caret
 
 The editor exposes `aria-expanded`, `aria-controls`, and `aria-activedescendant`; each candidate is a `role="option"`.
+Arrow keys cycle through candidates and, during chip resolution, the final “Use as plain text” option.
+Enter accepts the highlighted choice while focus stays in the editor. Conversion requires an explicit
+arrow-key, hover, or click choice; loading, empty, and error states do not select it automatically.
+Option buttons stay outside the Tab sequence, and the highlighted row scrolls into view.
+Escape and Tab dismiss without selecting; Tab and Shift+Tab retain normal focus movement.
 
 ## 9. Copy, paste, and unresolved mentions
 
@@ -212,7 +217,7 @@ Pasting recognizes configured triggers and creates an unresolved mention with `i
 Resolving an unresolved chip:
 
 - Searches using its entity type and label.
-- Automatically resolves exactly one case-insensitive exact match.
+- Automatically resolves exactly one case-insensitive exact match unless plain text was explicitly highlighted.
 - Otherwise leaves the candidates visible.
 - Offers “Use as plain text” if resolution is impossible or unwanted.
 

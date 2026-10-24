@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, ref } from 'vue'
 import ChatInput from '../ChatInput.vue'
@@ -6,6 +6,15 @@ import { createMentionDraft } from '../mentions/mentionDraft.js'
 import { defaultMentionTriggerProvider } from '../mentions/mentionTriggerProvider.js'
 
 const IME_PROCESS_KEY_CODE = 229
+const originalScrollIntoView = HTMLElement.prototype.scrollIntoView
+
+beforeAll(() => {
+  HTMLElement.prototype.scrollIntoView = vi.fn()
+})
+afterAll(() => {
+  if (originalScrollIntoView) HTMLElement.prototype.scrollIntoView = originalScrollIntoView
+  else delete HTMLElement.prototype.scrollIntoView
+})
 
 const options = {
   brand: [
@@ -497,6 +506,7 @@ describe('ChatInput mentions', () => {
     expect(optionButtons).toHaveLength(2)
 
     await optionButtons[0].trigger('mousedown')
+    await optionButtons[0].trigger('click')
     const draft = wrapper.emitted('update:modelValue').at(-1)[0]
 
     expect(draft.content).toBe('Wieviele Klicks hatte die ADIDAS')
@@ -596,7 +606,9 @@ describe('ChatInput mentions', () => {
       expect(optionProvider).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'brand', query: 'adi' })
       )
-      await getMenu().get('[role="option"]').trigger('mousedown')
+      const option = getMenu().get('[role="option"]')
+      await option.trigger('mousedown')
+      await option.trigger('click')
 
       const insertedMention = {
         kind: 'mention',
@@ -725,7 +737,7 @@ describe('ChatInput mentions', () => {
 
     await brandChip.trigger('click')
     await flushPromises()
-    expect(getMenu().findAll('[role="option"]')).toHaveLength(options.brand.length)
+    expect(getMenu().findAll('[role="option"]')).toHaveLength(options.brand.length + 1)
     await editor.trigger('keydown', { key: 'ArrowDown' })
     const menu = wrapper.findComponent({ name: 'ChatMentionMenu' })
 
@@ -743,7 +755,7 @@ describe('ChatInput mentions', () => {
     expect(wrapper.emitted('update:modelValue').at(-1)[0]).toEqual(initialDraft)
     expect(wrapper.emitted('submit')).toBeUndefined()
     expect(activeDescendantWhileLoading).toBeUndefined()
-    expect(getMenu().findAll('[role="option"]')).toHaveLength(0)
+    expect(getMenu().findAll('[role="option"]').map((row) => row.text())).toEqual(['Use as plain text'])
 
     menu.vm.$emit('select', options.brand.at(-1))
     await nextTick()
@@ -793,6 +805,179 @@ describe('ChatInput mentions', () => {
     expect(wrapper.emitted('submit')).toEqual([[initialDraft]])
   })
 
+  it.each(['Enter', ' '])('opens chip resolution with %j and moves focus and the caret to the editor', async (key) => {
+    const { model, wrapper } = mountControlledInput({
+      modelValue: 'Before @brand[UNKNOWN] after',
+      mentionOptionProvider: vi.fn().mockResolvedValue([])
+    })
+    await nextTick()
+    const initialDraft = model.value
+    const chip = wrapper.get('[data-mention-index]')
+    const editor = wrapper.get('[role="combobox"]')
+    const mentionEditor = wrapper.findComponent({ name: 'ChatMentionEditor' })
+    chip.element.focus()
+
+    await chip.trigger('keydown', { key })
+    await flushPromises()
+
+    expect(editor.attributes('aria-expanded')).toBe('true')
+    expect(document.activeElement).toBe(editor.element)
+    expect(mentionEditor.vm.getSelectionRange()).toEqual({
+      start: 'Before UNKNOWN'.length,
+      end: 'Before UNKNOWN'.length
+    })
+    expect(mentionEditor.emitted('keydown')).toBeUndefined()
+    expect(model.value).toEqual(initialDraft)
+    expect(wrapper.emitted('submit')).toBeUndefined()
+  })
+
+  it('wraps through entities and plain text in both directions, then converts with Enter', async () => {
+    const { model, wrapper } = mountControlledInput({
+      modelValue: '@brand[UNKNOWN]',
+      mentionOptionProvider: vi.fn().mockResolvedValue(options.brand)
+    })
+    await wrapper.get('[data-mention-index]').trigger('click')
+    await flushPromises()
+    const editor = wrapper.get('[role="combobox"]')
+    const expectHighlight = (label) => {
+      const selected = getMenu().findAll('[aria-selected="true"]')
+      expect(selected).toHaveLength(1)
+      expect(selected[0].text()).toBe(label)
+      expect(editor.attributes('aria-activedescendant')).toBe(selected[0].attributes('id'))
+      expect(document.activeElement).toBe(editor.element)
+    }
+    expectHighlight('ADIDAS')
+
+    for (const [key, label] of [
+      ['ArrowUp', 'Use as plain text'],
+      ['ArrowUp', 'ADIDAS ORIGINALS'],
+      ['ArrowDown', 'Use as plain text'],
+      ['ArrowDown', 'ADIDAS'],
+      ['ArrowDown', 'ADIDAS ORIGINALS'],
+      ['ArrowDown', 'Use as plain text']
+    ]) {
+      await editor.trigger('keydown', { key })
+      expectHighlight(label)
+    }
+    await editor.trigger('keydown', { key: 'Enter' })
+
+    expect(model.value).toEqual(createMentionDraft([{ kind: 'text', text: 'UNKNOWN' }]))
+    expect(editor.attributes('aria-expanded')).toBe('false')
+    expect(editor.attributes('aria-activedescendant')).toBeUndefined()
+    expect(wrapper.emitted('submit')).toBeUndefined()
+  })
+
+  it.each(['loading', 'empty', 'error'])('requires explicit plain-text selection during %s', async (state) => {
+    const pendingRequests = []
+    const optionProvider = vi.fn(({ signal }) => {
+      if (state === 'empty') return Promise.resolve([])
+      if (state === 'error') return Promise.reject(new Error('Lookup failed'))
+      return new Promise((resolve) => pendingRequests.push({ resolve, signal }))
+    })
+    const { model, wrapper } = mountControlledInput({
+      modelValue: '@brand[UNKNOWN]',
+      mentionOptionProvider: optionProvider
+    })
+    await wrapper.get('[data-mention-index]').trigger('click')
+    await flushPromises()
+    const initialDraft = model.value
+    const editor = wrapper.get('[role="combobox"]')
+    expect(editor.attributes('aria-activedescendant')).toBeUndefined()
+
+    await editor.trigger('keydown', { key: 'Enter' })
+    expect(model.value).toEqual(initialDraft)
+    expect(wrapper.emitted('submit')).toBeUndefined()
+
+    await editor.trigger('keydown', { key: 'ArrowDown' })
+    const plainTextOption = getMenu().get('[role="option"]')
+    expect(plainTextOption.text()).toBe('Use as plain text')
+    expect(plainTextOption.attributes('aria-selected')).toBe('true')
+    expect(editor.attributes('aria-activedescendant')).toBe(plainTextOption.attributes('id'))
+    await editor.trigger('keydown', { key: 'ArrowUp' })
+    expect(plainTextOption.attributes('aria-selected')).toBe('true')
+    await editor.trigger('keydown', { key: 'Enter' })
+
+    const convertedDraft = createMentionDraft([{ kind: 'text', text: 'UNKNOWN' }])
+    expect(model.value).toEqual(convertedDraft)
+    expect(editor.attributes('aria-expanded')).toBe('false')
+    expect(wrapper.emitted('submit')).toBeUndefined()
+    if (state === 'loading') {
+      expect(pendingRequests[0].signal.aborted).toBe(true)
+      pendingRequests[0].resolve([{ id: 'late', label: 'UNKNOWN' }])
+      await flushPromises()
+      expect(model.value).toEqual(convertedDraft)
+      expect(editor.attributes('aria-expanded')).toBe('false')
+    }
+  })
+
+  it('preserves hovered plain-text selection across exact-match results and resets it for another chip', async () => {
+    const pendingRequests = []
+    const { model, wrapper } = mountControlledInput({
+      modelValue: '@brand[UNKNOWN] @partner[OTHER]',
+      mentionOptionProvider: vi.fn(() => new Promise((resolve) => pendingRequests.push({ resolve })))
+    })
+    await nextTick()
+    const initialDraft = model.value
+    const [brandChip, partnerChip] = wrapper.findAll('[data-mention-index]')
+    const editor = wrapper.get('[role="combobox"]')
+    await brandChip.trigger('click')
+    await getMenu().get('button').trigger('mouseenter')
+    const fallbackId = editor.attributes('aria-activedescendant')
+    expect(fallbackId).toBeTruthy()
+
+    pendingRequests[0].resolve([{ id: 'exact', label: 'UNKNOWN' }, ...options.brand])
+    await flushPromises()
+
+    expect(model.value).toEqual(initialDraft)
+    expect(editor.attributes('aria-activedescendant')).toBe(fallbackId)
+    expect(getMenu().get('[aria-selected="true"]').text()).toBe('Use as plain text')
+    await getMenu().findAll('[role="option"]')[0].trigger('mouseenter')
+    expect(getMenu().get('[aria-selected="true"]').text()).toBe('UNKNOWN')
+    await editor.trigger('keydown', { key: 'ArrowUp' })
+    expect(getMenu().get('[aria-selected="true"]').text()).toBe('Use as plain text')
+
+    await partnerChip.trigger('click')
+    expect(editor.attributes('aria-activedescendant')).toBeUndefined()
+    await editor.trigger('keydown', { key: 'Enter' })
+    expect(model.value).toEqual(initialDraft)
+    await editor.trigger('keydown', { key: 'ArrowDown' })
+    await editor.trigger('keydown', { key: 'Enter' })
+
+    expect(model.value.parts).toEqual([initialDraft.parts[0], { kind: 'text', text: ' OTHER' }])
+    expect(wrapper.emitted('submit')).toBeUndefined()
+  })
+
+  it.each([
+    { key: 'Escape', shiftKey: false },
+    { key: 'Tab', shiftKey: false },
+    { key: 'Tab', shiftKey: true }
+  ])('dismisses resolution without selection on $key (shift: $shiftKey)', async (keyProperties) => {
+    const { model, wrapper } = mountControlledInput({
+      modelValue: '@brand[UNKNOWN]',
+      mentionOptionProvider: vi.fn().mockResolvedValue([])
+    })
+    await wrapper.get('[data-mention-index]').trigger('click')
+    await flushPromises()
+    const initialDraft = model.value
+    const editor = wrapper.get('[role="combobox"]')
+    await editor.trigger('keydown', { key: 'ArrowDown' })
+    const event = new KeyboardEvent('keydown', { ...keyProperties, bubbles: true, cancelable: true })
+    editor.element.dispatchEvent(event)
+    await nextTick()
+
+    expect(event.defaultPrevented).toBe(keyProperties.key === 'Escape')
+    expect(editor.attributes('aria-expanded')).toBe('false')
+    expect(editor.attributes('aria-activedescendant')).toBeUndefined()
+    expect(model.value).toEqual(initialDraft)
+    expect(wrapper.emitted('submit')).toBeUndefined()
+
+    await wrapper.get('[data-mention-index]').trigger('click')
+    await flushPromises()
+    expect(editor.attributes('aria-activedescendant')).toBeUndefined()
+    await editor.trigger('keydown', { key: 'Enter' })
+    expect(model.value).toEqual(initialDraft)
+  })
+
   it('can convert an unresolved mention to plain text when lookup fails', async () => {
     const wrapper = mountInput({
       modelValue: 'Klicks für @Marke[UNKNOWN]',
@@ -802,10 +987,11 @@ describe('ChatInput mentions', () => {
 
     await wrapper.get('[data-mention-index]').trigger('click')
     await nextTick()
-    await getMenu()
+    const plainTextOption = getMenu()
       .findAll('button')
       .find((button) => button.text() === 'Use as plain text')
-      .trigger('mousedown')
+    await plainTextOption.trigger('mousedown')
+    await plainTextOption.trigger('click')
 
     const draft = wrapper.emitted('update:modelValue').at(-1)[0]
     expect(draft.content).toBe('Klicks für UNKNOWN')

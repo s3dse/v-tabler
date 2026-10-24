@@ -12,8 +12,8 @@
         :title="accessibleLabel"
         :aria-label="accessibleLabel"
         @click.stop="activate"
-        @keydown.enter.prevent="activate"
-        @keydown.space.prevent="activate"
+        @keydown.enter.stop.prevent="activate"
+        @keydown.space.stop.prevent="activate"
     >
         <span class="truncate">{{ mention.label }}</span>
         <span

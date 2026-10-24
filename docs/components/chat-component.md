@@ -143,6 +143,13 @@ Copied mentions intentionally omit IDs. When pasted, `@Marke[ADIDAS]` becomes un
 be resolved through the receiving client's option provider or converted to plain text before the
 message can be sent.
 
+Press Enter or Space on an unresolved chip to open its suggestions and return focus to the editor.
+Use ArrowDown and ArrowUp to cycle through suggestions and the final “Use as plain text” option,
+then press Enter to accept the highlighted choice without sending the message. Plain-text conversion
+requires an explicit arrow-key, hover, or click choice, and remains available while loading or when
+no suggestions are available. Escape, Tab, and Shift+Tab dismiss the menu without changing the draft;
+Tab and Shift+Tab continue normal focus movement.
+
 Create or replace trigger behavior with the exported provider factory:
 
 ```javascript
