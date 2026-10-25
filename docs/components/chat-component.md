@@ -98,7 +98,7 @@ used independently.
 
 Mentions are opt-in. Supplying an option provider replaces the textarea with the mention composer;
 without one, `ChatInput` keeps its existing string model and behavior. The default trigger provider
-always recognizes `@brand`, `@Marke`, and `@partner`, independent of the current locale:
+recognizes `@brand`, `@Marke`, and `@partner`:
 
 ```vue
 <script setup>
@@ -113,56 +113,9 @@ const findMentionOptions = async ({ type, query, signal }) => {
 </template>
 ```
 
-The suggestion menu matches the editor width, prefers opening below it, and automatically flips or
-shifts to remain visible near viewport edges.
-
-Mention-enabled inputs emit a structured draft. `content` remains readable for existing AI
-handlers, while `parts` contains the resolved IDs and `serializedContent` provides a portable
-plain-text form:
-
-```javascript
-{
-    content: 'Wieviele Klicks hatte die ADIDAS?',
-    serializedContent: 'Wieviele Klicks hatte die @Marke[ADIDAS]?',
-    parts: [
-        { kind: 'text', text: 'Wieviele Klicks hatte die ' },
-        {
-            kind: 'mention',
-            type: 'brand',
-            trigger: 'Marke',
-            id: '123',
-            label: 'ADIDAS',
-            resolved: true
-        },
-        { kind: 'text', text: '?' }
-    ]
-}
-```
-
-Copied mentions intentionally omit IDs. When pasted, `@Marke[ADIDAS]` becomes unresolved and must
-be resolved through the receiving client's option provider or converted to plain text before the
-message can be sent.
-
-Press Enter or Space on an unresolved chip to open its suggestions and return focus to the editor.
-Use ArrowDown and ArrowUp to cycle through suggestions and the final “Use as plain text” option,
-then press Enter to accept the highlighted choice without sending the message. Plain-text conversion
-requires an explicit arrow-key, hover, or click choice, and remains available while loading or when
-no suggestions are available. Escape, Tab, and Shift+Tab dismiss the menu without changing the draft;
-Tab and Shift+Tab continue normal focus movement.
-
-Create or replace trigger behavior with the exported provider factory:
-
-```javascript
-import { createMentionTriggerProvider } from '@s3_dse/v-tabler'
-
-const mentionTriggerProvider = createMentionTriggerProvider({
-    brand: ['brand', 'Marke', 'label'],
-    partner: ['partner', 'retailer']
-})
-```
-
-The lower-level provider contract receives `{ text, cursorIndex }` and returns `null` or
-`{ type, trigger, query, replaceRange: { start, end } }`.
+Mention-enabled inputs use a structured draft rather than a string. See
+[Chat Mentions](/components/chat-mentions) for the provider APIs, interaction behavior, portable
+syntax, public draft contract, and transport guidance.
 
 ### Custom input
 

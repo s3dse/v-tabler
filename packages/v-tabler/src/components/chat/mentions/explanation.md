@@ -1,6 +1,6 @@
 The implementation is split cleanly: `ChatInput` selects legacy versus mention mode, `ChatMentionComposer` coordinates behavior, and the editor/menu/chip components own their respective DOM concerns.
 
-One important caveat: the current public draft still uses `kind` / `type` / `resolved`. The newer OASIStant-oriented `type` / `entityType` / `status` contract we discussed has not yet been applied.
+The existing `kind` / `type` / `resolved` vocabulary is the canonical public contract. Its JSDoc types and runtime validator are published from `@s3_dse/v-tabler/mentions`.
 
 ## 1. Public entry points
 
@@ -225,7 +225,7 @@ Resolving an unresolved chip:
 
 Submission remains blocked while any unresolved mention exists.
 
-## 10. Submission and OASIStant handoff
+## 10. Submission and client handoff
 
 [useChatLogic.js](../useChatLogic.js) accepts either a string or structured draft.
 
@@ -250,7 +250,7 @@ The AI handler therefore receives something like:
 }
 ```
 
-For OASIStant, Trendentify must forward `parts`; sending only `content` would discard the entity-resolution benefit.
+Clients that need resolved entity IDs must forward `parts`; sending only `content` discards the entity-resolution benefit.
 
 Recall clones the structured parts so resolved mentions remain resolved within the current chat.
 
@@ -265,16 +265,8 @@ A client can customize at two levels:
 
 Unresolved states use `colors.warning.{DEFAULT,bg,border,hover}`. The base preset also provides the matching `success` family, and custom themes can override either status through the existing theme merge.
 
-## Pending contract decision
+## Public contract
 
-The current v-tabler shape and our proposed OASIStant transport shape map as follows:
+The package subpath `@s3_dse/v-tabler/mentions` publishes JSDoc declarations for the draft and part types together with `isChatDraft()` for runtime validation. The component payload and the transport shape therefore share the same `content`, `serializedContent`, and `parts` semantics without a second field vocabulary.
 
-| Current v-tabler  | Proposed transport    |
-| ----------------- | --------------------- |
-| `kind: 'mention'` | `type: 'mention'`     |
-| `type: 'brand'`   | `entityType: 'brand'` |
-| `resolved: true`  | `status: 'resolved'`  |
-
-Because the feature is not released yet, I would align these before integrating OASIStant rather than maintain two nearly identical contracts.
-
-The main integration risk is forwarding only readable `content` and accidentally dropping the structured entity parts.
+HTTP envelopes, authentication, backend validation, and persistence remain client responsibilities. The main integration risk is forwarding only readable `content` and accidentally dropping the structured entity parts.

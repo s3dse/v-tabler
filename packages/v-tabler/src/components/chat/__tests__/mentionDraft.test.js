@@ -8,6 +8,7 @@ import {
     serializeMentionRange
 } from '../mentions/mentionDraft.js'
 import { defaultMentionTriggerProvider } from '../mentions/mentionTriggerProvider.js'
+import { isChatDraft } from '../../../mentions.js'
 
 const resolvedBrand = {
     kind: 'mention',
@@ -16,6 +17,14 @@ const resolvedBrand = {
     id: '123',
     label: 'ACME [DE] \\ Retail',
     resolved: true
+}
+
+const unresolvedBrand = {
+    kind: 'mention',
+    type: 'brand',
+    trigger: 'brand',
+    label: 'ADIDAS',
+    resolved: false
 }
 
 const promptParts = [
@@ -107,5 +116,33 @@ describe('mention drafts', () => {
     it('rejects resolved mentions without a usable id', () => {
         expect(isMentionDraft({ parts: [{ ...resolvedBrand, id: '' }] })).toBe(false)
         expect(isMentionDraft({ parts: [{ ...resolvedBrand, id: null }] })).toBe(false)
+    })
+
+    it.each([
+        ['empty', createMentionDraft([])],
+        ['plain text', createMentionDraft([{ kind: 'text', text: 'Hello' }])],
+        ['resolved mention', createMentionDraft([resolvedBrand])]
+    ])('accepts a canonical %s chat draft', (_description, draft) => {
+        expect(isChatDraft(draft)).toBe(true)
+    })
+
+    it.each([
+        ['null id', { ...unresolvedBrand, id: null }],
+        ['omitted id', unresolvedBrand]
+    ])('accepts an unresolved mention with a %s', (_description, mention) => {
+        expect(isChatDraft(createMentionDraft([mention]))).toBe(true)
+    })
+
+    it.each([
+        ['invalid resolved id', createMentionDraft([{ ...resolvedBrand, id: '' }])],
+        ['invalid part', { content: '', serializedContent: '', parts: [{ kind: 'invalid' }] }],
+        ['missing derived strings', { parts: [] }],
+        ['stale content', { ...createMentionDraft([resolvedBrand]), content: 'Outdated' }],
+        [
+            'stale serialized content',
+            { ...createMentionDraft([resolvedBrand]), serializedContent: 'Outdated' }
+        ]
+    ])('rejects a chat draft with %s', (_description, draft) => {
+        expect(isChatDraft(draft)).toBe(false)
     })
 })
