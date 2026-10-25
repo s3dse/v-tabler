@@ -713,6 +713,28 @@ describe('ChatInput mentions', () => {
     )
   })
 
+  it('downgrades a structured draft when the option provider is removed', async () => {
+    const initialDraft = createMentionDraft([
+      { kind: 'text', text: 'Sales for ' },
+      existingBrandMention
+    ])
+    const wrapper = mountInput({
+      modelValue: initialDraft,
+      mentionOptionProvider: vi.fn()
+    })
+    await nextTick()
+    const updateCount = wrapper.emitted('update:modelValue').length
+
+    await wrapper.setProps({ mentionOptionProvider: null })
+
+    const textarea = wrapper.get('textarea')
+    expect(wrapper.find('[role="combobox"]').exists()).toBe(false)
+    expect(textarea.element.value).toBe(initialDraft.serializedContent)
+    expect(textarea.element.value).not.toBe('[object Object]')
+    expect(wrapper.emitted('update:modelValue')).toHaveLength(updateCount + 1)
+    expect(wrapper.emitted('update:modelValue').at(-1)).toEqual([initialDraft.serializedContent])
+  })
+
   it('blocks pasted unresolved mentions until they are resolved', async () => {
     const optionProvider = vi.fn(() => Promise.resolve(options.brand))
     const wrapper = mountInput({

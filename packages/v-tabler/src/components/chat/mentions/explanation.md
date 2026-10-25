@@ -22,6 +22,8 @@ mentionOptionProvider installed?
 
 The switch is deliberately based only on the option provider. A trigger provider alone does not enable mentions because v-tabler would have no entity data to show.
 
+Removing the option provider at runtime converts the current structured draft to its portable `serializedContent` string before rendering the legacy textarea.
+
 ## 2. The draft model
 
 [mentionDraft.js](./mentionDraft.js) is the domain layer. Components do not manually maintain three competing representations. `createMentionDraft(parts)` derives:

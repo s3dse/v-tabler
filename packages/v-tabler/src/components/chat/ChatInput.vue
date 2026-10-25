@@ -155,6 +155,17 @@ const textareaRef = ref(null)
 const mentionComposerRef = ref(null)
 const pendingFocus = ref(false)
 const mentionsEnabled = computed(() => typeof props.mentionOptionProvider === 'function')
+
+watch(
+    mentionsEnabled,
+    (enabled) => {
+        if (!enabled && isMentionDraft(localMessage.value)) {
+            localMessage.value = localMessage.value.serializedContent
+        }
+    },
+    { flush: 'sync' }
+)
+
 const messageContent = computed(() =>
     isMentionDraft(localMessage.value) ? localMessage.value.content : localMessage.value
 )
