@@ -26,6 +26,19 @@ const DEFAULT_TRANSLATIONS = {
             input: {
                 placeholder: 'Type a message...'
             },
+            message: {
+                copyLabel: 'Copy message',
+                copiedLabel: 'Message copied'
+            },
+            mentions: {
+                loading: 'Loading suggestions...',
+                empty: 'No matching options.',
+                error: 'Suggestions could not be loaded.',
+                unresolved: 'Unresolved mention.',
+                resolve: 'Resolve mention.',
+                usePlainText: 'Use as plain text',
+                blocked: 'Resolve mentions or convert them to plain text before sending.'
+            },
             header: {
                 clearChatLabel: 'Clear Chat'
             }
@@ -55,6 +68,19 @@ const TRANSLATIONS_DE = {
         chat: {
             input: {
                 placeholder: 'Nachricht eingeben...'
+            },
+            message: {
+                copyLabel: 'Nachricht kopieren',
+                copiedLabel: 'Nachricht kopiert'
+            },
+            mentions: {
+                loading: 'Vorschläge werden geladen...',
+                empty: 'Keine passenden Optionen.',
+                error: 'Vorschläge konnten nicht geladen werden.',
+                unresolved: 'Nicht aufgelöste Erwähnung.',
+                resolve: 'Erwähnung auflösen.',
+                usePlainText: 'Als normalen Text verwenden',
+                blocked: 'Erwähnungen vor dem Senden auflösen oder in Text umwandeln.'
             },
             header: {
                 clearChatLabel: 'Chat löschen'
@@ -94,7 +120,7 @@ export function useI18n() {
             return translate(vueI18n, key, defaultValue, interpolationValues)
         },
         // translation exists fn
-        te: key => {
+        te: (key) => {
             return translationExists(vueI18n, key)
         }
     }

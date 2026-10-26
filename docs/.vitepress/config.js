@@ -42,6 +42,7 @@ export default defineConfig({
                         { text: 'Table Component', link: '/components/table-component' },
                         { text: 'Card Component', link: '/components/card-component' },
                         { text: 'Chat Component', link: '/components/chat-component' },
+                        { text: 'Chat Mentions', link: '/components/chat-mentions' },
                         { text: 'Dialog Component', link: '/components/dialog-component' },
                         { text: 'Dropdown Component', link: '/components/dropdown-component' },
                         { text: 'Select Components', link: '/components/select-components' },

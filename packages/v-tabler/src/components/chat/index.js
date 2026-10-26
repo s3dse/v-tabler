@@ -4,4 +4,19 @@ import ChatHeader from './ChatHeader.vue'
 import { useChatLogic } from './useChatLogic'
 import { useAutoHeight } from './useAutoHeight'
 import TypingIndicator from './TypingIndicator.vue'
-export { ChatComponent, ChatInput, ChatHeader, useChatLogic, useAutoHeight, TypingIndicator }
+import {
+    createMentionTriggerProvider,
+    defaultMentionTriggerProvider,
+    DEFAULT_CHAT_MENTION_TRIGGERS
+} from './mentions/mentionTriggerProvider.js'
+export {
+    ChatComponent,
+    ChatInput,
+    ChatHeader,
+    useChatLogic,
+    useAutoHeight,
+    TypingIndicator,
+    createMentionTriggerProvider,
+    defaultMentionTriggerProvider,
+    DEFAULT_CHAT_MENTION_TRIGGERS
+}

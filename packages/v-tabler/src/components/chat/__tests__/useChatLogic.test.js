@@ -75,6 +75,8 @@ describe('useChatLogic', () => {
             )
             expect(messages.value).toHaveLength(initialLength + 1)
             expect(messages.value[messages.value.length - 1]).toEqual(userMessage)
+            expect(userMessage).not.toHaveProperty('serializedContent')
+            expect(userMessage).not.toHaveProperty('parts')
         })
 
         it('should add AI message', () => {
@@ -207,6 +209,55 @@ describe('useChatLogic', () => {
                     aiMessage: expect.any(Object)
                 })
             )
+        })
+
+        it('should preserve structured mention drafts for the AI handler and recall', async () => {
+            const mentionDraft = {
+                content: 'Klicks für ADIDAS',
+                serializedContent: 'Klicks für @Marke[ADIDAS]',
+                parts: [
+                    { kind: 'text', text: 'Klicks für ' },
+                    {
+                        kind: 'mention',
+                        type: 'brand',
+                        trigger: 'Marke',
+                        id: '1',
+                        label: 'ADIDAS',
+                        resolved: true
+                    }
+                ]
+            }
+            const mockAiHandler = vi.fn().mockResolvedValue({ content: 'AI response' })
+            const { sendMessage, recallLastMessage } = useChatLogic({ aiHandler: mockAiHandler })
+
+            await sendMessage(mentionDraft)
+
+            expect(mockAiHandler).toHaveBeenCalledWith(
+                expect.objectContaining(mentionDraft),
+                expect.any(AbortSignal)
+            )
+            expect(recallLastMessage()).toEqual(mentionDraft)
+        })
+
+        it('should reject structured drafts with unresolved mentions', async () => {
+            const { sendMessage, messages } = useChatLogic()
+
+            await sendMessage({
+                content: 'Klicks für ADIDAS',
+                serializedContent: 'Klicks für @Marke[ADIDAS]',
+                parts: [
+                    {
+                        kind: 'mention',
+                        type: 'brand',
+                        trigger: 'Marke',
+                        id: null,
+                        label: 'ADIDAS',
+                        resolved: false
+                    }
+                ]
+            })
+
+            expect(messages.value).toHaveLength(1)
         })
 
         it('should handle AI handler errors', async () => {

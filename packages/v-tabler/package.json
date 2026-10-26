@@ -22,6 +22,11 @@
             "import": "./dist/v-tabler.js",
             "require": "./dist/v-tabler.cjs"
         },
+        "./mentions": {
+            "types": "./dist/mentions.d.ts",
+            "import": "./dist/mentions.js",
+            "require": "./dist/mentions.cjs"
+        },
         "./preset": {
             "import": "./dist/preset.js",
             "require": "./dist/preset.cjs"

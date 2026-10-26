@@ -1,9 +1,11 @@
 import { ref, nextTick } from 'vue'
+import {
+    createMentionDraft,
+    hasUnresolvedMentions,
+    isMentionDraft
+} from './mentions/mentionDraft.js'
 
-/**
- * Composable for chat logic and message management
- * Handles messages, AI integration, typing states, and scrolling
- */
+/** Manage chat messages, mention drafts, AI requests, recall, focus, and scrolling. */
 export function useChatLogic(options = {}) {
     const {
         initialMessage = 'Hello! How can I help you today?',
@@ -23,9 +25,7 @@ export function useChatLogic(options = {}) {
     ])
     const isTyping = ref(false)
 
-    const createTimestamp = () => {
-        return new Date()
-    }
+    const createTimestamp = () => new Date()
 
     const createMessage = (role, { content, ...extraData }) => ({
         role,
@@ -34,21 +34,23 @@ export function useChatLogic(options = {}) {
         timestamp: createTimestamp()
     })
 
-    const addMessage = message => {
+    const addMessage = (message) => {
         messages.value.push(message)
     }
 
-    const isFirstUserMessage = () => {
-        return messages.value.some(msg => msg.role === 'user') === false
-    }
+    const isFirstUserMessage = () => !messages.value.some((message) => message.role === 'user')
 
-    const addUserMessage = content => {
-        const message = createMessage('user', { content, newConversation: isFirstUserMessage() })
+    const addUserMessage = (input) => {
+        const messageData = typeof input === 'string' ? { content: input } : input
+        const message = createMessage('user', {
+            ...messageData,
+            newConversation: isFirstUserMessage()
+        })
         addMessage(message)
         return message
     }
 
-    const addAiMessage = aiResponse => {
+    const addAiMessage = (aiResponse) => {
         const message = createMessage('assistant', aiResponse)
         addMessage(message)
         return message
@@ -67,7 +69,6 @@ export function useChatLogic(options = {}) {
             if (messagesContainer?.value) {
                 messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
             }
-            // Allow parent to hook into scroll behavior
             onScrollToBottom?.()
         })
     }
@@ -75,46 +76,68 @@ export function useChatLogic(options = {}) {
     const focusInput = () => {
         nextTick(() => {
             chatInputRef?.value?.focus()
-            // Allow parent to hook into focus behavior
             onFocusInput?.()
         })
     }
 
-    // Track current request for cancellation
     const currentAbortController = ref(null)
 
-    const validateInput = content => {
-        const trimmedContent = content?.trim()
-        return !trimmedContent || isTyping.value ? null : trimmedContent
+    const trimDraftPart = (part, index, lastIndex) => {
+        if (part.kind !== 'text') return { ...part }
+
+        const withoutLeadingWhitespace = index === 0 ? part.text.trimStart() : part.text
+        return {
+            ...part,
+            text:
+                index === lastIndex ? withoutLeadingWhitespace.trimEnd() : withoutLeadingWhitespace
+        }
     }
 
-    const updateUIForUserMessage = async () => {
+    const trimMentionDraft = (draft) =>
+        createMentionDraft(
+            draft.parts.map((part, index) => trimDraftPart(part, index, draft.parts.length - 1))
+        )
+
+    const prepareMessageInput = (input) => {
+        if (isTyping.value) return null
+        if (isMentionDraft(input)) {
+            const trimmedDraft = trimMentionDraft(input)
+            return !trimmedDraft.content || hasUnresolvedMentions(trimmedDraft)
+                ? null
+                : trimmedDraft
+        }
+
+        const trimmedContent = input?.trim()
+        return trimmedContent || null
+    }
+
+    const clearInputAndScroll = async () => {
         chatInputRef?.value?.clear()
         await scrollToBottom()
     }
 
-    const updateUIForWaiting = async () => {
+    const showTypingAndScroll = async () => {
         isTyping.value = true
         await scrollToBottom()
     }
 
-    const updateUIForAIResponse = async () => {
+    const scrollAndFocusInput = async () => {
         await scrollToBottom()
         focusInput()
     }
 
-    const setupAIRequest = () => {
+    const startAIRequest = () => {
         currentAbortController.value = new AbortController()
         return currentAbortController.value.signal
     }
 
-    const cleanupAIRequest = () => {
+    const clearAIRequest = () => {
         currentAbortController.value = null
     }
 
-    const isAbortError = error => error.name === 'AbortError'
+    const isAbortError = (error) => error.name === 'AbortError'
 
-    const logError = error => {
+    const logError = (error) => {
         if (isAbortError(error)) {
             console.log('AI request was aborted')
         } else {
@@ -122,59 +145,61 @@ export function useChatLogic(options = {}) {
         }
     }
 
-    const handleAbortError = () => ({ aborted: true })
-
-    const handleRequestError = async error => {
+    const handleRequestError = async (error) => {
         const errorMessage = addErrorMessage()
         await scrollToBottom()
         return { errorMessage, error }
     }
 
-    const handleAIError = async error => {
+    const handleAIError = async (error) => {
         logError(error)
-        return isAbortError(error) ? handleAbortError() : await handleRequestError(error)
+        return isAbortError(error) ? { aborted: true } : await handleRequestError(error)
     }
 
-    // Main message sending function
-    const sendMessage = async content => {
-        const validContent = validateInput(content)
-        if (!validContent) return
+    const sendMessage = async (input) => {
+        const validInput = prepareMessageInput(input)
+        if (!validInput) return
 
-        const userMessage = addUserMessage(validContent)
-        await updateUIForUserMessage()
+        const userMessage = addUserMessage(validInput)
+        await clearInputAndScroll()
 
         if (!aiHandler) {
             return userMessage
         }
 
-        await updateUIForWaiting()
-        const signal = setupAIRequest()
+        await showTypingAndScroll()
+        const signal = startAIRequest()
 
         try {
             const aiResponse = await aiHandler(userMessage, signal)
             const aiMessage = addAiMessage(aiResponse)
-            await updateUIForAIResponse()
+            await scrollAndFocusInput()
             return { userMessage, aiMessage }
         } catch (error) {
             const errorResult = await handleAIError(error)
             return { userMessage, ...errorResult }
         } finally {
             isTyping.value = false
-            cleanupAIRequest()
+            clearAIRequest()
         }
     }
 
-    // Cancel current request
     const cancelCurrentRequest = () => {
-        if (currentAbortController.value) {
-            currentAbortController.value.abort()
-            currentAbortController.value = null
-        }
+        currentAbortController.value?.abort()
+        currentAbortController.value = null
     }
 
     const recallLastMessage = () => {
-        const userMessages = messages.value.filter(msg => msg.role === 'user')
-        return userMessages.length > 0 ? userMessages[userMessages.length - 1].content : ''
+        const userMessages = messages.value.filter((msg) => msg.role === 'user')
+        const lastMessage = userMessages.at(-1)
+        if (!lastMessage) return ''
+        if (!lastMessage.parts) return lastMessage.content
+
+        return {
+            content: lastMessage.content,
+            serializedContent: lastMessage.serializedContent,
+            parts: lastMessage.parts.map((part) => ({ ...part }))
+        }
     }
 
     const clearChat = () => {
@@ -187,30 +212,24 @@ export function useChatLogic(options = {}) {
         ]
     }
 
-    // Reset messages completely
     const resetMessages = () => {
         messages.value = []
     }
 
     return {
-        // State
         messages,
         isTyping,
-
-        // Message management
         addMessage,
         addUserMessage,
         addAiMessage,
         addErrorMessage,
 
-        // Core functionality
         sendMessage,
         cancelCurrentRequest,
         recallLastMessage,
         clearChat,
         resetMessages,
 
-        // Utilities
         scrollToBottom,
         focusInput,
         createTimestamp,

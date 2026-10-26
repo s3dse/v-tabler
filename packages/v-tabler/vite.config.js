@@ -29,6 +29,9 @@ export default defineConfig(({ mode }) => {
             vue(),
             UnoCSS(),
             dts({
+                compilerOptions: { allowJs: true },
+                entryRoot: 'src',
+                include: ['src/mentions.js'],
                 exclude: ['**/*.stories.*', '**/*.story.*', 'src/demo/**/*']
             })
         ],
@@ -41,6 +44,7 @@ export default defineConfig(({ mode }) => {
             lib: {
                 entry: {
                     'v-tabler': fileURLToPath(new URL('./src/install.js', import.meta.url)),
+                    mentions: fileURLToPath(new URL('./src/mentions.js', import.meta.url)),
                     preset: fileURLToPath(new URL('./src/preset/index.mjs', import.meta.url))
                 },
                 name: 'v-tabler',

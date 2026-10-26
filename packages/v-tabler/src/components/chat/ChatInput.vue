@@ -14,12 +14,26 @@
                     : ''
             "
         >
+            <ChatMentionComposer
+                v-if="mentionsEnabled"
+                ref="mentionComposerRef"
+                v-model="localMessage"
+                :option-provider="mentionOptionProvider"
+                :trigger-provider="mentionTriggerProvider"
+                :placeholder="resolvedPlaceholder"
+                :disabled="disabled"
+                :max-height="maxHeight"
+                :recall-last-message="recallLastMessage"
+                :variant="variant"
+                @submit="handleSubmit"
+            />
             <textarea
+                v-else
                 ref="textareaRef"
                 v-model="localMessage"
                 @keydown="handleKeydown"
-                @input="handleInput"
-                :placeholder="_placeholder"
+                @input="adjustHeight"
+                :placeholder="resolvedPlaceholder"
                 :disabled="disabled"
                 :style="autoHeightStyle"
                 :rows="isEmbedded ? 2 : 1"
@@ -34,7 +48,9 @@
             <button
                 type="button"
                 @click="handleButtonClick"
-                :disabled="!props.isTyping && (!localMessage.trim() || disabled)"
+                :disabled="
+                    !props.isTyping && (isMessageEmpty || containsUnresolvedMentions || disabled)
+                "
                 class="btn-primary-md flex-shrink-0"
                 :class="{ 'btn-secondary-md': props.isTyping }"
             >
@@ -72,14 +88,14 @@ import { useAutoHeight } from './useAutoHeight.js'
 import { useNavigatorLanguage } from '@vueuse/core'
 import { useI18n } from '@/composables/useI18n.js'
 import { ChatVariant, DEFAULT_CHAT_VARIANT, isChatVariant } from './chatVariants.js'
+import ChatMentionComposer from './mentions/ChatMentionComposer.vue'
+import { hasUnresolvedMentions, isMentionDraft } from './mentions/mentionDraft.js'
+
+const FOCUS_RESTORE_DELAY_MS = 50
 
 const { t } = useI18n()
 
 const props = defineProps({
-    modelValue: {
-        type: String,
-        default: ''
-    },
     placeholder: {
         type: String,
         default: null
@@ -95,7 +111,7 @@ const props = defineProps({
     maxHeight: {
         type: [Number, String],
         default: 150,
-        validator: value => {
+        validator: (value) => {
             if (typeof value === 'number') return value > 0
             if (typeof value === 'string') return /^\d+(\.\d+)?(px|rem|em|%)?$/.test(value)
             console.warn(
@@ -112,6 +128,14 @@ const props = defineProps({
         type: Function,
         default: null
     },
+    mentionOptionProvider: {
+        type: Function,
+        default: null
+    },
+    mentionTriggerProvider: {
+        type: Function,
+        default: null
+    },
     variant: {
         type: String,
         default: DEFAULT_CHAT_VARIANT,
@@ -119,13 +143,36 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
+const localMessage = defineModel({
+    type: [String, Object],
+    default: ''
+})
+const emit = defineEmits(['submit', 'cancel'])
 
 const isEmbedded = computed(() => props.variant === ChatVariant.EMBEDDED)
 
-const localMessage = ref(props.modelValue)
 const textareaRef = ref(null)
+const mentionComposerRef = ref(null)
 const pendingFocus = ref(false)
+const mentionsEnabled = computed(() => typeof props.mentionOptionProvider === 'function')
+
+watch(
+    mentionsEnabled,
+    (enabled) => {
+        if (!enabled && isMentionDraft(localMessage.value)) {
+            localMessage.value = localMessage.value.serializedContent
+        }
+    },
+    { flush: 'sync' }
+)
+
+const messageContent = computed(() =>
+    isMentionDraft(localMessage.value) ? localMessage.value.content : localMessage.value
+)
+const isMessageEmpty = computed(() => !messageContent.value?.trim())
+const containsUnresolvedMentions = computed(
+    () => isMentionDraft(localMessage.value) && hasUnresolvedMentions(localMessage.value)
+)
 
 const { language } = useNavigatorLanguage()
 
@@ -136,71 +183,55 @@ const { autoHeightStyle, adjustHeight, adjustHeightNextTick } = useAutoHeight({
 
 watch(
     () => props.disabled,
-    isDisabled => {
+    (isDisabled) => {
         if (!isDisabled && pendingFocus.value) {
             pendingFocus.value = false
-            // Small delay to avoid stealing focus if user focused elsewhere
             setTimeout(() => {
                 if (document.activeElement === document.body) {
-                    textareaRef.value?.focus()
+                    focus()
                 }
-            }, 50)
+            }, FOCUS_RESTORE_DELAY_MS)
         }
     }
 )
 
-// Sync with parent (only watch for external changes)
-watch(
-    () => props.modelValue,
-    newVal => {
-        localMessage.value = newVal
-        adjustHeightNextTick()
-    }
-)
+watch(localMessage, () => {
+    if (!mentionsEnabled.value) adjustHeightNextTick()
+})
 
-const handleInput = () => {
-    emit('update:modelValue', localMessage.value)
-    adjustHeight()
-}
-
-const recallLastMessageAllowed = computed(() => {
+const canRecallPlainMessage = computed(() => {
     const textarea = textareaRef.value
-    const inputEmpty = localMessage.value.trim() === ''
+    const inputEmpty = isMessageEmpty.value
     const cursorAtStart = textarea && textarea.selectionStart === 0
     return textarea && (inputEmpty || cursorAtStart)
 })
 
-const handleKeydown = event => {
-    // Handle up arrow to recall last message
-    if (event.key === 'ArrowUp' && props.recallLastMessage) {
-        // Only recall if textarea is empty or cursor is at the beginning
-        if (recallLastMessageAllowed.value) {
-            event.preventDefault()
-            const lastMessage = props.recallLastMessage()
-            if (lastMessage) {
-                localMessage.value = lastMessage
-                // Move cursor to end
-                nextTick(() => {
-                    textareaRef.value.setSelectionRange(lastMessage.length, lastMessage.length)
-                    adjustHeight()
-                })
-            }
-        }
+const recallPlainMessage = () => {
+    if (!props.recallLastMessage || !canRecallPlainMessage.value) return false
+
+    const lastMessage = props.recallLastMessage()
+    if (!lastMessage) return false
+
+    const recalledContent = isMentionDraft(lastMessage)
+        ? lastMessage.serializedContent
+        : lastMessage
+    localMessage.value = recalledContent
+    nextTick(() => {
+        textareaRef.value.setSelectionRange(recalledContent.length, recalledContent.length)
+        adjustHeight()
+    })
+    return true
+}
+
+const handleKeydown = (event) => {
+    if (event.key === 'ArrowUp') {
+        if (recallPlainMessage()) event.preventDefault()
         return
     }
-
-    // Allow Shift+Enter for new line (default behavior)
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()
         event.stopPropagation()
         handleSubmit()
-    }
-}
-
-const preventFormSubmission = event => {
-    if (event) {
-        event.stopPropagation()
-        event.preventDefault()
     }
 }
 
@@ -212,37 +243,47 @@ const handleButtonClick = () => {
     }
 }
 
-const handleSubmit = event => {
-    if (!localMessage.value.trim() || props.disabled || props.isTyping) return
-
-    preventFormSubmission(event)
-    emit('submit', localMessage.value)
-
-    nextTick(() => {
-        textareaRef.value?.focus()
-    })
-}
-
-const focus = () => {
-    const textarea = textareaRef.value
-    if (!textarea) {
+const handleSubmit = (submittedValue) => {
+    if (isMentionDraft(submittedValue)) localMessage.value = submittedValue
+    if (
+        isMessageEmpty.value ||
+        containsUnresolvedMentions.value ||
+        props.disabled ||
+        props.isTyping
+    ) {
         return
     }
 
+    emit('submit', localMessage.value)
+    nextTick(focus)
+}
+
+const focus = () => {
+    if (mentionsEnabled.value) {
+        if (props.disabled) pendingFocus.value = true
+        else mentionComposerRef.value?.focus()
+        return
+    }
+    const textarea = textareaRef.value
+    if (!textarea) return
+
     if (textarea.disabled) {
-        // Mark that focus is pending, watcher will handle it
         pendingFocus.value = true
     } else {
         textarea.focus()
     }
 }
 
-const _placeholder = computed(() => {
+const resolvedPlaceholder = computed(() => {
     if (props.placeholder !== null && props.placeholder !== undefined) return props.placeholder
     return t('vTabler.chat.input.placeholder')
 })
 
 const clear = () => {
+    if (mentionsEnabled.value) {
+        mentionComposerRef.value?.clear()
+        return
+    }
     localMessage.value = ''
     adjustHeightNextTick()
 }
@@ -251,7 +292,6 @@ defineExpose({ focus, clear })
 </script>
 
 <style scoped>
-/* Custom scrollbar for textarea */
 textarea::-webkit-scrollbar {
     width: 6px;
 }

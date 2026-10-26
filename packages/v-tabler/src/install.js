@@ -4,10 +4,10 @@ import { setVTablerI18n, getDefaultTranslationKeys } from './composables/useI18n
 
 const VTail = {
     install(Vue, options = {}) {
-        Object.keys(components).forEach(key => {
+        Object.keys(components).forEach((key) => {
             Vue.component(key, components[key])
         })
-        Object.keys(directives).forEach(key => {
+        Object.keys(directives).forEach((key) => {
             Vue.directive(key, directives[key])
         })
 
@@ -25,6 +25,11 @@ export * from './components'
 export * as components from './components'
 export * as directives from './directives'
 export * as composables from './composables'
+export {
+    createMentionTriggerProvider,
+    defaultMentionTriggerProvider,
+    DEFAULT_CHAT_MENTION_TRIGGERS
+} from './components/chat'
 
 // Export i18n utilities
 export { setVTablerI18n, getDefaultTranslationKeys }

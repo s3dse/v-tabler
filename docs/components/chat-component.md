@@ -10,25 +10,29 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 - **Message History** - Scrollable message container with auto-scroll to bottom
 - **Typing Indicator** - Visual feedback when AI/assistant is responding
 - **AI Integration** - Easy integration with custom AI handlers
+- **Optional Mentions** - Async brand and partner autocomplete with portable mention chips
 
 ## Props
 
-| Prop Name        | Type     | Default                              | Description                                                                                                |
-| ---------------- | -------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `initialMessage` | String   | `'Hello! How can I help you today?'` | The first message displayed when the chat is opened                                                        |
-| `placeholder`    | String   | `'Type your message...'`             | Placeholder text for the message input field                                                               |
-| `aiHandler`      | Function | `null`                               | Async function to handle AI responses. Receives user message and abort signal, then returns an AI response |
-| `chatTitle`      | String   | `'AI Assistant'`                     | Title displayed in the chat header                                                                         |
-| `size`           | String   | `'default'`                          | Card size: `'auto'`, `'compact'`, `'default'`, or `'wide'`; ignored by the embedded variant                |
-| `floating`       | Boolean  | `false`                              | Renders a fixed launcher, overlay, and card chat when enabled                                              |
-| `variant`        | String   | `'card'`                             | Visual presentation: `'card'` or `'embedded'`; embedded cannot be combined with `floating`                 |
+| Prop Name                | Type     | Default                              | Description                                                                                                |
+| ------------------------ | -------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `initialMessage`         | String   | `'Hello! How can I help you today?'` | The first message displayed when the chat is opened                                                        |
+| `placeholder`            | String   | `'Type your message...'`             | Placeholder text for the message input field                                                               |
+| `aiHandler`              | Function | `null`                               | Async function to handle AI responses. Receives user message and abort signal, then returns an AI response |
+| `mentionOptionProvider`  | Function | `null`                               | Enables mentions and returns entity options for the active trigger                                         |
+| `mentionTriggerProvider` | Function | default provider                     | Overrides how active mention triggers are detected                                                         |
+| `chatTitle`              | String   | `'AI Assistant'`                     | Title displayed in the chat header                                                                         |
+| `size`                   | String   | `'default'`                          | Card size: `'auto'`, `'compact'`, `'default'`, or `'wide'`; ignored by the embedded variant                |
+| `floating`               | Boolean  | `false`                              | Renders a fixed launcher, overlay, and card chat when enabled                                              |
+| `variant`                | String   | `'card'`                             | Visual presentation: `'card'` or `'embedded'`; embedded cannot be combined with `floating`                 |
 
 ## Slots
 
-| Slot name  | Slot props              | Description                                                                |
-| ---------- | ----------------------- | -------------------------------------------------------------------------- |
-| `title`    | none                    | Replaces the default chat title                                            |
-| `messages` | `{ messages, variant }` | Provides a custom message view and exposes the active presentation variant |
+| Slot name  | Slot props                                 | Description                                                                |
+| ---------- | ------------------------------------------ | -------------------------------------------------------------------------- |
+| `title`    | none                                       | Replaces the default chat title                                            |
+| `messages` | `{ messages, variant }`                    | Provides a custom message view and exposes the active presentation variant |
+| `input`    | `{ inputProps, inputEvents, setInputRef }` | Replaces the built-in input while retaining chat state and handlers        |
 
 ## Usage
 
@@ -89,6 +93,46 @@ presentation:
 
 `ChatHeader`, `ChatInput`, and `TypingIndicator` also accept the same `variant` values when they are
 used independently.
+
+## Mentions
+
+Mentions are opt-in. Supplying an option provider replaces the textarea with the mention composer;
+without one, `ChatInput` keeps its existing string model and behavior. The default trigger provider
+recognizes `@brand`, `@Marke`, and `@partner`:
+
+```vue
+<script setup>
+const findMentionOptions = async ({ type, query, signal }) => {
+    const response = await fetch(`/api/${type}s?q=${encodeURIComponent(query)}`, { signal })
+    return response.json() // [{ id, label }]
+}
+</script>
+
+<template>
+    <ChatComponent :mention-option-provider="findMentionOptions" />
+</template>
+```
+
+Mention-enabled inputs use a structured draft rather than a string. See
+[Chat Mentions](/components/chat-mentions) for the provider APIs, interaction behavior, portable
+syntax, public draft contract, and transport guidance.
+
+### Custom input
+
+Use the `input` slot for a complete input replacement. Bind the supplied props and events and
+register a component that exposes `focus()` and `clear()`:
+
+```vue
+<ChatComponent>
+    <template #input="{ inputProps, inputEvents, setInputRef }">
+        <CustomChatInput
+            :ref="setInputRef"
+            v-bind="inputProps"
+            v-on="inputEvents"
+        />
+    </template>
+</ChatComponent>
+```
 
 ### Customized Chat
 
@@ -228,6 +272,8 @@ Messages in the chat follow this structure:
 {
     role: 'user' | 'assistant',  // Message sender
     content: String,              // Message text
+    serializedContent?: String,  // Portable mention syntax when mentions are enabled
+    parts?: Array,               // Structured text and mention parts
     timestamp: String             // Formatted time (HH:MM)
 }
 ```
