@@ -180,7 +180,15 @@
                     :ai-handler="handleAiRequest"
                     :mention-option-provider="mentionOptionProvider"
                     placeholder="Try @Marke adi or @partner dys..."
-                />
+                >
+                    <template #input="{ inputProps, inputEvents, setInputRef }">
+                        <ChatInput :ref="setInputRef" v-bind="inputProps" v-on="inputEvents">
+                            <template #additional-hints>
+                                <p>{{ mentionHint }}</p>
+                            </template>
+                        </ChatInput>
+                    </template>
+                </ChatComponent>
             </div>
 
             <div class="mb-8">
@@ -199,7 +207,15 @@
                         :mention-option-provider="mentionOptionProvider"
                         :mention-trigger-provider="customMentionTriggerProvider"
                         placeholder="This input also accepts @label..."
-                    />
+                    >
+                        <template #input="{ inputProps, inputEvents, setInputRef }">
+                            <ChatInput :ref="setInputRef" v-bind="inputProps" v-on="inputEvents">
+                                <template #additional-hints>
+                                    <p>{{ mentionHint }}</p>
+                                </template>
+                            </ChatInput>
+                        </template>
+                    </ChatComponent>
                     <aside class="hidden lg:flex min-h-0 flex-col border border-border bg-surface">
                         <h5 class="border-b border-border p-4 font-semibold text-default">
                             Workspace content
@@ -246,13 +262,24 @@
             :ai-handler="handleAiRequest"
             :mention-option-provider="mentionOptionProvider"
             placeholder="Try @brand adi... (cancel with X button during processing)"
-        />
+        >
+            <template #input="{ inputProps, inputEvents, setInputRef }">
+                <ChatInput :ref="setInputRef" v-bind="inputProps" v-on="inputEvents">
+                    <template #additional-hints>
+                        <p>{{ mentionHint }}</p>
+                    </template>
+                </ChatInput>
+            </template>
+        </ChatComponent>
     </section>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { ChatComponent, createMentionTriggerProvider } from '@/components/chat'
+import { ChatComponent, ChatInput, createMentionTriggerProvider } from '@/components/chat'
+
+const mentionHint =
+    'Select brands and partners: type @brand ADIDAS or @partner DYSON and choose a suggestion.'
 
 const formData = ref({
     testInput: '',

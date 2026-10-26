@@ -134,6 +134,23 @@ register a component that exposes `focus()` and `clear()`:
 </ChatComponent>
 ```
 
+### Additional input hints
+
+`ChatInput` provides an optional `additional-hints` slot between the keyboard shortcuts and the
+AI disclaimer. Its content inherits the hint block's muted text styling and spacing, and is
+hidden together with the built-in hints when `showHint` is `false`.
+
+```vue
+<ChatInput v-model="draft">
+    <template #additional-hints>
+        <p>Additional guidance for this input.</p>
+    </template>
+</ChatInput>
+```
+
+To use this within `ChatComponent`, render `ChatInput` through the `input` slot above, preserving
+the supplied props, events, and input reference registration.
+
 ### Customized Chat
 
 ```vue

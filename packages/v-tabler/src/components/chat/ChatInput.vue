@@ -67,6 +67,7 @@
                     neue Zeile, <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd>, um die
                     letzte Nachricht abzurufen
                 </p>
+                <slot name="additional-hints" />
                 <p>AI kann Fehler machen. Bitte überprüfe die Antworten.</p>
             </div>
             <div v-else class="flex flex-col gap-2">
@@ -76,6 +77,7 @@
                     line, <kbd class="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd> to recall last
                     message
                 </p>
+                <slot name="additional-hints" />
                 <p>AI can make mistakes. Please verify the responses.</p>
             </div>
         </div>
