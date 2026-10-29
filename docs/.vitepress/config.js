@@ -47,6 +47,7 @@ export default defineConfig({
                         { text: 'Dropdown Component', link: '/components/dropdown-component' },
                         { text: 'Select Components', link: '/components/select-components' },
                         { text: 'ListSelect Component', link: '/components/listselect' },
+                        { text: 'Sortable', link: '/components/sortable' },
                         { text: 'Toggle Component', link: '/components/toggle-component' },
                         { text: 'Checkbox Component', link: '/components/checkbox-component' },
                         { text: 'Pagination Component', link: '/components/pagination-component' },

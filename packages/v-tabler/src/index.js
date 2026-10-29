@@ -13,6 +13,7 @@ import { CheckboxComponent } from '@/components/checkbox'
 import { Heading, PageTitle } from '@/components/typography'
 import { TableSkeleton } from '@/components/skeleton'
 import { RadioGroup } from '@/components/radio-group'
+import { SortableRoot, SortableItem, SortableHandle } from '@/components/sortable'
 import {
     ChatComponent,
     ChatInput,
@@ -35,6 +36,9 @@ import VTabler from '@/install.js'
 export default VTabler
 
 export {
+    SortableRoot,
+    SortableItem,
+    SortableHandle,
     TableComponent,
     PaginationComponent,
     DropdownComponent,

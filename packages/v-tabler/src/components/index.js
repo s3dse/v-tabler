@@ -13,6 +13,7 @@ import { CheckboxComponent } from './checkbox'
 import { Heading, PageTitle } from './typography'
 import { TableSkeleton } from './skeleton'
 import { RadioGroup } from './radio-group'
+import { SortableRoot, SortableItem, SortableHandle } from './sortable'
 import {
     ChatComponent,
     ChatInput,
@@ -23,6 +24,9 @@ import {
 } from './chat'
 
 export {
+    SortableRoot,
+    SortableItem,
+    SortableHandle,
     TableComponent,
     useExpandFetch,
     PaginationComponent,

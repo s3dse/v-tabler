@@ -77,6 +77,10 @@ Switch/toggle component for boolean values.
 
 ## UI Components
 
+### [Sortable](/components/sortable)
+
+Headless native drag-and-drop for vertical lists. Decorate existing components and provide move buttons for keyboard and touch users.
+
 ### [DropdownComponent](/components/dropdown-component)
 
 Flexible dropdown menu component.
