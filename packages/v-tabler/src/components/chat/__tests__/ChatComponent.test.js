@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount as vueMount } from '@vue/test-utils'
-import { h, nextTick } from 'vue'
+import { h, nextTick, ref } from 'vue'
 import ChatComponent from '../ChatComponent.vue'
 import { useChatLogic } from '../useChatLogic.js'
 
@@ -22,6 +22,7 @@ vi.mock('../useChatLogic.js', () => ({
             value: [{ role: 'assistant', content: 'Hello! How can I help?', timestamp: '12:00' }]
         },
         isTyping: { value: false },
+        isAwaitingResponse: ref(false),
         sendMessage: vi.fn(),
         cancelCurrentRequest: vi.fn(),
         recallLastMessage: vi.fn(),
@@ -91,6 +92,7 @@ describe('ChatComponent', () => {
                 ]
             },
             isTyping: { value: false },
+            isAwaitingResponse: ref(false),
             sendMessage: vi.fn(),
             cancelCurrentRequest: vi.fn(),
             recallLastMessage: vi.fn(),
@@ -157,8 +159,8 @@ describe('ChatComponent', () => {
             expect(messages.length).toBeGreaterThan(0)
         })
 
-        it('should render typing indicator when isTyping is true', async () => {
-            mockComposable.isTyping.value = true
+        it('should render typing indicator while awaiting a reply', async () => {
+            mockComposable.isAwaitingResponse.value = true
 
             wrapper = mountFloatingChat()
             await wrapper.find('button').trigger('click')
@@ -166,15 +168,13 @@ describe('ChatComponent', () => {
             expect(wrapper.find('[data-testid="typing-indicator"]').exists()).toBe(true)
         })
 
-        it('should not render typing indicator when isTyping is false', async () => {
-            mockComposable.isTyping.value = false
+        it('should not render typing indicator after a reply starts', async () => {
+            mockComposable.isAwaitingResponse.value = false
 
             wrapper = mountFloatingChat()
             await wrapper.find('button').trigger('click')
 
-            // Since isTyping is false, the typing indicator should not exist
-            // but since we're mocking the component, we need to check the mock composable state
-            expect(mockComposable.isTyping.value).toBe(false)
+            expect(wrapper.find('[data-testid="typing-indicator"]').exists()).toBe(false)
         })
     })
 
@@ -520,6 +520,7 @@ describe('ChatComponent', () => {
 
         it('should pass embedded variant to each built-in chat constituent', () => {
             mockComposable.isTyping.value = true
+            mockComposable.isAwaitingResponse.value = true
             wrapper = mountInlineChat({ props: { variant: 'embedded' } })
 
             expect(wrapper.findComponent({ name: 'ChatHeader' }).props('variant')).toBe('embedded')

@@ -2,6 +2,23 @@
     <div class="flex" :class="alignmentClass">
         <div :class="messageClasses">
             <p class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
+            <p
+                v-if="message.requestState === 'streaming' && !message.content"
+                class="text-sm opacity-70"
+                role="status"
+            >
+                {{ t('vTabler.chat.message.streamingLabel') }}
+            </p>
+            <p
+                v-else-if="message.requestState === 'cancelled'"
+                class="text-sm opacity-70"
+                role="status"
+            >
+                {{ t('vTabler.chat.message.cancelledLabel') }}
+            </p>
+            <p v-else-if="message.requestState === 'error'" class="text-sm" role="alert">
+                {{ message.requestError }}
+            </p>
             <div class="mt-1 flex items-center justify-between gap-2">
                 <span class="text-xs opacity-70" :title="message.timestamp.toLocaleString()">
                     {{
@@ -40,7 +57,7 @@ const props = defineProps({
     message: {
         type: Object,
         required: true,
-        validator: value => {
+        validator: (value) => {
             return (
                 value.role &&
                 ['user', 'assistant'].includes(value.role) &&

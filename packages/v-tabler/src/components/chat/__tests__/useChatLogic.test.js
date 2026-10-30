@@ -193,7 +193,8 @@ describe('useChatLogic', () => {
                     role: 'user',
                     content: 'User message'
                 }),
-                expect.any(AbortSignal)
+                expect.any(AbortSignal),
+                expect.any(Function)
             )
             expect(messages.value).toHaveLength(3) // Initial + user + AI
             expect(messages.value[2]).toEqual(
@@ -234,7 +235,8 @@ describe('useChatLogic', () => {
 
             expect(mockAiHandler).toHaveBeenCalledWith(
                 expect.objectContaining(mentionDraft),
-                expect.any(AbortSignal)
+                expect.any(AbortSignal),
+                expect.any(Function)
             )
             expect(recallLastMessage()).toEqual(mentionDraft)
         })

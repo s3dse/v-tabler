@@ -37,7 +37,7 @@
                         />
                     </slot>
 
-                    <TypingIndicator v-if="isTyping" :variant="variant" />
+                    <TypingIndicator v-if="isAwaitingResponse" :variant="variant" />
                 </div>
 
                 <slot
@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, watch, watchEffect, computed } from 'vue'
+import { ref, watch, watchEffect, computed, onBeforeUnmount } from 'vue'
 import ChatInput from './ChatInput.vue'
 import ChatMessage from './ChatMessage.vue'
 import ChatHeader from './ChatHeader.vue'
@@ -161,6 +161,7 @@ const chatInputRef = ref(null)
 const {
     messages,
     isTyping,
+    isAwaitingResponse,
     sendMessage,
     cancelCurrentRequest,
     recallLastMessage,
@@ -173,6 +174,8 @@ const {
     messagesContainer,
     chatInputRef
 })
+
+onBeforeUnmount(cancelCurrentRequest)
 
 const handleSubmit = async (message) => {
     await sendMessage(message)

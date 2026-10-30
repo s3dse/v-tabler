@@ -9,22 +9,22 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 - **Modal Chat Interface** - Slide-up chat window with backdrop
 - **Message History** - Scrollable message container with auto-scroll to bottom
 - **Typing Indicator** - Visual feedback when AI/assistant is responding
-- **AI Integration** - Easy integration with custom AI handlers
+- **AI Integration** - Promise responses or incremental updates through an optional callback
 - **Optional Mentions** - Async brand and partner autocomplete with portable mention chips
 
 ## Props
 
-| Prop Name                | Type     | Default                              | Description                                                                                                |
-| ------------------------ | -------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `initialMessage`         | String   | `'Hello! How can I help you today?'` | The first message displayed when the chat is opened                                                        |
-| `placeholder`            | String   | `'Type your message...'`             | Placeholder text for the message input field                                                               |
-| `aiHandler`              | Function | `null`                               | Async function to handle AI responses. Receives user message and abort signal, then returns an AI response |
-| `mentionOptionProvider`  | Function | `null`                               | Enables mentions and returns entity options for the active trigger                                         |
-| `mentionTriggerProvider` | Function | default provider                     | Overrides how active mention triggers are detected                                                         |
-| `chatTitle`              | String   | `'AI Assistant'`                     | Title displayed in the chat header                                                                         |
-| `size`                   | String   | `'default'`                          | Card size: `'auto'`, `'compact'`, `'default'`, or `'wide'`; ignored by the embedded variant                |
-| `floating`               | Boolean  | `false`                              | Renders a fixed launcher, overlay, and card chat when enabled                                              |
-| `variant`                | String   | `'card'`                             | Visual presentation: `'card'` or `'embedded'`; embedded cannot be combined with `floating`                 |
+| Prop Name                | Type     | Default                              | Description                                                                                                                 |
+| ------------------------ | -------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `initialMessage`         | String   | `'Hello! How can I help you today?'` | The first message displayed when the chat is opened                                                                         |
+| `placeholder`            | String   | `'Type your message...'`             | Placeholder text for the message input field                                                                                |
+| `aiHandler`              | Function | `null`                               | Receives the user message, AbortSignal, and update callback; resolves with a response object or completes published updates |
+| `mentionOptionProvider`  | Function | `null`                               | Enables mentions and returns entity options for the active trigger                                                          |
+| `mentionTriggerProvider` | Function | default provider                     | Overrides how active mention triggers are detected                                                                          |
+| `chatTitle`              | String   | `'AI Assistant'`                     | Title displayed in the chat header                                                                                          |
+| `size`                   | String   | `'default'`                          | Card size: `'auto'`, `'compact'`, `'default'`, or `'wide'`; ignored by the embedded variant                                 |
+| `floating`               | Boolean  | `false`                              | Renders a fixed launcher, overlay, and card chat when enabled                                                               |
+| `variant`                | String   | `'card'`                             | Visual presentation: `'card'` or `'embedded'`; embedded cannot be combined with `floating`                                  |
 
 ## Slots
 
@@ -214,13 +214,14 @@ import { ChatComponent } from '@s3_dse/v-tabler'
 import { ChatComponent } from '@s3_dse/v-tabler'
 
 // Example AI handler function
-const handleAiMessage = async userMessage => {
+const handleAiMessage = async (userMessage, signal) => {
     // userMessage object contains: { role, content, timestamp }
 
     try {
         // Call your AI API
         const response = await fetch('/api/ai-chat', {
             method: 'POST',
+            signal,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 message: userMessage.content
@@ -229,8 +230,7 @@ const handleAiMessage = async userMessage => {
 
         const data = await response.json()
 
-        // Return the AI response as a string
-        return data.response
+        return { content: data.response }
     } catch (error) {
         console.error('AI Error:', error)
         throw error // Component will handle error display
@@ -252,7 +252,7 @@ import { ref } from 'vue'
 
 const conversationContext = ref([])
 
-const handleAiWithContext = async userMessage => {
+const handleAiWithContext = async (userMessage) => {
     // Add user message to context
     conversationContext.value.push({
         role: 'user',
@@ -276,7 +276,7 @@ const handleAiWithContext = async userMessage => {
         content: data.response
     })
 
-    return data.response
+    return { content: data.response }
 }
 </script>
 ```
@@ -291,7 +291,9 @@ Messages in the chat follow this structure:
     content: String,              // Message text
     serializedContent?: String,  // Portable mention syntax when mentions are enabled
     parts?: Array,               // Structured text and mention parts
-    timestamp: String             // Formatted time (HH:MM)
+    timestamp: Date,             // Created once when the message is inserted
+    requestState?: 'streaming' | 'complete' | 'cancelled' | 'error',
+    requestError?: String        // Safe generic error text after an incremental reply fails
 }
 ```
 
@@ -345,12 +347,12 @@ Messages will be added to the chat, but no AI responses will be generated.
 <script setup>
 import { ChatComponent } from '@s3_dse/v-tabler'
 
-const mockAiHandler = async userMessage => {
+const mockAiHandler = async (userMessage) => {
     // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     // Return mock response
-    return `You said: "${userMessage.content}". This is a mock response!`
+    return { content: `You said: "${userMessage.content}". This is a mock response!` }
 }
 </script>
 
@@ -363,7 +365,7 @@ const mockAiHandler = async userMessage => {
 
 1. **Error Handling** - Always handle errors in your `aiHandler` function
 2. **Loading States** - The component handles typing indicators automatically
-3. **Response Format** - Ensure `aiHandler` returns a string or throws an error
+3. **Response Format** - Return `{ content, ...metadata }`, or publish updates and resolve without a final response
 4. **Performance** - For long conversations, consider implementing message pagination/virtualization
 5. **Context Management** - Maintain conversation context in your `aiHandler` for better AI responses
 
@@ -400,21 +402,91 @@ Works with all modern browsers that support:
 The `aiHandler` prop accepts an async function with the following signature:
 
 ```typescript
-type AIHandler = (userMessage: Message) => Promise<string>
+interface AIResponse {
+    content: string
+    id?: string
+    [key: string]: unknown
+}
+
+type MessageUpdate = Partial<AIResponse>
+
+type AIHandler = (
+    userMessage: Message,
+    signal: AbortSignal,
+    updateMessage: (patch: MessageUpdate) => void
+) => Promise<MessageUpdate | void>
 
 interface Message {
     role: 'user' | 'assistant'
     content: string
-    timestamp: string
+    timestamp: Date
+    newConversation?: boolean
 }
 ```
 
 **Expected Behavior:**
 
-- Receives the user's message object
-- Should return a Promise that resolves to a string (the AI response)
-- Can throw an error, which will be caught and displayed as an error message
-- The typing indicator will show while the Promise is pending
+- Existing handlers can keep accepting only the user message and AbortSignal;
+  they may ignore the new third argument. Final-only handlers must return an
+  object with string `content`.
+- `updateMessage(patch)` synchronously creates or updates one assistant reply.
+  `content` is the complete text so far: it replaces content rather than appending
+  a delta. Other supplied fields shallow-merge; omitted fields retain their values.
+- Metadata may arrive before content. A server-owned `id` can arrive later without
+  replacing the placeholder or its timestamp. Custom message slots see the same
+  reactive message object throughout the request.
+- A final returned object merges into that reply. A returned aggregate replaces
+  content once, so it is not duplicated. After publishing an update, a handler
+  may instead resolve with `undefined` to finalize its latest reply. Completing
+  without either updates or a response is an error.
+- Updates must be non-null, non-array objects. A supplied `content` must be a
+  string. `role`, `timestamp`, `requestState`, `requestError`, and `__proto__` are
+  protected fields; publishing them is a handler error. Final patches after
+  updates follow the same rules. Other metadata remains application-owned.
+
+#### Incremental replies
+
+The transport remains in your application. In this example, `appReplyStream`
+represents your own adapter producing message patches with complete text so far:
+
+```javascript
+const handleAiMessage = async (userMessage, signal, updateMessage) => {
+    for await (const patch of appReplyStream(userMessage, signal)) {
+        updateMessage(patch)
+    }
+    // No final response is needed after publishing updates.
+}
+```
+
+Callback-created replies expose `requestState`: `streaming` while the handler is
+pending, followed by `complete`, `cancelled`, or `error`. On failure,
+`requestError` contains the existing safe generic error text. These fields belong
+to the library. Final-only replies retain their existing shape.
+
+The default renderer shows activity for an empty active reply, preserves partial
+text with a stopped label on cancellation, and shows a safe error notice on the
+same reply after failure. Custom message slots can use those lifecycle fields
+and their own progress metadata. `isTyping` continues to mean that a request is
+active, keeping input disabled and the cancel control available. The composable's
+`isAwaitingResponse` controls the separate typing indicator before a placeholder
+exists; once updates begin, the reply itself shows activity.
+
+#### Cancellation and cleanup
+
+Use the supplied AbortSignal in your transport. Cancel aborts it and releases the
+local busy state. Clearing or resetting the chat also cancels first, and
+`ChatComponent` cancels on unmount. Direct `useChatLogic()` consumers must call
+`cancelCurrentRequest()` when disposing their UI.
+
+Late updates, final responses, and errors from cancelled or cleared requests are
+ignored, including when a newer request is already running. Updates stop being
+accepted as soon as the handler settles. Partial text remains visible on cancel;
+no generic error message is added. A failure after updates marks the existing
+reply instead of inserting another assistant message. Raw exception details are
+logged rather than displayed.
+
+Aborting the signal cannot stop a handler that ignores it. Server-side work and
+cleanup acknowledgment remain the transport adapter's responsibility.
 
 ## Troubleshooting
 
@@ -425,7 +497,7 @@ interface Message {
 
 ### AI responses not showing
 
-- Verify your `aiHandler` function returns a string
+- Verify your `aiHandler` returns `{ content: '...' }` or publishes message updates
 - Check browser console for errors in your AI handler
 - Ensure the Promise is resolving correctly
 

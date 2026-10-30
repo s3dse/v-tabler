@@ -28,7 +28,9 @@ const DEFAULT_TRANSLATIONS = {
             },
             message: {
                 copyLabel: 'Copy message',
-                copiedLabel: 'Message copied'
+                copiedLabel: 'Message copied',
+                streamingLabel: 'Responding…',
+                cancelledLabel: 'Stopped'
             },
             mentions: {
                 loading: 'Loading suggestions...',
@@ -71,7 +73,9 @@ const TRANSLATIONS_DE = {
             },
             message: {
                 copyLabel: 'Nachricht kopieren',
-                copiedLabel: 'Nachricht kopiert'
+                copiedLabel: 'Nachricht kopiert',
+                streamingLabel: 'Antwort wird erstellt…',
+                cancelledLabel: 'Gestoppt'
             },
             mentions: {
                 loading: 'Vorschläge werden geladen...',

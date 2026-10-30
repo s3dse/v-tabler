@@ -185,14 +185,15 @@ const { autoHeightStyle, adjustHeight, adjustHeightNextTick } = useAutoHeight({
 
 watch(
     () => props.disabled,
-    (isDisabled) => {
+    (isDisabled, _previousDisabled, onCleanup) => {
         if (!isDisabled && pendingFocus.value) {
             pendingFocus.value = false
-            setTimeout(() => {
+            const focusTimer = setTimeout(() => {
                 if (document.activeElement === document.body) {
                     focus()
                 }
             }, FOCUS_RESTORE_DELAY_MS)
+            onCleanup(() => clearTimeout(focusTimer))
         }
     }
 )
