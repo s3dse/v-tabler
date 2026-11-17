@@ -1,125 +1,94 @@
-import { computed, nextTick, ref, shallowRef, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 
 const MESSAGE_ATTRIBUTE = 'data-chat-message'
 
-const measureSpan = (elements) => {
-    const firstRect = elements[0].getBoundingClientRect()
-    const lastRect = elements.at(-1).getBoundingClientRect()
-    return lastRect.bottom - firstRect.top
-}
-
-const measureReveal = (container, messageIndex) => {
+const measurePin = (container, messageIndex) => {
     if (!container) return null
 
-    const elements = [
-        ...container.querySelectorAll(`[${MESSAGE_ATTRIBUTE}="${messageIndex}"]`)
-    ]
-    const firstElement = elements[0]
-    if (!firstElement) return null
+    const anchorElement = container.querySelector(
+        `[${MESSAGE_ATTRIBUTE}="${messageIndex}"]`
+    )
+    if (!anchorElement) return null
 
     const containerRect = container.getBoundingClientRect()
-    const firstElementRect = firstElement.getBoundingClientRect()
-    const topPadding = Number.parseFloat(getComputedStyle(container).paddingTop) || 0
-    const desiredScrollTop = Math.max(
-        0,
-        container.scrollTop + firstElementRect.top - containerRect.top - topPadding
-    )
-    const maximumScrollTop = Math.max(0, container.scrollHeight - container.clientHeight)
+    const anchorRect = anchorElement.getBoundingClientRect()
+    const containerStyle = getComputedStyle(container)
+    const paddingTop = Number.parseFloat(containerStyle.paddingTop) || 0
+    const paddingBottom = Number.parseFloat(containerStyle.paddingBottom) || 0
+    const anchorOffsetTop =
+        container.scrollTop + anchorRect.top - containerRect.top - paddingTop
 
     return {
-        elements,
-        desiredScrollTop,
-        missingScrollRange: Math.max(0, desiredScrollTop - maximumScrollTop),
-        initialSpan: measureSpan(elements)
+        anchorOffsetTop,
+        pinHeight: Math.max(
+            0,
+            anchorOffsetTop + container.clientHeight - paddingTop - paddingBottom
+        )
     }
 }
 
 /**
- * Reveal each assistant reply once: submission arms the reveal, the first assistant
- * message is aligned to the viewport top, user scrolling cancels a pending reveal,
- * later stream updates do not scroll, and trailing space shrinks as the reply grows.
- * getMessageAttributes must receive indexes from the original, unfiltered messages array.
- * Limit: only the first new assistant message in an armed reveal contributes to spacer
- * shrinkage; use shared turn IDs when one request can own several replies.
+ * Pin the latest submitted question to the viewport top once. The flex layout keeps
+ * the available space below it stable while answers grow or shrink, and later updates
+ * never change scrollTop. Indexes must come from the original, unfiltered messages array.
  */
 export function useScrolling(containerRef, messages) {
-    const isRevealArmed = ref(false)
-    const reveal = shallowRef(null)
-    const spanHeight = ref(0)
+    const anchorIndex = ref(null)
+    const pinHeight = ref(0)
 
-    useResizeObserver(
-        () => reveal.value?.elements ?? [],
-        () => {
-            const currentReveal = reveal.value
-            if (currentReveal) spanHeight.value = measureSpan(currentReveal.elements)
-        },
-        { box: 'border-box' }
-    )
-
-    const tailSpace = computed(() => {
-        const currentReveal = reveal.value
-        if (!currentReveal) return 0
-
-        const messageGrowth = spanHeight.value - currentReveal.initialSpan
-        return Math.max(0, currentReveal.missingScrollRange - messageGrowth)
-    })
-
-    const resetReveal = () => {
-        isRevealArmed.value = false
-        reveal.value = null
+    const resetPin = () => {
+        anchorIndex.value = null
+        pinHeight.value = 0
     }
 
-    const armReveal = () => {
-        resetReveal()
-        isRevealArmed.value = true
+    const measureCurrentPin = () => {
+        if (anchorIndex.value === null) return null
+
+        const layout = measurePin(containerRef.value, anchorIndex.value)
+        if (!layout) {
+            if (import.meta.env.DEV) {
+                console.warn(
+                    '[ChatComponent] No marked element found for the submitted question; bind getMessageAttributes(index) in your custom messages slot.'
+                )
+            }
+            resetPin()
+            return null
+        }
+
+        pinHeight.value = layout.pinHeight
+        return layout
     }
 
-    const cancelPendingReveal = () => {
-        if (!isRevealArmed.value) return
-        resetReveal()
-    }
+    useResizeObserver(containerRef, measureCurrentPin, { box: 'border-box' })
 
     watch(
         () => messages.value.length,
         async (messageCount, previousMessageCount) => {
-            if (!isRevealArmed.value || messageCount <= previousMessageCount) return
+            if (messageCount <= previousMessageCount) return
 
-            const targetIndex = messages.value.findIndex(
+            const targetIndex = messages.value.findLastIndex(
                 (message, index) =>
-                    index >= previousMessageCount && message.role === 'assistant'
+                    index >= previousMessageCount && message.role === 'user'
             )
             if (targetIndex === -1) return
 
+            anchorIndex.value = targetIndex
+            const layout = measureCurrentPin()
+            if (!layout) return
+
             await nextTick()
-            if (!isRevealArmed.value) return
+            if (anchorIndex.value !== targetIndex) return
 
-            const layout = measureReveal(containerRef.value, targetIndex)
-            if (!layout) {
-                if (import.meta.env.DEV) {
-                    console.warn(
-                        '[ChatComponent] No marked element found for the incoming message; bind getMessageAttributes(index) in your custom messages slot.'
-                    )
-                }
-                resetReveal()
-                return
-            }
-
-            spanHeight.value = layout.initialSpan
-            reveal.value = layout
-            await nextTick()
-
-            if (!isRevealArmed.value) return
-            isRevealArmed.value = false
-            containerRef.value.scrollTop = layout.desiredScrollTop
-        }
+            const container = containerRef.value
+            if (container) container.scrollTop = layout.anchorOffsetTop
+        },
+        { flush: 'post' }
     )
 
     return {
-        tailSpace,
+        pinHeight,
         getMessageAttributes: (index) => ({ [MESSAGE_ATTRIBUTE]: String(index) }),
-        armReveal,
-        cancelPendingReveal,
-        resetReveal
+        resetPin
     }
 }

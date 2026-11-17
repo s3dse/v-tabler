@@ -1,21 +1,24 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import { h, nextTick, ref } from 'vue'
+import { h, nextTick } from 'vue'
 import ChatComponent from '../ChatComponent.vue'
 import ChatMessage from '../ChatMessage.vue'
 import TypingIndicator from '../TypingIndicator.vue'
-import { useScrolling } from '../useScrolling.js'
 
 const mounted = []
 const resizeObservers = []
 const VIEWPORT_HEIGHT = 400
-const CONTENT_HEIGHT = 500
-const INITIAL_SCROLL_TOP = 100
+const PADDING_TOP = 10
+const PADDING_BOTTOM = 20
 const MESSAGE_TOP_STEP = 100
-const MESSAGE_ELEMENT_HEIGHT = 40
-const MESSAGE_ELEMENT_GAP = 16
-const INCOMING_MESSAGE_INDEX = 2
-const INCOMING_MESSAGE_TOP = 300
+const FIRST_QUESTION_INDEX = 1
+const SECOND_QUESTION_INDEX = 3
+const FIRST_QUESTION_SCROLL_TOP = FIRST_QUESTION_INDEX * MESSAGE_TOP_STEP
+const SECOND_QUESTION_SCROLL_TOP = SECOND_QUESTION_INDEX * MESSAGE_TOP_STEP
+const FIRST_PIN_HEIGHT =
+    FIRST_QUESTION_SCROLL_TOP + VIEWPORT_HEIGHT - PADDING_TOP - PADDING_BOTTOM
+const SECOND_PIN_HEIGHT =
+    SECOND_QUESTION_SCROLL_TOP + VIEWPORT_HEIGHT - PADDING_TOP - PADDING_BOTTOM
 
 class ResizeObserverMock {
     constructor(callback) {
@@ -23,10 +26,6 @@ class ResizeObserverMock {
         this.observe = vi.fn()
         this.disconnect = vi.fn()
         resizeObservers.push(this)
-    }
-
-    emit() {
-        this.callback([])
     }
 }
 
@@ -41,7 +40,32 @@ afterEach(() => {
     vi.restoreAllMocks()
 })
 
-async function startChat(props = {}, slots = {}) {
+const createRect = ({ top, height = 40 }) => ({ top, bottom: top + height, height })
+
+function configurePinLayout(wrapper) {
+    const pinArea = wrapper.get('[data-chat-message]').element.parentElement
+    const container = pinArea.parentElement
+    container.style.paddingTop = `${PADDING_TOP}px`
+    container.style.paddingBottom = `${PADDING_BOTTOM}px`
+    Object.defineProperty(container, 'clientHeight', {
+        configurable: true,
+        value: VIEWPORT_HEIGHT
+    })
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
+        if (this === container) return createRect({ top: 0, height: VIEWPORT_HEIGHT })
+
+        const messageIndex = this.getAttribute('data-chat-message')
+        if (messageIndex === null) return createRect({ top: 0 })
+        const messageOffset = Number(messageIndex) * MESSAGE_TOP_STEP
+        return createRect({
+            top: PADDING_TOP + messageOffset - container.scrollTop
+        })
+    })
+
+    return { container, pinArea }
+}
+
+async function startChat(props = {}, slots = {}, { withLayout = false } = {}) {
     const started = Promise.withResolvers()
     const response = Promise.withResolvers()
     const wrapper = mount(ChatComponent, {
@@ -56,163 +80,105 @@ async function startChat(props = {}, slots = {}) {
     })
     mounted.push(wrapper)
     if (props.floating) await wrapper.get('button').trigger('click')
+    const layout = withLayout ? configurePinLayout(wrapper) : null
     wrapper.findComponent({ name: 'ChatInput' }).vm.$emit('submit', 'Hello')
-    return { wrapper, ...response, ...(await started.promise) }
+    return { wrapper, layout, ...response, ...(await started.promise) }
 }
 
-const createRect = ({ top, height }) => ({ top, bottom: top + height, height })
-
-function configureRevealLayout(wrapper, onMessageMeasure = () => {}) {
-    const container = wrapper.get('[data-chat-message]').element.parentElement
-    const elementRectsByMessage = new Map()
-
-    Object.defineProperties(container, {
-        clientHeight: { configurable: true, value: VIEWPORT_HEIGHT },
-        scrollHeight: { configurable: true, value: CONTENT_HEIGHT }
-    })
-    container.scrollTop = INITIAL_SCROLL_TOP
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
-        if (this === container) return createRect({ top: 0, height: VIEWPORT_HEIGHT })
-
-        const messageIndex = this.getAttribute('data-chat-message')
-        if (messageIndex === null) return createRect({ top: 0, height: 0 })
-
-        onMessageMeasure()
-        const messageElements = [
-            ...container.querySelectorAll(`[data-chat-message="${messageIndex}"]`)
-        ]
-        const elementIndex = messageElements.indexOf(this)
-        const defaultRect = {
-            top:
-                (Number(messageIndex) + 1) * MESSAGE_TOP_STEP +
-                elementIndex * (MESSAGE_ELEMENT_HEIGHT + MESSAGE_ELEMENT_GAP),
-            height: MESSAGE_ELEMENT_HEIGHT
-        }
-        const elementRect = elementRectsByMessage.get(messageIndex)?.[elementIndex] ?? defaultRect
-        return createRect(elementRect)
-    })
-
-    return {
-        container,
-        setMessageElementRects: (messageIndex, elementRects) => {
-            elementRectsByMessage.set(String(messageIndex), elementRects)
-        }
-    }
-}
-
-describe('useScrolling', () => {
-    it('reveals the first assistant message when several are added in one tick', async () => {
-        const messages = ref([
-            { role: 'assistant', content: 'Initial' },
-            { role: 'user', content: 'Question' }
-        ])
-        const wrapper = mount({
-            setup() {
-                const container = ref(null)
-                return { container, messages, ...useScrolling(container, messages) }
-            },
-            template: `
-                <div ref="container">
-                    <div
-                        v-for="(message, index) in messages"
-                        :key="index"
-                        v-bind="getMessageAttributes(index)"
-                    >{{ message.content }}</div>
-                    <div v-if="tailSpace" :style="{ height: tailSpace + 'px' }"></div>
-                </div>
-            `
-        })
-        mounted.push(wrapper)
-        const { container } = configureRevealLayout(wrapper)
-
-        wrapper.vm.armReveal()
-        messages.value.push(
-            { role: 'assistant', content: 'First answer' },
-            { role: 'assistant', content: 'Second answer' }
-        )
+describe('ChatComponent question pinning with the real composable', () => {
+    it('pins the submitted question and renders the CSS-filled column', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
         await flushPromises()
 
-        const activeResizeObserver = resizeObservers.at(-1)
-        expect(container.scrollTop).toBe(400)
-        expect(activeResizeObserver.observe).toHaveBeenCalledTimes(1)
-        expect(activeResizeObserver.observe.mock.calls[0][0].dataset.chatMessage).toBe(
-            String(INCOMING_MESSAGE_INDEX)
+        const { container, pinArea } = turn.layout
+        expect(container.scrollTop).toBe(FIRST_QUESTION_SCROLL_TOP)
+        expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
+        expect([...pinArea.classList]).toEqual(
+            expect.arrayContaining(['flex', 'flex-col', 'gap-4', 'min-w-0'])
         )
-    })
-})
+        expect(pinArea.lastElementChild.classList).toContain('flex-1')
+        expect(pinArea.lastElementChild.getAttribute('aria-hidden')).toBe('true')
+        expect(resizeObservers.at(-1).observe).toHaveBeenCalledWith(container, {
+            box: 'border-box'
+        })
 
-describe('ChatComponent incremental replies with the real composable', () => {
-    it('shrinks the reveal spacer as the incoming reply grows without moving the viewport', async () => {
-        const turn = await startChat()
-        const { container, setMessageElementRects } = configureRevealLayout(turn.wrapper)
+        turn.resolve({ content: 'Done' })
+        await flushPromises()
+    })
+
+    it('does not scroll or change the pin while an answer streams', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
+        await flushPromises()
+        const { container, pinArea } = turn.layout
+        container.scrollTop = 42
 
         turn.updateMessage({ content: 'Partial' })
         await flushPromises()
 
-        expect(container.lastElementChild.style.height).toBe('300px')
-        expect(container.scrollTop).toBe(400)
-        const activeResizeObserver = resizeObservers.at(-1)
-        const messageElements = container.querySelectorAll(
-            `[data-chat-message="${INCOMING_MESSAGE_INDEX}"]`
-        )
-        expect(activeResizeObserver.observe).toHaveBeenCalledWith(
-            messageElements.item(0),
-            { box: 'border-box' }
-        )
+        expect(container.scrollTop).toBe(42)
+        expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
 
-        container.dispatchEvent(new Event('wheel', { bubbles: true }))
-        await nextTick()
-
-        expect(container.lastElementChild.style.height).toBe('300px')
-        expect(activeResizeObserver.disconnect).not.toHaveBeenCalled()
-
-        setMessageElementRects(INCOMING_MESSAGE_INDEX, [
-            { top: INCOMING_MESSAGE_TOP, height: 140 }
-        ])
-        activeResizeObserver.emit()
-        await nextTick()
-
-        expect(container.lastElementChild.style.height).toBe('200px')
-        expect(container.scrollTop).toBe(400)
-
-        turn.resolve()
+        turn.resolve({ content: 'Done' })
         await flushPromises()
     })
 
-    it('reveals a final-only reply after rendering enough trailing space', async () => {
-        const turn = await startChat()
-        const typingIndicatorVisibilityDuringMeasurement = []
-        const { container } = configureRevealLayout(turn.wrapper, () => {
-            typingIndicatorVisibilityDuringMeasurement.push(
-                turn.wrapper.findComponent(TypingIndicator).exists()
-            )
-        })
+    it('does not scroll or change the pin for a final-only answer', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
+        await flushPromises()
+        const { container, pinArea } = turn.layout
+        container.scrollTop = 42
 
         turn.resolve({ content: 'Final answer' })
         await flushPromises()
 
-        expect(typingIndicatorVisibilityDuringMeasurement.length).toBeGreaterThan(0)
-        expect(typingIndicatorVisibilityDuringMeasurement).not.toContain(true)
-        expect(container.lastElementChild.style.height).toBe('300px')
-        expect(container.scrollTop).toBe(400)
+        expect(container.scrollTop).toBe(42)
+        expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
+        expect(turn.wrapper.findComponent(TypingIndicator).exists()).toBe(false)
     })
 
-    it('does not reveal a reply after the user scrolls while waiting', async () => {
-        const turn = await startChat()
-        const { container } = configureRevealLayout(turn.wrapper)
-
-        container.dispatchEvent(new Event('wheel', { bubbles: true }))
-        turn.updateMessage({ content: 'Partial' })
+    it('does not scroll or clear the pin when the request is cancelled', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
         await flushPromises()
+        const { container, pinArea } = turn.layout
+        container.scrollTop = 42
 
-        expect(container.scrollTop).toBe(100)
-        expect(container.lastElementChild.matches('[data-chat-message]')).toBe(true)
+        turn.wrapper.findComponent({ name: 'ChatInput' }).vm.$emit('cancel')
+        await nextTick()
+
+        expect(container.scrollTop).toBe(42)
+        expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
+        expect(turn.signal.aborted).toBe(true)
 
         turn.resolve()
         await flushPromises()
     })
 
-    it('warns when a custom messages slot does not mark its messages', async () => {
+    it('keeps the previous pin height until the next question takes over', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
+        turn.resolve({ content: 'Short answer' })
+        await flushPromises()
+        const { container, pinArea } = turn.layout
+
+        turn.wrapper.findComponent({ name: 'ChatInput' }).vm.$emit('submit', 'Next question')
+        expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
+        await flushPromises()
+
+        expect(pinArea.style.minHeight).toBe(`${SECOND_PIN_HEIGHT}px`)
+        expect(container.scrollTop).toBe(SECOND_QUESTION_SCROLL_TOP)
+    })
+
+    it('clears the pin when the chat is cleared', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
+        await flushPromises()
+
+        await turn.wrapper.get('button[title="Clear Chat"]').trigger('click')
+
+        expect(turn.layout.pinArea.style.minHeight).toBe('0px')
+        turn.resolve()
+        await flushPromises()
+    })
+
+    it('warns when a custom messages slot does not mark the submitted question', async () => {
         const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
         const turn = await startChat(
             {},
@@ -222,71 +188,17 @@ describe('ChatComponent incremental replies with the real composable', () => {
             }
         )
 
-        turn.updateMessage({ content: 'Partial' })
         await flushPromises()
-
         expect(warning).toHaveBeenCalledWith(
-            '[ChatComponent] No marked element found for the incoming message; bind getMessageAttributes(index) in your custom messages slot.'
+            '[ChatComponent] No marked element found for the submitted question; bind getMessageAttributes(index) in your custom messages slot.'
         )
 
-        turn.resolve()
+        turn.resolve({ content: 'Done' })
         await flushPromises()
     })
+})
 
-    it('tracks the combined span of multiple elements for one message', async () => {
-        const turn = await startChat(
-            {},
-            {
-                messages: ({ messages, getMessageAttributes }) =>
-                    messages.flatMap((message, index) =>
-                        ['summary', 'detail'].map((part) =>
-                            h(
-                                'p',
-                                {
-                                    ...getMessageAttributes(index),
-                                    key: `${index}-${part}`,
-                                    'data-part': part
-                                },
-                                message.content
-                            )
-                        )
-                    )
-            }
-        )
-        const { container, setMessageElementRects } = configureRevealLayout(turn.wrapper)
-
-        turn.updateMessage({ content: 'Partial' })
-        await flushPromises()
-
-        const activeResizeObserver = resizeObservers.at(-1)
-        const incomingElements = [
-            ...container.querySelectorAll(
-                `[data-chat-message="${INCOMING_MESSAGE_INDEX}"]`
-            )
-        ]
-        expect(container.scrollTop).toBe(400)
-        expect(container.lastElementChild.style.height).toBe('300px')
-        expect(activeResizeObserver.observe.mock.calls.map(([element]) => element)).toEqual(
-            incomingElements
-        )
-
-        setMessageElementRects(INCOMING_MESSAGE_INDEX, [
-            { top: INCOMING_MESSAGE_TOP, height: MESSAGE_ELEMENT_HEIGHT },
-            {
-                top: INCOMING_MESSAGE_TOP + MESSAGE_ELEMENT_HEIGHT + MESSAGE_ELEMENT_GAP,
-                height: 100
-            }
-        ])
-        activeResizeObserver.emit()
-        await nextTick()
-
-        expect(container.lastElementChild.style.height).toBe('240px')
-        expect(container.scrollTop).toBe(400)
-
-        turn.resolve()
-        await flushPromises()
-    })
-
+describe('ChatComponent incremental replies with the real composable', () => {
     it.each([{ variant: 'embedded' }, { floating: true }])(
         'renders one reply before completion in %j',
         async (props) => {

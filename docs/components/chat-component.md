@@ -7,7 +7,7 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 - **Floating Chat Button** - Fixed position chat toggle button with smooth animations
 - **Embedded Workspace Mode** - Parent-sized, neutral chat presentation for page layouts
 - **Modal Chat Interface** - Slide-up chat window with backdrop
-- **Message History** - Reveals each new answer once without scrolling on later updates
+- **Message History** - Pins each question to the top while its answer streams below it
 - **Typing Indicator** - Visual feedback when AI/assistant is responding
 - **AI Integration** - Promise responses or incremental updates through an optional callback
 - **Optional Mentions** - Async brand and partner autocomplete with portable mention chips
@@ -28,21 +28,22 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 
 ## Slots
 
-| Slot name  | Slot props                                    | Description                                                                                     |
-| ---------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `title`    | none                                          | Replaces the default chat title                                                                 |
-| `messages` | `{ messages, variant, getMessageAttributes }` | Provides a custom message view, presentation variant, and required attributes for answer reveal |
-| `input`    | `{ inputProps, inputEvents, setInputRef }`    | Replaces the built-in input while retaining chat state and handlers                             |
+| Slot name  | Slot props                                    | Description                                                                                        |
+| ---------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `title`    | none                                          | Replaces the default chat title                                                                    |
+| `messages` | `{ messages, variant, getMessageAttributes }` | Provides a custom message view, presentation variant, and required attributes for question pinning |
+| `input`    | `{ inputProps, inputEvents, setInputRef }`    | Replaces the built-in input while retaining chat state and handlers                                |
 
 ### Scrolling behavior and migration notes
 
-The first streaming update, or a final-only answer, scrolls the top of the answer into view once.
-Later streaming updates and completion do not scroll.
+Each submitted question is pinned to the top once. The answer, typing indicator, and any additional
+message content fill the space below it without scrolling during streaming, completion, or
+cancellation.
 
 - Custom `messages` slots must now bind `getMessageAttributes(index)` to every outer element that
   represents a message, using the index from the original, unfiltered `messages` array. Without it,
-  new answers are not revealed and a development warning is logged.
-- `onScrollToBottom` no longer fires for incoming assistant updates. It still fires on submit and
+  submitted questions are not pinned and a development warning is logged.
+- `onScrollToBottom` no longer fires on submit or for incoming assistant updates. It only fires
   when the chat opens.
 - `isAwaitingResponse` becomes `false` as soon as an assistant message is on screen.
 

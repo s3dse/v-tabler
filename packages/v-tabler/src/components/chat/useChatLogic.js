@@ -135,9 +135,9 @@ export function useChatLogic(options = {}) {
         return trimmedContent || null
     }
 
-    const clearInputAndScroll = async (request = null) => {
+    const clearInput = async () => {
         chatInputRef?.value?.clear()
-        await scrollToBottom(request)
+        await nextTick()
     }
 
     const startAIRequest = () => {
@@ -166,7 +166,7 @@ export function useChatLogic(options = {}) {
         const userMessage = addUserMessage(validInput)
 
         if (!request) {
-            await clearInputAndScroll()
+            await clearInput()
             return userMessage
         }
 
@@ -176,7 +176,7 @@ export function useChatLogic(options = {}) {
         }
 
         try {
-            await clearInputAndScroll(request)
+            await clearInput()
             if (!ownsRequest(request)) return { userMessage, aborted: true }
             const aiResponse = await aiHandler(
                 userMessage,
