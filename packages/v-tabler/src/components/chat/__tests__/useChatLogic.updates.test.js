@@ -168,14 +168,13 @@ describe('incremental AI replies', () => {
     })
 
     it.each(['clearChat', 'resetMessages'])(
-        '%s aborts and ignores late work and queued scrolls',
+        '%s aborts and ignores late work without scrolling on submit',
         async (action) => {
             const turn = controlledHandler()
             const scroll = vi.fn()
             const chat = useChatLogic({ aiHandler: turn.handler, onScrollToBottom: scroll })
             const completion = chat.sendMessage('Hello')
             const { signal, updateMessage } = await turn.started
-            scroll.mockClear()
             updateMessage({ content: 'Partial' })
             chat[action]()
             updateMessage({ content: 'Late' })

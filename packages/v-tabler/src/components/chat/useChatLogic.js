@@ -45,7 +45,9 @@ export function useChatLogic(options = {}) {
     ])
     const isTyping = ref(false)
     const activeRequest = ref(null)
-    const isAwaitingResponse = computed(() => isTyping.value && !activeRequest.value?.message)
+    const isAwaitingResponse = computed(
+        () => isTyping.value && messages.value.at(-1)?.role !== 'assistant'
+    )
     const ownsRequest = (request) =>
         activeRequest.value === request && !request.controller.signal.aborted
 
@@ -133,9 +135,9 @@ export function useChatLogic(options = {}) {
         return trimmedContent || null
     }
 
-    const clearInputAndScroll = async (request = null) => {
+    const clearInput = async () => {
         chatInputRef?.value?.clear()
-        await scrollToBottom(request)
+        await nextTick()
     }
 
     const startAIRequest = () => {
@@ -164,18 +166,17 @@ export function useChatLogic(options = {}) {
         const userMessage = addUserMessage(validInput)
 
         if (!request) {
-            await clearInputAndScroll()
+            await clearInput()
             return userMessage
         }
 
         const updateMessage = (patch) => {
             if (!ownsRequest(request) || !request.acceptsUpdates) return
             applyMessageUpdate(request, patch)
-            void scrollToBottom(request)
         }
 
         try {
-            await clearInputAndScroll(request)
+            await clearInput()
             if (!ownsRequest(request)) return { userMessage, aborted: true }
             const aiResponse = await aiHandler(
                 userMessage,
@@ -199,7 +200,6 @@ export function useChatLogic(options = {}) {
                 }
             }
             const aiMessage = request.message ?? addAiMessage(aiResponse)
-            await scrollToBottom(request)
             await focusInput(request)
             if (!ownsRequest(request)) return { userMessage, aborted: true }
             if (request.message) request.message.requestState = 'complete'
@@ -217,7 +217,6 @@ export function useChatLogic(options = {}) {
                 request.message.requestError = DEFAULT_REQUEST_ERROR
             }
             const errorMessage = request.message ?? addErrorMessage()
-            await scrollToBottom(request)
             return ownsRequest(request)
                 ? { userMessage, errorMessage, error }
                 : { userMessage, aborted: true }

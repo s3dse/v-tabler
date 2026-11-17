@@ -35,7 +35,7 @@ Floating chat interface component for AI assistants and messaging experiences.
 
 - Floating chat button with smooth animations
 - Modal chat interface with backdrop
-- Message history with auto-scroll
+- Message history that keeps short answers in place and pins overflowing questions once
 - Typing indicators and AI integration
 - Customizable appearance and behavior
 
