@@ -9,6 +9,8 @@ const RESIZED_VIEWPORT_HEIGHT = 300
 const PADDING_TOP = 10
 const PADDING_BOTTOM = 20
 const QUESTION_INDEX = 1
+const FITTING_CONTENT_END = 250
+const OVERFLOWING_CONTENT_END = 450
 const EXPECTED_SCROLL_TOP = QUESTION_INDEX * MESSAGE_TOP_STEP
 const EXPECTED_PIN_HEIGHT =
     EXPECTED_SCROLL_TOP + VIEWPORT_HEIGHT - PADDING_TOP - PADDING_BOTTOM
@@ -32,24 +34,37 @@ class ResizeObserverMock {
 
 const createRect = ({ top, height = 40 }) => ({ top, bottom: top + height, height })
 
+const observerFor = (target) =>
+    resizeObservers.find((observer) =>
+        observer.observe.mock.calls.some(([element]) => element === target)
+    )
+
 const mountScrolling = ({ markMessages = true } = {}) => {
     const messages = ref([{ role: 'assistant', content: 'Initial' }])
+    const isTyping = ref(true)
     const viewportHeight = ref(VIEWPORT_HEIGHT)
+    const contentEndOffset = ref(FITTING_CONTENT_END)
     const wrapper = mount({
         setup() {
             const container = ref(null)
-            const scrolling = useScrolling(container, messages)
+            const contentEnd = ref(null)
+            const scrolling = useScrolling(container, contentEnd, messages, isTyping)
             const messageAttributes = (index) =>
                 markMessages ? scrolling.getMessageAttributes(index) : {}
-            return { container, messages, messageAttributes, ...scrolling }
+            return { container, contentEnd, isTyping, messages, messageAttributes, ...scrolling }
         },
         template: `
             <div ref="container">
-                <div
-                    v-for="(message, index) in messages"
-                    :key="index"
-                    v-bind="messageAttributes(index)"
-                >{{ message.content }}</div>
+                <div>
+                    <div>
+                        <div
+                            v-for="(message, index) in messages"
+                            :key="index"
+                            v-bind="messageAttributes(index)"
+                        >{{ message.content }}</div>
+                        <div ref="contentEnd" data-chat-content-end></div>
+                    </div>
+                </div>
             </div>
         `
     })
@@ -62,8 +77,18 @@ const mountScrolling = ({ markMessages = true } = {}) => {
         configurable: true,
         get: () => viewportHeight.value
     })
+    container.scrollTo = vi.fn(({ top }) => {
+        container.scrollTop = top
+    })
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
         if (this === container) return createRect({ top: 0, height: viewportHeight.value })
+
+        if (this.hasAttribute('data-chat-content-end')) {
+            return createRect({
+                top: PADDING_TOP + contentEndOffset.value - container.scrollTop,
+                height: 0
+            })
+        }
 
         const messageIndex = this.getAttribute('data-chat-message')
         if (messageIndex === null) return createRect({ top: 0 })
@@ -73,7 +98,14 @@ const mountScrolling = ({ markMessages = true } = {}) => {
         })
     })
 
-    return { container, messages, viewportHeight, wrapper }
+    return {
+        container,
+        contentEnd: wrapper.get('[data-chat-content-end]').element,
+        contentEndOffset,
+        messages,
+        viewportHeight,
+        wrapper
+    }
 }
 
 beforeEach(() => {
@@ -88,8 +120,8 @@ afterEach(() => {
 })
 
 describe('useScrolling', () => {
-    it('pins the newest user message when an answer is added in the same tick', async () => {
-        const { container, messages, wrapper } = mountScrolling()
+    it('arms the newest user message without scrolling while its answer fits', async () => {
+        const { container, contentEnd, messages, wrapper } = mountScrolling()
 
         messages.value.push(
             { role: 'user', content: 'Question' },
@@ -98,10 +130,54 @@ describe('useScrolling', () => {
         await flushPromises()
 
         expect(wrapper.vm.pinHeight).toBe(EXPECTED_PIN_HEIGHT)
-        expect(container.scrollTop).toBe(EXPECTED_SCROLL_TOP)
-        expect(resizeObservers.at(-1).observe).toHaveBeenCalledWith(container, {
+        expect(container.scrollTop).toBe(0)
+        expect(container.scrollTo).not.toHaveBeenCalled()
+        expect(observerFor(container).observe).toHaveBeenCalledWith(container, {
             box: 'border-box'
         })
+        expect(observerFor(contentEnd.parentElement).observe).toHaveBeenCalledWith(
+            contentEnd.parentElement,
+            { box: 'border-box' }
+        )
+    })
+
+    it.each([
+        { reducedMotion: false, behavior: 'smooth' },
+        { reducedMotion: true, behavior: 'instant' }
+    ])(
+        'pins once with $behavior scrolling when the answer crosses the viewport bottom',
+        async ({ reducedMotion, behavior }) => {
+            vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: reducedMotion })))
+            const { container, contentEnd, contentEndOffset, messages } = mountScrolling()
+            messages.value.push({ role: 'user', content: 'Question' })
+            await flushPromises()
+
+            contentEndOffset.value = OVERFLOWING_CONTENT_END
+            observerFor(contentEnd.parentElement).emit()
+            await flushPromises()
+
+            expect(container.scrollTo).toHaveBeenCalledOnce()
+            expect(container.scrollTo).toHaveBeenCalledWith({
+                top: EXPECTED_SCROLL_TOP,
+                behavior
+            })
+
+            contentEndOffset.value += MESSAGE_TOP_STEP
+            observerFor(contentEnd.parentElement).emit()
+            expect(container.scrollTo).toHaveBeenCalledOnce()
+        }
+    )
+
+    it('does not pin after user interaction cancels the pending pin', async () => {
+        const { container, contentEnd, contentEndOffset, messages, wrapper } = mountScrolling()
+        messages.value.push({ role: 'user', content: 'Question' })
+        await flushPromises()
+
+        wrapper.vm.cancelPendingPin()
+        contentEndOffset.value = OVERFLOWING_CONTENT_END
+        observerFor(contentEnd.parentElement).emit()
+
+        expect(container.scrollTo).not.toHaveBeenCalled()
     })
 
     it('recalculates the pin height on resize without restoring the scroll position', async () => {
@@ -111,7 +187,7 @@ describe('useScrolling', () => {
         container.scrollTop = 42
 
         viewportHeight.value = RESIZED_VIEWPORT_HEIGHT
-        resizeObservers.at(-1).emit()
+        observerFor(container).emit()
         await flushPromises()
 
         expect(wrapper.vm.pinHeight).toBe(EXPECTED_RESIZED_PIN_HEIGHT)
@@ -129,11 +205,12 @@ describe('useScrolling', () => {
             '[ChatComponent] No marked element found for the submitted question; bind getMessageAttributes(index) in your custom messages slot.'
         )
         expect(wrapper.vm.pinHeight).toBe(0)
-        expect(container.scrollTop).toBe(0)
+        expect(container.scrollTo).not.toHaveBeenCalled()
     })
 
     it('does not finish pinning after the pin is reset during nextTick', async () => {
-        const { container, messages, wrapper } = mountScrolling()
+        const { container, contentEndOffset, messages, wrapper } = mountScrolling()
+        contentEndOffset.value = OVERFLOWING_CONTENT_END
 
         messages.value.push({ role: 'user', content: 'Question' })
         await wrapper.vm.$nextTick()
@@ -141,6 +218,6 @@ describe('useScrolling', () => {
         await flushPromises()
 
         expect(wrapper.vm.pinHeight).toBe(0)
-        expect(container.scrollTop).toBe(0)
+        expect(container.scrollTo).not.toHaveBeenCalled()
     })
 })

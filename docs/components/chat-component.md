@@ -7,7 +7,7 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 - **Floating Chat Button** - Fixed position chat toggle button with smooth animations
 - **Embedded Workspace Mode** - Parent-sized, neutral chat presentation for page layouts
 - **Modal Chat Interface** - Slide-up chat window with backdrop
-- **Message History** - Pins each question to the top while its answer streams below it
+- **Message History** - Keeps short answers in place and pins overflowing questions once
 - **Typing Indicator** - Visual feedback when AI/assistant is responding
 - **AI Integration** - Promise responses or incremental updates through an optional callback
 - **Optional Mentions** - Async brand and partner autocomplete with portable mention chips
@@ -36,13 +36,15 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 
 ### Scrolling behavior and migration notes
 
-Each submitted question is pinned to the top once. The answer, typing indicator, and any additional
-message content fill the space below it without scrolling during streaming, completion, or
-cancellation.
+Each submitted question stays where it appears while the answer fits in the remaining viewport. If
+the answer crosses the viewport bottom, the question scrolls to the top once, smoothly unless the
+user prefers reduced motion. The turn gets one final overflow check when it ends, which covers
+final-only answers. The pending pin then expires, so later chart or image rendering and viewport
+reflow do not move the conversation. User scrolling cancels a pending pin.
 
 - Custom `messages` slots must now bind `getMessageAttributes(index)` to every outer element that
   represents a message, using the index from the original, unfiltered `messages` array. Without it,
-  submitted questions are not pinned and a development warning is logged.
+  overflowing questions are not pinned and a development warning is logged.
 - `onScrollToBottom` no longer fires on submit or for incoming assistant updates. It only fires
   when the chat opens.
 - `isAwaitingResponse` becomes `false` as soon as an assistant message is on screen.

@@ -2,6 +2,7 @@ import { nextTick, ref, watch } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 
 const MESSAGE_ATTRIBUTE = 'data-chat-message'
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
 const measurePin = (container, messageIndex) => {
     if (!container) return null
@@ -29,17 +30,23 @@ const measurePin = (container, messageIndex) => {
 }
 
 /**
- * Pin the latest submitted question to the viewport top once. The flex layout keeps
- * the available space below it stable while answers grow or shrink, and later updates
- * never change scrollTop. Indexes must come from the original, unfiltered messages array.
+ * Keep each submitted question in place while its answer fits. If content overflows,
+ * pin the question to the viewport top once. A final overflow check runs when the turn
+ * ends, then the pending pin expires. Indexes must come from the original messages array.
  */
-export function useScrolling(containerRef, messages) {
+export function useScrolling(containerRef, contentEndRef, messages, isTyping) {
     const anchorIndex = ref(null)
+    const isPinPending = ref(false)
     const pinHeight = ref(0)
 
     const resetPin = () => {
         anchorIndex.value = null
+        isPinPending.value = false
         pinHeight.value = 0
+    }
+
+    const cancelPendingPin = () => {
+        isPinPending.value = false
     }
 
     const measureCurrentPin = () => {
@@ -60,7 +67,41 @@ export function useScrolling(containerRef, messages) {
         return layout
     }
 
+    const pinIfContentOverflows = () => {
+        if (!isPinPending.value) return
+
+        const container = containerRef.value
+        const contentEnd = contentEndRef.value
+        if (!container || !contentEnd) return
+
+        const containerRect = container.getBoundingClientRect()
+        const paddingBottom = Number.parseFloat(getComputedStyle(container).paddingBottom) || 0
+        if (contentEnd.getBoundingClientRect().bottom <= containerRect.bottom - paddingBottom) return
+
+        const layout = measureCurrentPin()
+        if (!layout) return
+
+        isPinPending.value = false
+        const behavior = globalThis.matchMedia?.(REDUCED_MOTION_QUERY).matches
+            ? 'instant'
+            : 'smooth'
+        container.scrollTo({ top: layout.anchorOffsetTop, behavior })
+    }
+
+    const expirePendingPin = async () => {
+        await nextTick()
+        if (isTyping.value || !isPinPending.value) return
+
+        pinIfContentOverflows()
+        isPinPending.value = false
+    }
+
     useResizeObserver(containerRef, measureCurrentPin, { box: 'border-box' })
+    useResizeObserver(
+        () => contentEndRef.value?.parentElement,
+        pinIfContentOverflows,
+        { box: 'border-box' }
+    )
 
     watch(
         () => messages.value.length,
@@ -74,14 +115,22 @@ export function useScrolling(containerRef, messages) {
             if (targetIndex === -1) return
 
             anchorIndex.value = targetIndex
+            isPinPending.value = true
             const layout = measureCurrentPin()
             if (!layout) return
 
             await nextTick()
-            if (anchorIndex.value !== targetIndex) return
+            if (anchorIndex.value !== targetIndex || !isPinPending.value) return
+            pinIfContentOverflows()
+            if (!isTyping.value) isPinPending.value = false
+        },
+        { flush: 'post' }
+    )
 
-            const container = containerRef.value
-            if (container) container.scrollTop = layout.anchorOffsetTop
+    watch(
+        isTyping,
+        (typing) => {
+            if (!typing) expirePendingPin()
         },
         { flush: 'post' }
     )
@@ -89,6 +138,7 @@ export function useScrolling(containerRef, messages) {
     return {
         pinHeight,
         getMessageAttributes: (index) => ({ [MESSAGE_ATTRIBUTE]: String(index) }),
+        cancelPendingPin,
         resetPin
     }
 }

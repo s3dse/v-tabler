@@ -27,25 +27,37 @@
                     ref="messagesContainer"
                     class="flex-1 min-h-0 overflow-y-auto p-4 with-scrollbar"
                     :class="isEmbedded ? 'bg-transparent' : 'bg-background'"
+                    @wheel="cancelPendingPin"
+                    @touchstart="cancelPendingPin"
+                    @pointerdown="cancelPendingPin"
+                    @keydown="handleMessageScrollKeydown"
                 >
                     <div
-                        class="flex min-w-0 flex-col gap-4"
+                        class="flex min-w-0 flex-col"
                         :style="{ minHeight: `${pinHeight}px` }"
                     >
-                        <slot
-                            name="messages"
-                            v-bind="{ messages, variant, getMessageAttributes }"
-                        >
-                            <ChatMessage
-                                v-for="(message, index) in messages"
-                                :key="index"
-                                :message="message"
-                                :variant="variant"
-                                v-bind="getMessageAttributes(index)"
-                            />
-                        </slot>
+                        <div class="flex min-w-0 flex-col gap-4">
+                            <slot
+                                name="messages"
+                                v-bind="{ messages, variant, getMessageAttributes }"
+                            >
+                                <ChatMessage
+                                    v-for="(message, index) in messages"
+                                    :key="index"
+                                    :message="message"
+                                    :variant="variant"
+                                    v-bind="getMessageAttributes(index)"
+                                />
+                            </slot>
 
-                        <TypingIndicator v-if="isAwaitingResponse" :variant="variant" />
+                            <TypingIndicator v-if="isAwaitingResponse" :variant="variant" />
+                            <div
+                                ref="contentEnd"
+                                class="h-0"
+                                data-chat-content-end
+                                aria-hidden="true"
+                            ></div>
+                        </div>
                         <div class="flex-1" aria-hidden="true"></div>
                     </div>
                 </div>
@@ -136,6 +148,8 @@ watchEffect(() => {
 
 const emit = defineEmits(['clear-chat'])
 
+const MESSAGE_SCROLL_KEYS = ['PageUp', 'PageDown', 'Home', 'End', ' ', 'ArrowUp', 'ArrowDown']
+
 const isEmbedded = computed(() => props.variant === ChatVariant.EMBEDDED)
 
 const rootClasses = computed(() => {
@@ -167,6 +181,7 @@ const chatContainerClasses = computed(() => {
 const isOpen = ref(!props.floating)
 const inputMessage = ref('')
 const messagesContainer = ref(null)
+const contentEnd = ref(null)
 const chatInputRef = ref(null)
 
 const {
@@ -189,8 +204,9 @@ const {
 const {
     pinHeight,
     getMessageAttributes,
+    cancelPendingPin,
     resetPin
-} = useScrolling(messagesContainer, messages)
+} = useScrolling(messagesContainer, contentEnd, messages, isTyping)
 
 onBeforeUnmount(() => {
     // Disarm pin work suspended at nextTick before template refs are cleared.
@@ -204,6 +220,10 @@ const handleSubmit = async (message) => {
 
 const handleCancel = () => {
     cancelCurrentRequest()
+}
+
+const handleMessageScrollKeydown = (event) => {
+    if (MESSAGE_SCROLL_KEYS.includes(event.key)) cancelPendingPin()
 }
 
 const setInputRef = (input) => {

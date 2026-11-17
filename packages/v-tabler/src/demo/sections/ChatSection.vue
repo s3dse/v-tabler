@@ -113,6 +113,35 @@
                 </p>
             </div>
 
+            <!-- Response Simulation -->
+            <div class="mb-4 p-4 bg-surface border border-border rounded space-y-3">
+                <div v-for="setting in responseSettings" :key="setting.label">
+                    <label class="block text-sm font-medium text-default mb-2">
+                        {{ setting.label }}:
+                    </label>
+                    <div class="flex gap-3 flex-wrap">
+                        <button
+                            v-for="option in setting.options"
+                            :key="option.value"
+                            @click="setting.model.value = option.value"
+                            class="px-4 py-2 rounded transition-colors"
+                            :class="
+                                setting.model.value === option.value
+                                    ? 'bg-primary text-white'
+                                    : 'bg-surface border border-border text-default hover:bg-surface-hover'
+                            "
+                        >
+                            {{ option.label }}
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-muted">
+                    <strong>Stream</strong> reveals the answer word by word through
+                    <code>updateMessage</code>; <strong>Final only</strong> returns it at once.
+                    <strong>Long</strong> answers overflow the chat to exercise question pinning.
+                </p>
+            </div>
+
             <p class="text-sm text-muted mb-4">
                 These examples use the same mock AI service. The inline card is the default; use
                 <code>variant="embedded"</code> for a page-owned workspace pane, or set
@@ -250,6 +279,10 @@
                     button (X icon)
                 </li>
                 <li><strong>NEW:</strong> Click the cancel button to abort ongoing AI requests</li>
+                <li>
+                    Stream a long answer: the question pins to the top once, then stays put while
+                    the answer grows; scrolling during the thinking phase cancels the pin
+                </li>
                 <li>Watch the status panel above to see chat activity tracking</li>
             </ol>
         </div>
@@ -306,6 +339,37 @@ const chatStats = ref({
 const lastMessageTime = ref('')
 const isAiThinking = ref(false)
 
+// Response simulation
+const responseMode = ref('final')
+const responseLength = ref('short')
+
+const responseSettings = [
+    {
+        label: 'Response Mode',
+        model: responseMode,
+        options: [
+            { value: 'final', label: 'Final only' },
+            { value: 'stream', label: 'Stream' }
+        ]
+    },
+    {
+        label: 'Answer Length',
+        model: responseLength,
+        options: [
+            { value: 'short', label: 'Short' },
+            { value: 'long', label: 'Long' }
+        ]
+    }
+]
+
+const LONG_RESPONSE_PARAGRAPHS = [
+    'Long answers are where scrolling gets interesting. Once this message grows past the bottom of the chat, your question is pinned to the top so you can read the answer beneath it.',
+    'After that single pin, streaming never moves the view again. New words appear below the fold and you decide when to scroll.',
+    'Scrolling with the wheel, touch, or keyboard while the answer is still pending cancels the pin entirely. The user always wins.',
+    'With reduced motion enabled, the pin jumps instantly instead of scrolling smoothly.',
+    'The reserved space below the answer stays stable between questions, so submitting the next message does not make the conversation jump.'
+]
+
 const mentionOptions = {
     brand: [
         { id: 'brand-adidas', label: 'ADIDAS' },
@@ -349,59 +413,49 @@ const resetForm = () => {
     submissionResult.value = null
 }
 
-// AI handler function for the chat component
-const handleAiRequest = async (message, signal) => {
-    console.log('💬 Chat message received:', message.content)
+// Resolves after `ms`, or rejects with an AbortError when the request is cancelled
+const wait = (ms, signal) =>
+    new Promise((resolve, reject) => {
+        signal.throwIfAborted()
+        const onAbort = () => {
+            clearTimeout(timeoutId)
+            reject(signal.reason)
+        }
+        const timeoutId = setTimeout(() => {
+            signal.removeEventListener('abort', onAbort)
+            resolve()
+        }, ms)
+        signal.addEventListener('abort', onAbort, { once: true })
+    })
 
-    // Update stats
+// Publishes the answer word by word, like a token stream
+const streamResponse = async (content, signal, updateMessage) => {
+    const words = content.split(/(?<=\s)/)
+    for (const index of words.keys()) {
+        await wait(30 + Math.random() * 30, signal)
+        updateMessage({ content: words.slice(0, index + 1).join('') })
+    }
+}
+
+const generateResponse = (userMessage, length) =>
+    length === 'long'
+        ? [generateDemoAiResponse(userMessage), ...LONG_RESPONSE_PARAGRAPHS].join('\n\n')
+        : generateDemoAiResponse(userMessage)
+
+// AI handler function for the chat component
+const handleAiRequest = async (message, signal, updateMessage) => {
+    const mode = responseMode.value
+    const content = generateResponse(message.content, responseLength.value)
+
     chatStats.value.messagesSent++
     lastMessageTime.value = message.timestamp
-
-    // Show AI thinking state
     isAiThinking.value = true
 
     try {
-        // Simulate AI processing time
-        const processingTime = 1000 + Math.random() * 2500 // 1-3.5 seconds
-
-        // Create a promise that can be aborted
-        await new Promise((resolve, reject) => {
-            const timeoutId = setTimeout(resolve, processingTime)
-
-            // Listen for abort signal
-            if (signal) {
-                signal.addEventListener('abort', () => {
-                    clearTimeout(timeoutId)
-                    reject(new DOMException('Request was cancelled', 'AbortError'))
-                })
-            }
-        })
-
-        // Check if aborted before generating response
-        if (signal?.aborted) {
-            throw new DOMException('Request was cancelled', 'AbortError')
-        }
-
-        // Generate AI response
-        const aiResponse = generateDemoAiResponse(message.content)
-
-        // Update stats
+        await wait(1000 + Math.random() * 2500, signal)
+        if (mode === 'stream') await streamResponse(content, signal, updateMessage)
         chatStats.value.aiResponses++
-
-        console.log('🤖 AI response generated:', aiResponse)
-
-        // Return the response - component will handle adding it to chat
-        return { content: aiResponse, metadata: { demo: true } }
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            console.log('🚫 AI request was cancelled by user')
-            throw error // Re-throw abort errors so component can handle them
-        }
-
-        console.error('❌ Error generating AI response:', error)
-
-        // Return error response for other errors
-        return 'I apologize, but I encountered an error. Please try again.'
+        return { content, metadata: { demo: true } }
     } finally {
         isAiThinking.value = false
     }

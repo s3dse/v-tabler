@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import { h, nextTick } from 'vue'
+import { h, nextTick, ref } from 'vue'
 import ChatComponent from '../ChatComponent.vue'
 import ChatMessage from '../ChatMessage.vue'
 import TypingIndicator from '../TypingIndicator.vue'
@@ -13,6 +13,8 @@ const PADDING_BOTTOM = 20
 const MESSAGE_TOP_STEP = 100
 const FIRST_QUESTION_INDEX = 1
 const SECOND_QUESTION_INDEX = 3
+const FITTING_CONTENT_END = 250
+const OVERFLOWING_CONTENT_END = 450
 const FIRST_QUESTION_SCROLL_TOP = FIRST_QUESTION_INDEX * MESSAGE_TOP_STEP
 const SECOND_QUESTION_SCROLL_TOP = SECOND_QUESTION_INDEX * MESSAGE_TOP_STEP
 const FIRST_PIN_HEIGHT =
@@ -27,7 +29,16 @@ class ResizeObserverMock {
         this.disconnect = vi.fn()
         resizeObservers.push(this)
     }
+
+    emit() {
+        this.callback([])
+    }
 }
+
+const observerFor = (target) =>
+    resizeObservers.find((observer) =>
+        observer.observe.mock.calls.some(([element]) => element === target)
+    )
 
 beforeEach(() => {
     resizeObservers.splice(0)
@@ -43,16 +54,29 @@ afterEach(() => {
 const createRect = ({ top, height = 40 }) => ({ top, bottom: top + height, height })
 
 function configurePinLayout(wrapper) {
-    const pinArea = wrapper.get('[data-chat-message]').element.parentElement
+    const contentEnd = wrapper.get('[data-chat-content-end]').element
+    const contentArea = contentEnd.parentElement
+    const pinArea = contentArea.parentElement
     const container = pinArea.parentElement
+    const contentEndOffset = ref(FITTING_CONTENT_END)
     container.style.paddingTop = `${PADDING_TOP}px`
     container.style.paddingBottom = `${PADDING_BOTTOM}px`
     Object.defineProperty(container, 'clientHeight', {
         configurable: true,
         value: VIEWPORT_HEIGHT
     })
+    container.scrollTo = vi.fn(({ top }) => {
+        container.scrollTop = top
+    })
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
         if (this === container) return createRect({ top: 0, height: VIEWPORT_HEIGHT })
+
+        if (this === contentEnd) {
+            return createRect({
+                top: PADDING_TOP + contentEndOffset.value - container.scrollTop,
+                height: 0
+            })
+        }
 
         const messageIndex = this.getAttribute('data-chat-message')
         if (messageIndex === null) return createRect({ top: 0 })
@@ -62,7 +86,7 @@ function configurePinLayout(wrapper) {
         })
     })
 
-    return { container, pinArea }
+    return { container, contentArea, contentEndOffset, pinArea }
 }
 
 async function startChat(props = {}, slots = {}, { withLayout = false } = {}) {
@@ -86,19 +110,24 @@ async function startChat(props = {}, slots = {}, { withLayout = false } = {}) {
 }
 
 describe('ChatComponent question pinning with the real composable', () => {
-    it('pins the submitted question and renders the CSS-filled column', async () => {
+    it('arms the submitted question and renders the CSS-filled column', async () => {
         const turn = await startChat({}, {}, { withLayout: true })
         await flushPromises()
 
-        const { container, pinArea } = turn.layout
-        expect(container.scrollTop).toBe(FIRST_QUESTION_SCROLL_TOP)
+        const { container, contentArea, pinArea } = turn.layout
+        expect(container.scrollTop).toBe(0)
+        expect(container.scrollTo).not.toHaveBeenCalled()
         expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
         expect([...pinArea.classList]).toEqual(
-            expect.arrayContaining(['flex', 'flex-col', 'gap-4', 'min-w-0'])
+            expect.arrayContaining(['flex', 'flex-col', 'min-w-0'])
         )
+        expect(contentArea.classList).toContain('gap-4')
         expect(pinArea.lastElementChild.classList).toContain('flex-1')
         expect(pinArea.lastElementChild.getAttribute('aria-hidden')).toBe('true')
-        expect(resizeObservers.at(-1).observe).toHaveBeenCalledWith(container, {
+        expect(observerFor(container).observe).toHaveBeenCalledWith(container, {
+            box: 'border-box'
+        })
+        expect(observerFor(contentArea).observe).toHaveBeenCalledWith(contentArea, {
             box: 'border-box'
         })
 
@@ -106,18 +135,40 @@ describe('ChatComponent question pinning with the real composable', () => {
         await flushPromises()
     })
 
-    it('does not scroll or change the pin while an answer streams', async () => {
+    it('pins once when a streaming answer overflows', async () => {
         const turn = await startChat({}, {}, { withLayout: true })
         await flushPromises()
-        const { container, pinArea } = turn.layout
-        container.scrollTop = 42
+        const { container, contentArea, contentEndOffset, pinArea } = turn.layout
 
         turn.updateMessage({ content: 'Partial' })
+        contentEndOffset.value = OVERFLOWING_CONTENT_END
+        observerFor(contentArea).emit()
         await flushPromises()
 
-        expect(container.scrollTop).toBe(42)
+        expect(container.scrollTo).toHaveBeenCalledOnce()
+        expect(container.scrollTo).toHaveBeenCalledWith({
+            top: FIRST_QUESTION_SCROLL_TOP,
+            behavior: 'smooth'
+        })
         expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
 
+        contentEndOffset.value += MESSAGE_TOP_STEP
+        observerFor(contentArea).emit()
+        turn.resolve({ content: 'Done' })
+        await flushPromises()
+        expect(container.scrollTo).toHaveBeenCalledOnce()
+    })
+
+    it('does not pin after the user scrolls while the pin is pending', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
+        await flushPromises()
+        const { container, contentArea, contentEndOffset } = turn.layout
+
+        container.dispatchEvent(new Event('wheel', { bubbles: true }))
+        contentEndOffset.value = OVERFLOWING_CONTENT_END
+        observerFor(contentArea).emit()
+
+        expect(container.scrollTo).not.toHaveBeenCalled()
         turn.resolve({ content: 'Done' })
         await flushPromises()
     })
@@ -132,8 +183,38 @@ describe('ChatComponent question pinning with the real composable', () => {
         await flushPromises()
 
         expect(container.scrollTop).toBe(42)
+        expect(container.scrollTo).not.toHaveBeenCalled()
         expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
         expect(turn.wrapper.findComponent(TypingIndicator).exists()).toBe(false)
+    })
+
+    it('pins a final-only answer that overflows on arrival', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
+        await flushPromises()
+        const { container, contentEndOffset } = turn.layout
+        contentEndOffset.value = OVERFLOWING_CONTENT_END
+
+        turn.resolve({ content: 'Long final answer' })
+        await flushPromises()
+
+        expect(container.scrollTo).toHaveBeenCalledOnce()
+        expect(container.scrollTo).toHaveBeenCalledWith({
+            top: FIRST_QUESTION_SCROLL_TOP,
+            behavior: 'smooth'
+        })
+    })
+
+    it('does not pin when content grows after the turn has completed', async () => {
+        const turn = await startChat({}, {}, { withLayout: true })
+        await flushPromises()
+        const { container, contentArea, contentEndOffset } = turn.layout
+        turn.resolve({ content: 'Short final answer' })
+        await flushPromises()
+
+        contentEndOffset.value = OVERFLOWING_CONTENT_END
+        observerFor(contentArea).emit()
+
+        expect(container.scrollTo).not.toHaveBeenCalled()
     })
 
     it('does not scroll or clear the pin when the request is cancelled', async () => {
@@ -146,6 +227,7 @@ describe('ChatComponent question pinning with the real composable', () => {
         await nextTick()
 
         expect(container.scrollTop).toBe(42)
+        expect(container.scrollTo).not.toHaveBeenCalled()
         expect(pinArea.style.minHeight).toBe(`${FIRST_PIN_HEIGHT}px`)
         expect(turn.signal.aborted).toBe(true)
 
@@ -164,7 +246,7 @@ describe('ChatComponent question pinning with the real composable', () => {
         await flushPromises()
 
         expect(pinArea.style.minHeight).toBe(`${SECOND_PIN_HEIGHT}px`)
-        expect(container.scrollTop).toBe(SECOND_QUESTION_SCROLL_TOP)
+        expect(container.scrollTo).not.toHaveBeenCalled()
     })
 
     it('clears the pin when the chat is cleared', async () => {

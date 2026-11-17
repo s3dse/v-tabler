@@ -21,7 +21,7 @@ vi.mock('../useChatLogic.js', () => ({
         messages: {
             value: [{ role: 'assistant', content: 'Hello! How can I help?', timestamp: '12:00' }]
         },
-        isTyping: { value: false },
+        isTyping: ref(false),
         isAwaitingResponse: ref(false),
         sendMessage: vi.fn(),
         cancelCurrentRequest: vi.fn(),
@@ -91,7 +91,7 @@ describe('ChatComponent', () => {
                     { role: 'assistant', content: 'Hello! How can I help?', timestamp: '12:00' }
                 ]
             },
-            isTyping: { value: false },
+            isTyping: ref(false),
             isAwaitingResponse: ref(false),
             sendMessage: vi.fn(),
             cancelCurrentRequest: vi.fn(),
@@ -380,7 +380,7 @@ describe('ChatComponent', () => {
 
         it('should enable input when not typing', async () => {
             // Ensure the mock composable has isTyping set to false
-            mockComposable.isTyping = { value: false }
+            mockComposable.isTyping = ref(false)
             mockUseChatLogic.mockReturnValue(mockComposable)
 
             wrapper = mountFloatingChat()
