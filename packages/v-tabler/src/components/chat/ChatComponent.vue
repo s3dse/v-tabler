@@ -27,17 +27,27 @@
                     ref="messagesContainer"
                     class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 with-scrollbar"
                     :class="isEmbedded ? 'bg-transparent' : 'bg-background'"
+                    @wheel="cancelPendingReveal"
+                    @touchstart="cancelPendingReveal"
+                    @pointerdown="cancelPendingReveal"
+                    @keydown="handleMessageScrollKeydown"
                 >
-                    <slot name="messages" v-bind="{ messages, variant }">
+                    <slot name="messages" v-bind="{ messages, variant, getMessageAttributes }">
                         <ChatMessage
                             v-for="(message, index) in messages"
                             :key="index"
                             :message="message"
                             :variant="variant"
+                            v-bind="getMessageAttributes(index)"
                         />
                     </slot>
 
                     <TypingIndicator v-if="isAwaitingResponse" :variant="variant" />
+                    <div
+                        v-if="tailSpace"
+                        aria-hidden="true"
+                        :style="{ height: `${tailSpace}px` }"
+                    ></div>
                 </div>
 
                 <slot
@@ -68,6 +78,7 @@ import ChatMessage from './ChatMessage.vue'
 import ChatHeader from './ChatHeader.vue'
 import TypingIndicator from './TypingIndicator.vue'
 import { useChatLogic } from './useChatLogic.js'
+import { useScrolling } from './useScrolling.js'
 import {
     assertValidChatLayout,
     ChatVariant,
@@ -115,6 +126,8 @@ const props = defineProps({
         validator: isChatVariant
     }
 })
+
+const MESSAGE_SCROLL_KEYS = ['PageUp', 'PageDown', 'Home', 'End', ' ', 'ArrowUp', 'ArrowDown']
 
 watchEffect(() => {
     assertValidChatLayout({
@@ -175,14 +188,32 @@ const {
     chatInputRef
 })
 
-onBeforeUnmount(cancelCurrentRequest)
+const {
+    tailSpace,
+    getMessageAttributes,
+    armReveal,
+    cancelPendingReveal,
+    resetReveal
+} = useScrolling(messagesContainer, messages)
+
+onBeforeUnmount(() => {
+    // Disarm reveal work already suspended at nextTick before template refs are cleared.
+    resetReveal()
+    cancelCurrentRequest()
+})
 
 const handleSubmit = async (message) => {
+    armReveal()
     await sendMessage(message)
 }
 
 const handleCancel = () => {
+    cancelPendingReveal()
     cancelCurrentRequest()
+}
+
+const handleMessageScrollKeydown = (event) => {
+    if (MESSAGE_SCROLL_KEYS.includes(event.key)) cancelPendingReveal()
 }
 
 const setInputRef = (input) => {
@@ -211,6 +242,7 @@ const inputEvents = {
 }
 
 const handleClearChat = () => {
+    resetReveal()
     clearChat()
     emit('clear-chat')
 }
@@ -218,6 +250,8 @@ const handleClearChat = () => {
 watch(
     isOpen,
     (newVal) => {
+        resetReveal()
+
         if (newVal) {
             scrollToBottom().then(() => focusInput())
         }

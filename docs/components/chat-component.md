@@ -7,7 +7,7 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 - **Floating Chat Button** - Fixed position chat toggle button with smooth animations
 - **Embedded Workspace Mode** - Parent-sized, neutral chat presentation for page layouts
 - **Modal Chat Interface** - Slide-up chat window with backdrop
-- **Message History** - Scrollable message container with auto-scroll to bottom
+- **Message History** - Reveals each new answer once without scrolling on later updates
 - **Typing Indicator** - Visual feedback when AI/assistant is responding
 - **AI Integration** - Promise responses or incremental updates through an optional callback
 - **Optional Mentions** - Async brand and partner autocomplete with portable mention chips
@@ -28,11 +28,23 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 
 ## Slots
 
-| Slot name  | Slot props                                 | Description                                                                |
-| ---------- | ------------------------------------------ | -------------------------------------------------------------------------- |
-| `title`    | none                                       | Replaces the default chat title                                            |
-| `messages` | `{ messages, variant }`                    | Provides a custom message view and exposes the active presentation variant |
-| `input`    | `{ inputProps, inputEvents, setInputRef }` | Replaces the built-in input while retaining chat state and handlers        |
+| Slot name  | Slot props                                    | Description                                                                                     |
+| ---------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `title`    | none                                          | Replaces the default chat title                                                                 |
+| `messages` | `{ messages, variant, getMessageAttributes }` | Provides a custom message view, presentation variant, and required attributes for answer reveal |
+| `input`    | `{ inputProps, inputEvents, setInputRef }`    | Replaces the built-in input while retaining chat state and handlers                             |
+
+### Scrolling behavior and migration notes
+
+The first streaming update, or a final-only answer, scrolls the top of the answer into view once.
+Later streaming updates and completion do not scroll.
+
+- Custom `messages` slots must now bind `getMessageAttributes(index)` to every outer element that
+  represents a message, using the index from the original, unfiltered `messages` array. Without it,
+  new answers are not revealed and a development warning is logged.
+- `onScrollToBottom` no longer fires for incoming assistant updates. It still fires on submit and
+  when the chat opens.
+- `isAwaitingResponse` becomes `false` as soon as an assistant message is on screen.
 
 ## Usage
 
@@ -80,16 +92,20 @@ presentation:
 
 ```vue
 <ChatComponent variant="embedded">
-    <template #messages="{ messages, variant }">
+    <template #messages="{ messages, variant, getMessageAttributes }">
         <CustomMessage
-            v-for="message in messages"
-            :key="message.id"
+            v-for="(message, index) in messages"
+            :key="message.id ?? index"
             :message="message"
             :variant="variant"
+            v-bind="getMessageAttributes(index)"
         />
     </template>
 </ChatComponent>
 ```
+
+Use the index from this unfiltered `messages` array. If one message renders as several outer
+elements, bind `getMessageAttributes(index)` to each of them.
 
 `ChatHeader`, `ChatInput`, and `TypingIndicator` also accept the same `variant` values when they are
 used independently.
@@ -505,6 +521,8 @@ cleanup acknowledgment remain the transport adapter's responsibility.
 
 - Check that the messages container has proper overflow properties
 - Verify no CSS conflicts with scrolling behavior
+- For a custom `messages` slot, bind `getMessageAttributes(index)` to every message element; a
+  missing marker also produces a development console warning
 
 ### Typing indicator stuck
 
