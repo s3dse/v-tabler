@@ -355,6 +355,38 @@ describe('ChatComponent', () => {
 
             expect(mockComposable.sendMessage).toHaveBeenCalledWith('Test message')
         })
+
+        it('should submit a draft through sendMessage from the messages slot', async () => {
+            const draft = {
+                content: 'Why did ADIDAS drop?',
+                serializedContent: 'Why did @brand[ADIDAS] drop?',
+                parts: [
+                    { kind: 'text', text: 'Why did ' },
+                    {
+                        kind: 'mention',
+                        type: 'brand',
+                        trigger: 'brand',
+                        id: 'B1',
+                        label: 'ADIDAS',
+                        resolved: true
+                    },
+                    { kind: 'text', text: ' drop?' }
+                ]
+            }
+            wrapper = mountInlineChat({
+                slots: {
+                    messages: ({ sendMessage }) =>
+                        h('button', {
+                            'data-testid': 'follow-up',
+                            onClick: () => sendMessage(draft)
+                        })
+                }
+            })
+
+            await wrapper.find('[data-testid="follow-up"]').trigger('click')
+
+            expect(mockComposable.sendMessage).toHaveBeenCalledWith(draft)
+        })
     })
 
     describe('chat state management', () => {

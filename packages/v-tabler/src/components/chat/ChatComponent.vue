@@ -39,7 +39,12 @@
                         <div class="flex min-w-0 flex-col gap-4">
                             <slot
                                 name="messages"
-                                v-bind="{ messages, variant, getMessageAttributes }"
+                                v-bind="{
+                                    messages,
+                                    variant,
+                                    getMessageAttributes,
+                                    sendMessage: handleSubmit
+                                }"
                             >
                                 <ChatMessage
                                     v-for="(message, index) in messages"

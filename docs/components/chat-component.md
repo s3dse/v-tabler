@@ -28,11 +28,11 @@ The `ChatComponent` is a chat interface component designed for AI assistants. It
 
 ## Slots
 
-| Slot name  | Slot props                                    | Description                                                                                        |
-| ---------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `title`    | none                                          | Replaces the default chat title                                                                    |
-| `messages` | `{ messages, variant, getMessageAttributes }` | Provides a custom message view, presentation variant, and required attributes for question pinning |
-| `input`    | `{ inputProps, inputEvents, setInputRef }`    | Replaces the built-in input while retaining chat state and handlers                                |
+| Slot name  | Slot props                                                 | Description                                                                                                                       |
+| ---------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `title`    | none                                                       | Replaces the default chat title                                                                                                   |
+| `messages` | `{ messages, variant, getMessageAttributes, sendMessage }` | Provides a custom message view, presentation variant, required attributes for question pinning, and a way to submit from messages |
+| `input`    | `{ inputProps, inputEvents, setInputRef }`                 | Replaces the built-in input while retaining chat state and handlers                                                               |
 
 ### Scrolling behavior and migration notes
 
@@ -109,6 +109,11 @@ presentation:
 
 Use the index from this unfiltered `messages` array. If one message renders as several outer
 elements, bind `getMessageAttributes(index)` to each of them.
+
+`sendMessage(input)` submits a message from inside the message view, for example a suggested
+follow-up button. It takes the same input as the chat input: a string or a `ChatDraft` with
+resolved mentions. It goes through the same path as a typed message, so it is ignored while a
+request is in flight and after validation fails (empty content or unresolved mentions).
 
 `ChatHeader`, `ChatInput`, and `TypingIndicator` also accept the same `variant` values when they are
 used independently.
